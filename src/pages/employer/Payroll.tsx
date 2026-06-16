@@ -1,7 +1,8 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   Download, Plus, ChevronDown, MoreHorizontal,
-  ChevronLeft, ChevronRight, PoundSterling, Users, Clock, Calendar
+  ChevronLeft, ChevronRight, PoundSterling, Users, Clock, Calendar, Play
 } from 'lucide-react'
 
 type PayTab = 'cycle' | 'employees' | 'components'
@@ -128,12 +129,23 @@ function StatusPill({ status }: { status: CycleStatus }) {
 }
 
 export default function Payroll() {
+  const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<PayTab>('cycle')
 
   return (
     <div className="max-w-7xl mx-auto">
-      {/* Page title */}
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Payroll</h1>
+      {/* Page header */}
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold text-gray-900">Payroll</h1>
+        <button
+          onClick={() => navigate('/employer/payroll/run')}
+          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors"
+          style={{ backgroundColor: '#22c55e' }}
+        >
+          <Play size={14} />
+          Run payroll
+        </button>
+      </div>
 
       {/* Stat cards */}
       <div className="grid grid-cols-4 gap-4 mb-6">
@@ -230,7 +242,8 @@ export default function Payroll() {
                 {payCycles.map((cycle) => (
                   <tr
                     key={cycle.id}
-                    className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                    onClick={() => navigate(`/employer/payroll/feb-2025`)}
+                    className="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer"
                   >
                     {/* Cycle month */}
                     <td className="px-4 py-3.5 text-sm font-medium text-gray-800">

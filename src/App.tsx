@@ -13,10 +13,14 @@ import Dashboard from './pages/employer/Dashboard'
 import Analytics from './pages/employer/Analytics'
 import Employees from './pages/employer/Employees'
 import EmployeeDetail from './pages/employer/EmployeeDetail'
+import AddEmployee from './pages/employer/AddEmployee'
 import HrOps from './pages/employer/HrOps'
 import Payroll from './pages/employer/Payroll'
+import PayrollDetail from './pages/employer/PayrollDetail'
+import PayrollRun from './pages/employer/PayrollRun'
 import UserAccess from './pages/employer/UserAccess'
 import Reports from './pages/employer/Reports'
+import CreateReport from './pages/employer/CreateReport'
 import Documents from './pages/employer/Documents'
 import Benefits from './pages/employer/Benefits'
 import Config from './pages/employer/Config'
@@ -45,12 +49,16 @@ export default function App() {
         <Route path="/employer" element={<EmployerLayout />}>
           <Route index element={<Dashboard />} />
           <Route path="analytics"   element={<Analytics />} />
-          <Route path="employees"   element={<Employees />} />
-          <Route path="employees/:id" element={<EmployeeDetail />} />
-          <Route path="hr-ops"      element={<HrOps />} />
-          <Route path="payroll"     element={<Payroll />} />
+          <Route path="employees"        element={<Employees />} />
+          <Route path="employees/add"    element={<AddEmployee />} />
+          <Route path="employees/:id"    element={<EmployeeDetail />} />
+          <Route path="hr-ops"           element={<HrOps />} />
+          <Route path="payroll"          element={<Payroll />} />
+          <Route path="payroll/run"      element={<PayrollRun />} />
+          <Route path="payroll/:runId"   element={<PayrollDetail />} />
           <Route path="user-access" element={<UserAccess />} />
-          <Route path="reports"     element={<Reports />} />
+          <Route path="reports"          element={<Reports />} />
+          <Route path="reports/create"   element={<CreateReport />} />
           <Route path="documents"   element={<Documents />} />
           <Route path="benefits"    element={<Benefits />} />
           <Route path="config"      element={<Config />} />

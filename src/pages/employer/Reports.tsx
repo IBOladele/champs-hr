@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Users, DollarSign, Gift, Calendar, Umbrella, Lock } from 'lucide-react'
 
 type SubTab = 'All reports' | 'My reports'
@@ -51,6 +52,7 @@ const myReportCards = [
 ]
 
 export default function Reports() {
+  const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<SubTab>('All reports')
 
   return (
@@ -58,7 +60,10 @@ export default function Reports() {
       {/* Page heading + Create button */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Reports</h1>
-        <button className="bg-[#22c55e] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-600 transition-colors">
+        <button
+          onClick={() => navigate('/employer/reports/create')}
+          className="bg-[#22c55e] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-600 transition-colors"
+        >
           + Create reports
         </button>
       </div>
@@ -99,7 +104,10 @@ export default function Reports() {
                 {/* Title */}
                 <p className="text-sm font-semibold text-gray-900">{card.title}</p>
                 {/* Link */}
-                <button className="text-sm text-[#22c55e] font-medium hover:underline text-left mt-auto">
+                <button
+                  onClick={() => navigate('/employer/reports/create')}
+                  className="text-sm text-[#22c55e] font-medium hover:underline text-left mt-auto"
+                >
                   + Create report
                 </button>
               </div>

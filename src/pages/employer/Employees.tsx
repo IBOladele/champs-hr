@@ -118,7 +118,9 @@ export default function Employees() {
             <CirclePlus size={15} />
             Import Employees
           </button>
-          <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors" style={{ backgroundColor: '#22c55e' }}>
+          <button
+            onClick={() => navigate('/employer/employees/add')}
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors" style={{ backgroundColor: '#22c55e' }}>
             <Plus size={15} />
             Add new employee
           </button>
