@@ -12,6 +12,7 @@ import EmployerLayout from './layouts/EmployerLayout'
 import Dashboard from './pages/employer/Dashboard'
 import Analytics from './pages/employer/Analytics'
 import Employees from './pages/employer/Employees'
+import EmployeeDetail from './pages/employer/EmployeeDetail'
 import HrOps from './pages/employer/HrOps'
 import Payroll from './pages/employer/Payroll'
 import UserAccess from './pages/employer/UserAccess'
@@ -45,6 +46,7 @@ export default function App() {
           <Route index element={<Dashboard />} />
           <Route path="analytics"   element={<Analytics />} />
           <Route path="employees"   element={<Employees />} />
+          <Route path="employees/:id" element={<EmployeeDetail />} />
           <Route path="hr-ops"      element={<HrOps />} />
           <Route path="payroll"     element={<Payroll />} />
           <Route path="user-access" element={<UserAccess />} />

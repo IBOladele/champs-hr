@@ -1,7 +1,8 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   Search, Plus, Users, UserCheck, UserPlus, Clock,
-  ChevronLeft, ChevronRight, CirclePlus, ChevronsUpDown, Pencil
+  ChevronLeft, ChevronRight, CirclePlus, ChevronsUpDown, Eye
 } from 'lucide-react'
 
 type Tab = 'active' | 'invited' | 'pending' | 'terminated'
@@ -97,6 +98,7 @@ const tabs: { key: Tab; label: string }[] = [
 export default function Employees() {
   const [activeTab, setActiveTab] = useState<Tab>('active')
   const [search, setSearch] = useState('')
+  const navigate = useNavigate()
 
   const filtered = employees.filter(
     (e) =>
@@ -296,9 +298,12 @@ export default function Employees() {
 
                 {/* Actions */}
                 <td className="px-4 py-4">
-                  <button className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition-colors">
-                    <Pencil size={13} />
-                    Edit employee
+                  <button
+                    onClick={() => navigate(`/employer/employees/${emp.id}`)}
+                    className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition-colors"
+                  >
+                    <Eye size={13} />
+                    View employee
                   </button>
                 </td>
               </tr>
