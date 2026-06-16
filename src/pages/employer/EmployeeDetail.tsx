@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
-  ChevronLeft, Pencil, FileText, Calendar, Clock,
-  DollarSign, User, Briefcase, Shield, Activity,
-  MapPin, Phone, Building2, Download, MoreHorizontal,
+  ChevronLeft, Pencil, FileText,
+  DollarSign, User,
+  Download, MoreHorizontal,
   CheckCircle2, XCircle, AlertCircle
 } from 'lucide-react'
 
