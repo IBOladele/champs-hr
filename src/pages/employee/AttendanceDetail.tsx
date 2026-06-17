@@ -120,7 +120,7 @@ export default function AttendanceDetail() {
           { label: 'Days present',  value: '18', color: 'text-green-600', bg: 'bg-green-50' },
           { label: 'Days absent',   value: '1',  color: 'text-red-600',   bg: 'bg-red-50'   },
           { label: 'Late arrivals', value: '2',  color: 'text-amber-600', bg: 'bg-amber-50' },
-        ].map(({ label, value, color, bg }) => (
+        ].map(({ label, value, color }) => (
           <div key={label} className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
             <p className="text-xs text-gray-500 mb-1">{label}</p>
             <p className={`text-3xl font-bold ${color}`}>{value}</p>
