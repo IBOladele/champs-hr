@@ -1,5 +1,8 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 
+// Landing
+import LandingPage from './pages/LandingPage'
+
 // Auth
 import RoleSelect from './pages/auth/RoleSelect'
 import Signup from './pages/auth/Signup'
@@ -47,8 +50,11 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Landing */}
+        <Route path="/" element={<LandingPage />} />
+
         {/* Auth flow */}
-        <Route path="/" element={<RoleSelect />} />
+        <Route path="/get-started" element={<RoleSelect />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/otp" element={<OtpVerify />} />
         <Route path="/login" element={<Login />} />

@@ -106,7 +106,7 @@ export default function Login() {
 
           <p className="text-center text-sm text-gray-500 mt-4">
             Don't have an account?{' '}
-            <button onClick={() => navigate('/')} className="text-[#22c55e] font-semibold hover:underline">
+            <button onClick={() => navigate('/get-started')} className="text-[#22c55e] font-semibold hover:underline">
               Get started
             </button>
           </p>
