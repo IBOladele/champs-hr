@@ -54,7 +54,7 @@ const stats = [
 
 const testimonials = [
   {
-    quote: 'CHAMP cut our monthly payroll processing from 3 days to under an hour. It's the best HR investment we've made.',
+    quote: "CHAMP cut our monthly payroll processing from 3 days to under an hour. It's the best HR investment we've made.",
     author: 'Sarah Mitchell',
     role: 'Head of People, Vantara Inc.',
     initial: 'S',
