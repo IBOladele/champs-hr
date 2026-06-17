@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Search, FileText, History, Clock, ChevronDown, MoreHorizontal } from 'lucide-react'
 
 type SubTab = 'Documents uploaded' | 'Assigned documents' | 'Archived documents'
@@ -96,6 +97,7 @@ function StatusPill({ status }: { status: DocStatus }) {
 }
 
 export default function Documents() {
+  const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<SubTab>('Documents uploaded')
   const [search, setSearch] = useState('')
 
@@ -129,7 +131,10 @@ export default function Documents() {
       {/* Section heading + Add button */}
       <div className="flex items-center justify-between mb-5">
         <h2 className="text-base font-semibold text-gray-900">Documents uploaded</h2>
-        <button className="bg-[#22c55e] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-600 transition-colors">
+        <button
+          onClick={() => navigate('/employer/documents/upload')}
+          className="bg-[#22c55e] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-600 transition-colors"
+        >
           + Add new documents
         </button>
       </div>

@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom'
 import { FileText, Download, Search, ChevronDown, Eye } from 'lucide-react'
 
 type PayslipStatus = 'Loaded' | 'Pending' | 'Refund'
@@ -37,6 +38,8 @@ function StatusPill({ status }: { status: PayslipStatus }) {
 }
 
 export default function Payslips() {
+  const navigate = useNavigate()
+
   return (
     <div className="px-8 py-6">
 
@@ -98,7 +101,11 @@ export default function Payslips() {
             </thead>
             <tbody className="divide-y divide-gray-100">
               {rows.map((row, i) => (
-                <tr key={i} className="hover:bg-gray-50 transition-colors">
+                <tr
+                  key={i}
+                  className="hover:bg-gray-50 transition-colors cursor-pointer"
+                  onClick={() => navigate('/employee/payslips/feb-2025')}
+                >
                   <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">{row.period}</td>
                   <td className="px-6 py-4 text-gray-600 whitespace-nowrap">{row.payDate}</td>
                   <td className="px-6 py-4 text-gray-900 font-medium whitespace-nowrap">{row.netPay}</td>
@@ -106,10 +113,16 @@ export default function Payslips() {
                   <td className="px-6 py-4"><StatusPill status={row.status} /></td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <button className="flex items-center gap-1 text-xs text-gray-600 hover:text-gray-900">
+                      <button
+                        className="flex items-center gap-1 text-xs text-gray-600 hover:text-gray-900"
+                        onClick={e => { e.stopPropagation(); navigate('/employee/payslips/feb-2025') }}
+                      >
                         <Eye size={12} /> View details
                       </button>
-                      <button className="flex items-center gap-1 text-xs text-gray-600 hover:text-gray-900">
+                      <button
+                        className="flex items-center gap-1 text-xs text-gray-600 hover:text-gray-900"
+                        onClick={e => e.stopPropagation()}
+                      >
                         <Download size={12} /> Download
                       </button>
                     </div>

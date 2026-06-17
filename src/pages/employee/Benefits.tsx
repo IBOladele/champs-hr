@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom'
 import { Gift, ChevronRight } from 'lucide-react'
 
 type BenefitStatus = 'Active' | 'Pending' | 'Inactive'
@@ -10,15 +11,16 @@ interface BenefitItem {
   coverage: string
   renewalDate: string
   status: BenefitStatus
+  planId: string
 }
 
 const benefits: BenefitItem[] = [
-  { name: 'Dental plan premium',  provider: 'Meyers Inc', dependants: 2, coverage: '$5,000/yr',  renewalDate: 'Jan 1, 2026',  status: 'Active'   },
-  { name: 'Dental plan premium',  provider: 'Meyers Inc', dependants: 2, coverage: '$5,000/yr',  renewalDate: 'Jan 1, 2026',  status: 'Active'   },
-  { name: 'Dental plan premium',  provider: 'Meyers Inc', dependants: 2, coverage: '$5,000/yr',  renewalDate: 'Mar 1, 2026',  status: 'Pending'  },
-  { name: 'Health Insurance',     provider: 'BlueCross',  dependants: 3, coverage: '$20,000/yr', renewalDate: 'Jun 1, 2026',  status: 'Active'   },
-  { name: 'Life Insurance',       provider: 'AXA Group',  dependants: 0, coverage: '$50,000',    renewalDate: 'Dec 1, 2025',  status: 'Active'   },
-  { name: 'Gym Membership',       provider: 'Fitness Co', dependants: 0, coverage: 'Unlimited',  renewalDate: 'Feb 1, 2026',  status: 'Inactive' },
+  { name: 'Dental plan premium',  provider: 'Meyers Inc', dependants: 2, coverage: '$5,000/yr',  renewalDate: 'Jan 1, 2026',  status: 'Active',   planId: 'dental'  },
+  { name: 'Dental plan premium',  provider: 'Meyers Inc', dependants: 2, coverage: '$5,000/yr',  renewalDate: 'Jan 1, 2026',  status: 'Active',   planId: 'dental'  },
+  { name: 'Dental plan premium',  provider: 'Meyers Inc', dependants: 2, coverage: '$5,000/yr',  renewalDate: 'Mar 1, 2026',  status: 'Pending',  planId: 'dental'  },
+  { name: 'Health Insurance',     provider: 'BlueCross',  dependants: 3, coverage: '$20,000/yr', renewalDate: 'Jun 1, 2026',  status: 'Active',   planId: 'health'  },
+  { name: 'Life Insurance',       provider: 'AXA Group',  dependants: 0, coverage: '$50,000',    renewalDate: 'Dec 1, 2025',  status: 'Active',   planId: 'pension' },
+  { name: 'Gym Membership',       provider: 'Fitness Co', dependants: 0, coverage: 'Unlimited',  renewalDate: 'Feb 1, 2026',  status: 'Inactive', planId: 'leave'   },
 ]
 
 function StatusPill({ status }: { status: BenefitStatus }) {
@@ -38,6 +40,7 @@ function StatusPill({ status }: { status: BenefitStatus }) {
 import { useState } from 'react'
 
 export default function Benefits() {
+  const navigate = useNavigate()
   const [activeSection, setActiveSection] = useState<SideSection>('plans')
 
   const sidebarItems: { key: SideSection; label: string; sub: string }[] = [
@@ -101,7 +104,10 @@ export default function Benefits() {
                         <p className="text-sm font-medium text-gray-700">{item.renewalDate}</p>
                       </div>
                       <StatusPill status={item.status} />
-                      <button className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700">
+                      <button
+                        onClick={() => navigate(`/employee/benefits/${item.planId}`)}
+                        className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700"
+                      >
                         View details <ChevronRight size={14} />
                       </button>
                     </div>

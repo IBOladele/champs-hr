@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Pencil, Trash2, ChevronLeft, ChevronRight } from 'lucide-react'
 
 type SubTab =
@@ -108,6 +109,7 @@ const users: UserRow[] = [
 ]
 
 export default function UserAccess() {
+  const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<SubTab>('User accounts')
 
   return (
@@ -135,7 +137,10 @@ export default function UserAccess() {
       {/* Section heading + Add button */}
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-base font-semibold text-gray-900">User accounts</h2>
-        <button className="bg-[#22c55e] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-600 transition-colors">
+        <button
+          onClick={() => navigate('/employer/user-access/add')}
+          className="bg-[#22c55e] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-600 transition-colors"
+        >
           + Add new accounts
         </button>
       </div>

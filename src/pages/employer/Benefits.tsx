@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Search, ChevronDown } from 'lucide-react'
 
 type SubTab = 'Benefit plans' | 'Benefit sync' | 'Benefit requests'
@@ -44,6 +45,7 @@ function StatusPill({ status }: { status: BenefitStatus }) {
 }
 
 export default function Benefits() {
+  const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<SubTab>('Benefit plans')
   const [search, setSearch] = useState('')
 
@@ -77,7 +79,10 @@ export default function Benefits() {
       {/* Section heading + Add button */}
       <div className="flex items-center justify-between mb-5">
         <h2 className="text-base font-semibold text-gray-900">Your benefit plans</h2>
-        <button className="bg-[#22c55e] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-600 transition-colors">
+        <button
+          onClick={() => navigate('/employer/benefits/create')}
+          className="bg-[#22c55e] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-600 transition-colors"
+        >
           + Create benefit plan
         </button>
       </div>

@@ -1,7 +1,8 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   Building2, ShieldCheck, Coins, Wallet, Clock, CalendarDays,
-  Pencil, ChevronDown, Plus
+  Pencil, ChevronDown, Plus, Settings,
 } from 'lucide-react'
 
 type SidebarKey = 'organisation' | 'compliance' | 'compensation' | 'bank' | 'hours' | 'leave'
@@ -155,14 +156,22 @@ function PlaceholderContent({ title }: { title: string }) {
 }
 
 export default function Config() {
+  const navigate = useNavigate()
   const [mainTab, setMainTab] = useState<MainTab>('organization')
   const [activeSection, setActiveSection] = useState<SidebarKey>('organisation')
 
   return (
     <div className="px-8 py-6 max-w-6xl">
       {/* Page title */}
-      <div className="mb-5">
+      <div className="flex items-center justify-between mb-5">
         <h1 className="text-2xl font-bold text-gray-900">Configuration</h1>
+        <button
+          onClick={() => navigate('/employer/config/settings')}
+          className="flex items-center gap-1.5 px-4 py-2 text-sm text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+        >
+          <Settings size={14} />
+          Settings
+        </button>
       </div>
 
       {/* Main tabs */}

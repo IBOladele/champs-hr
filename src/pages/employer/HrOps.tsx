@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Settings, Search, ChevronDown, Users, UserCheck, Clock, Calendar } from 'lucide-react'
 
 type HrTab = 'Attendance' | 'Leave requests'
@@ -43,6 +44,7 @@ function StatusPill({ status }: { status: EmpStatus }) {
 }
 
 export default function HrOps() {
+  const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<HrTab>('Attendance')
   const [search, setSearch] = useState('')
 
@@ -153,7 +155,10 @@ export default function HrOps() {
                       <td className="px-6 py-4 text-gray-600 whitespace-nowrap">{row.totalClockOut}</td>
                       <td className="px-6 py-4"><StatusPill status={row.status} /></td>
                       <td className="px-6 py-4">
-                        <button className="text-xs text-gray-500 hover:text-gray-800 whitespace-nowrap">
+                        <button
+                          onClick={() => navigate('/employer/hr-ops/employee/1')}
+                          className="text-xs text-gray-500 hover:text-gray-800 whitespace-nowrap"
+                        >
                           ↳ View attendance history
                         </button>
                       </td>

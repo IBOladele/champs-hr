@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom'
 import { CalendarDays, Plus, ChevronDown, ChevronLeft, ChevronRight, Eye } from 'lucide-react'
 
 type LeaveStatus = 'Pending' | 'Approved' | 'Denied'
@@ -35,15 +36,20 @@ function StatusPill({ status }: { status: LeaveStatus }) {
 }
 
 export default function LeaveRequests() {
+  const navigate = useNavigate()
+
   return (
     <div className="px-8 py-6">
 
       {/* Page heading */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Leave requests</h1>
-        <button className="flex items-center gap-2 bg-[#22c55e] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-600 transition-colors">
+        <button
+          onClick={() => navigate('/employee/leave/submit')}
+          className="flex items-center gap-2 bg-[#22c55e] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-600 transition-colors"
+        >
           <Plus size={14} />
-          Add new request
+          Submit leave request
         </button>
       </div>
 

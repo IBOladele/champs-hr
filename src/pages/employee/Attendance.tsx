@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom'
 import { Clock, MapPin, ChevronLeft, ChevronRight, ChevronDown, FileText } from 'lucide-react'
 
 type AttendanceStatus = 'Early' | 'Overtime' | 'Absent' | 'Late'
@@ -39,6 +40,8 @@ function StatusPill({ status }: { status: AttendanceStatus }) {
 }
 
 export default function Attendance() {
+  const navigate = useNavigate()
+
   return (
     <div className="px-8 py-6">
 
@@ -80,6 +83,12 @@ export default function Attendance() {
       {/* Filters */}
       <div className="flex items-center gap-3 mb-4">
         <div className="text-sm text-gray-500">Jan 2025 – Feb 2025</div>
+        <button
+          onClick={() => navigate('/employee/attendance/detail')}
+          className="ml-auto flex items-center gap-1.5 text-sm text-[#22c55e] font-medium border border-[#22c55e] rounded-lg px-3 py-1.5 hover:bg-green-50 transition-colors"
+        >
+          View detailed log
+        </button>
         <button className="flex items-center gap-1.5 text-sm text-gray-600 border border-gray-200 rounded-lg px-3 py-1.5 hover:bg-gray-50">
           Filter by <ChevronDown size={13} />
         </button>
