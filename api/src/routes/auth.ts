@@ -94,6 +94,11 @@ router.post(
         res.status(400).json({ error: err.errors });
         return;
       }
+      // Duplicate email — unique constraint violation
+      if ((err as { code?: string }).code === '23505') {
+        res.status(409).json({ error: 'An account with this email already exists' });
+        return;
+      }
       next(err);
     }
   }
