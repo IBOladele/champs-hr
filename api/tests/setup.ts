@@ -177,6 +177,6 @@ export async function loginAsEmployee(email: string): Promise<string> {
   return res.body.accessToken as string;
 }
 
-afterAll(async () => {
-  await pool.end();
-});
+// Pool is closed by --forceExit; don't call pool.end() here because
+// setupFilesAfterEnv runs once per test FILE so end() would fire between
+// files and break subsequent suites running in the same process.
