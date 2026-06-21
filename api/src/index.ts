@@ -34,6 +34,8 @@ app.use(errorHandler);
 
 const PORT = parseInt(process.env.PORT || '3000', 10);
 
+export { app };
+
 async function bootstrap() {
   try {
     await runMigrations();
@@ -46,4 +48,7 @@ async function bootstrap() {
   }
 }
 
-bootstrap();
+// Only call bootstrap when this file is run directly, not when imported by tests
+if (require.main === module) {
+  bootstrap();
+}
