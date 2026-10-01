@@ -1,8 +1,17 @@
 import { useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
+
+function maskEmail(email: string): string {
+  const [user, domain] = email.split('@')
+  if (!domain) return email
+  const visible = user.slice(0, Math.min(2, user.length))
+  return `${visible}***@${domain}`
+}
 
 export default function OtpVerify() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const email: string = (location.state as { email?: string })?.email ?? ''
   const inputs = useRef<(HTMLInputElement | null)[]>([])
 
   function handleInput(i: number, e: React.ChangeEvent<HTMLInputElement>) {
@@ -79,7 +88,9 @@ export default function OtpVerify() {
           <p className="text-sm text-gray-500 mb-1">
             Please enter the OTP information that was sent to
           </p>
-          <p className="text-sm font-medium text-gray-700 mb-7">***@gmail@champs.com</p>
+          <p className="text-sm font-medium text-gray-700 mb-7">
+            {email ? maskEmail(email) : '—'}
+          </p>
 
           {/* OTP boxes */}
           <div className="flex gap-3 mb-2">

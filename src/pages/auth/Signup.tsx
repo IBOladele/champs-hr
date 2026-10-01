@@ -4,6 +4,7 @@ import { Eye, EyeOff } from 'lucide-react'
 
 export default function Signup() {
   const [showPassword, setShowPassword] = useState(false)
+  const [email, setEmail] = useState('')
   const navigate = useNavigate()
 
   return (
@@ -85,6 +86,8 @@ export default function Signup() {
               <input
                 type="email"
                 placeholder="Enter email address"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
                 className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[#22c55e]"
               />
             </div>
@@ -110,7 +113,7 @@ export default function Signup() {
           </div>
 
           <button
-            onClick={() => navigate('/otp')}
+            onClick={() => navigate('/otp', { state: { email } })}
             className="w-full mt-7 bg-[#22c55e] hover:bg-green-600 text-white font-semibold py-3 rounded-xl transition-colors text-sm"
           >
             Continue
