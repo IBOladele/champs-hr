@@ -8,6 +8,6 @@ export default defineConfig({
   preview: {
     port: parseInt(process.env.PORT || '4173'),
     host: true,
-    allowedHosts: ['champs-hr-production.up.railway.app'],
+    allowedHosts: ['champs-hr-production.up.railway.app', 'paychamps.com', 'www.paychamps.com'],
   },
 })
