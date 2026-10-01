@@ -1,64 +1,5 @@
 const BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3000').replace(/\/$/, '')
 
-// ── Token storage ─────────────────────────────────────────────────────────────
-
-/** Decode a JWT payload without verifying the signature (server does that). */
-function decodeJwtPayload(token: string): Record<string, unknown> | null {
-  try {
-    const [, part] = token.split('.')
-    if (!part) return null
-    return JSON.parse(atob(part.replace(/-/g, '+').replace(/_/g, '/')))
-  } catch {
-    return null
-  }
-}
-
-/** Returns stored token only if it exists and hasn't expired. */
-export function getToken(): string | null {
-  try {
-    const token = localStorage.getItem('champs_token')
-    if (!token) return null
-    const payload = decodeJwtPayload(token)
-    if (!payload) {
-      localStorage.removeItem('champs_token')
-      return null
-    }
-    const exp = payload.exp as number | undefined
-    if (exp && Date.now() / 1000 > exp) {
-      localStorage.removeItem('champs_token')
-      localStorage.removeItem('champs_user')
-      return null
-    }
-    return token
-  } catch {
-    return null
-  }
-}
-
-function saveToken(token: string): void {
-  try { localStorage.setItem('champs_token', token) } catch { /* storage blocked */ }
-}
-
-function clearStorage(): void {
-  try {
-    localStorage.removeItem('champs_token')
-    localStorage.removeItem('champs_user')
-  } catch { /* storage blocked */ }
-}
-
-function saveUser(user: AuthUser): void {
-  try { localStorage.setItem('champs_user', JSON.stringify(user)) } catch { /* storage blocked */ }
-}
-
-function loadUser(): AuthUser | null {
-  try {
-    const raw = localStorage.getItem('champs_user')
-    return raw ? (JSON.parse(raw) as AuthUser) : null
-  } catch {
-    return null
-  }
-}
-
 // ── Error class ───────────────────────────────────────────────────────────────
 
 export class ApiError extends Error {
@@ -71,36 +12,56 @@ export class ApiError extends Error {
 }
 
 // ── Core fetch wrapper ────────────────────────────────────────────────────────
+// credentials: 'include' sends the HttpOnly session cookie automatically.
+// The JWT never touches JavaScript — it lives only in the cookie.
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const token = getToken()
   const res = await fetch(`${BASE_URL}/api/v1${path}`, {
     ...options,
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(options.headers ?? {}),
     },
   })
 
-  // 401 — token rejected by server (expired, tampered, revoked)
   if (res.status === 401) {
-    clearStorage()
-    // Let callers decide whether to redirect — throw so AuthContext can handle it
-    const body = await res.json().catch(() => ({ error: 'Unauthorised' }))
-    throw new ApiError(401, body.error ?? 'Unauthorised')
+    // Session expired or cookie missing — clear cached user and throw
+    clearUser()
+    throw new ApiError(401, 'Session expired. Please log in again.')
   }
 
-  // 204 No Content — nothing to parse
   if (res.status === 204) return undefined as unknown as T
 
   const body = await res.json().catch(() => ({ error: 'Unexpected response' }))
 
   if (!res.ok) {
-    throw new ApiError(res.status, body.error ?? 'Request failed')
+    const message = Array.isArray(body.error)
+      ? (body.error[0]?.message ?? 'Validation failed')
+      : (body.error ?? 'Request failed')
+    throw new ApiError(res.status, message)
   }
 
   return body as T
+}
+
+// ── User cache (profile only — no token ever stored) ─────────────────────────
+
+function saveUser(user: AuthUser): void {
+  try { localStorage.setItem('champs_user', JSON.stringify(user)) } catch { /* storage blocked */ }
+}
+
+function clearUser(): void {
+  try { localStorage.removeItem('champs_user') } catch { /* storage blocked */ }
+}
+
+function loadUser(): AuthUser | null {
+  try {
+    const raw = localStorage.getItem('champs_user')
+    return raw ? (JSON.parse(raw) as AuthUser) : null
+  } catch {
+    return null
+  }
 }
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -113,11 +74,6 @@ export interface AuthUser {
   fullName: string
   phone?: string | null
   avatarUrl?: string | null
-}
-
-export interface AuthResponse {
-  accessToken: string
-  user: AuthUser
 }
 
 export interface Employee {
@@ -207,58 +163,38 @@ export interface Benefit {
 }
 
 export interface DashboardStats {
-  employees: {
-    total: number
-    active: number
-    onLeave: number
-    newThisMonth: number
-  }
-  leave: {
-    pendingRequests: number
-    approvedThisMonth: number
-  }
-  payroll: {
-    totalRuns: number
-    pendingRuns: number
-    latestRunGross: number | null
-    latestRunDate: string | null
-  }
-  attendance: {
-    today: {
-      present: number
-      late: number
-      absent: number
-      remote: number
-    }
-  }
+  employees: { total: number; active: number; onLeave: number; newThisMonth: number }
+  leave: { pendingRequests: number; approvedThisMonth: number }
+  payroll: { totalRuns: number; pendingRuns: number; latestRunGross: number | null; latestRunDate: string | null }
+  attendance: { today: { present: number; late: number; absent: number; remote: number } }
 }
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
 
 export const auth = {
   signup: async (data: {
-    email: string
-    password: string
-    fullName: string
-    companyName: string
-  }): Promise<AuthResponse> => {
-    const res = await request<AuthResponse>('/auth/signup', {
+    email: string; password: string; fullName: string; companyName: string
+  }): Promise<{ user: AuthUser }> => {
+    const res = await request<{ user: AuthUser }>('/auth/signup', {
       method: 'POST',
       body: JSON.stringify(data),
     })
-    saveToken(res.accessToken)
     saveUser(res.user)
     return res
   },
 
-  login: async (email: string, password: string): Promise<AuthResponse> => {
-    const res = await request<AuthResponse>('/auth/login', {
+  login: async (email: string, password: string): Promise<{ user: AuthUser }> => {
+    const res = await request<{ user: AuthUser }>('/auth/login', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     })
-    saveToken(res.accessToken)
     saveUser(res.user)
     return res
+  },
+
+  logout: async (): Promise<void> => {
+    await request<void>('/auth/logout', { method: 'POST' }).catch(() => {})
+    clearUser()
   },
 
   me: (): Promise<AuthUser> => request<AuthUser>('/auth/me'),
@@ -266,10 +202,7 @@ export const auth = {
   updateMe: (data: { fullName?: string; phone?: string | null }): Promise<AuthUser> =>
     request<AuthUser>('/auth/me', { method: 'PATCH', body: JSON.stringify(data) }),
 
-  logout: () => clearStorage(),
-
   getStoredUser: loadUser,
-  getToken,
 }
 
 // ── Employees ─────────────────────────────────────────────────────────────────
@@ -278,15 +211,9 @@ export const employees = {
   list: (): Promise<Employee[]> => request<Employee[]>('/employees'),
   get: (id: string): Promise<Employee> => request<Employee>(`/employees/${id}`),
   create: (data: {
-    email: string
-    fullName: string
-    jobTitle?: string
-    departmentId?: string
-    employeeNumber: string
-    employmentType?: string
-    grossSalary?: number
-    startDate?: string
-    payFrequency?: string
+    email: string; fullName: string; jobTitle?: string; departmentId?: string;
+    employeeNumber: string; employmentType?: string; grossSalary?: number;
+    startDate?: string; payFrequency?: string;
   }): Promise<Employee> =>
     request<Employee>('/employees', { method: 'POST', body: JSON.stringify(data) }),
   update: (id: string, data: Partial<Pick<Employee, 'fullName' | 'phone' | 'jobTitle'>>): Promise<Employee> =>
@@ -316,11 +243,7 @@ export const departments = {
 export const leave = {
   list: (): Promise<LeaveRequest[]> => request<LeaveRequest[]>('/leave'),
   create: (data: {
-    leaveType: string
-    startDate: string
-    endDate: string
-    daysRequested: number
-    reason?: string
+    leaveType: string; startDate: string; endDate: string; daysRequested: number; reason?: string;
   }): Promise<LeaveRequest> =>
     request<LeaveRequest>('/leave', { method: 'POST', body: JSON.stringify(data) }),
   approve: (id: string): Promise<LeaveRequest> =>
@@ -351,19 +274,12 @@ export const attendance = {
   clockOut: (): Promise<AttendanceRecord> =>
     request<AttendanceRecord>('/attendance/clock-out', { method: 'POST' }),
   create: (data: {
-    employeeId: string
-    date: string
-    status: string
-    clockIn?: string | null
-    clockOut?: string | null
-    notes?: string | null
+    employeeId: string; date: string; status: string;
+    clockIn?: string | null; clockOut?: string | null; notes?: string | null;
   }): Promise<AttendanceRecord> =>
     request<AttendanceRecord>('/attendance', { method: 'POST', body: JSON.stringify(data) }),
   update: (id: string, data: {
-    status?: string
-    clockIn?: string | null
-    clockOut?: string | null
-    notes?: string | null
+    status?: string; clockIn?: string | null; clockOut?: string | null; notes?: string | null;
   }): Promise<AttendanceRecord> =>
     request<AttendanceRecord>(`/attendance/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
 }
@@ -373,18 +289,11 @@ export const attendance = {
 export const benefits = {
   list: (): Promise<Benefit[]> => request<Benefit[]>('/benefits'),
   create: (data: {
-    name: string
-    description?: string
-    benefitType: string
-    value: number
-    currency?: string
+    name: string; description?: string; benefitType: string; value: number; currency?: string;
   }): Promise<Benefit> =>
     request<Benefit>('/benefits', { method: 'POST', body: JSON.stringify(data) }),
   enrol: (id: string, employeeId: string): Promise<unknown> =>
-    request<unknown>(`/benefits/${id}/enrol`, {
-      method: 'POST',
-      body: JSON.stringify({ employeeId }),
-    }),
+    request<unknown>(`/benefits/${id}/enrol`, { method: 'POST', body: JSON.stringify({ employeeId }) }),
 }
 
 // ── Stats ─────────────────────────────────────────────────────────────────────

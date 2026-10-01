@@ -15,21 +15,16 @@ export function requireAuth(
   res: Response,
   next: NextFunction
 ): void {
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    res.status(401).json({ error: 'Missing or malformed Authorization header' });
+  // Token lives in an HttpOnly cookie — never exposed to JavaScript
+  const token = req.cookies?.champs_session;
+  if (!token) {
+    res.status(401).json({ error: 'Not authenticated' });
     return;
   }
 
-  const token = authHeader.slice(7).trim();
-  if (!token) {
-    res.status(401).json({ error: 'Missing or malformed Authorization header' });
-    return;
-  }
   try {
     const payload = jwt.verify(token, JWT_SECRET) as JwtPayload;
 
-    // Reject tokens with non-UUID claims — prevents DB type errors and injection
     if (
       !payload.userId || !payload.tenantId || !payload.role ||
       !UUID_RE.test(payload.userId) || !UUID_RE.test(payload.tenantId) ||
@@ -46,7 +41,7 @@ export function requireAuth(
     };
     next();
   } catch {
-    res.status(401).json({ error: 'Invalid or expired token' });
+    res.status(401).json({ error: 'Invalid or expired session' });
   }
 }
 
@@ -63,3 +58,15 @@ export function requireEmployer(
     next();
   });
 }
+
+const IS_PROD = process.env.NODE_ENV === 'production';
+
+export const SESSION_COOKIE = 'champs_session';
+
+export const cookieOptions = {
+  httpOnly: true,
+  secure: IS_PROD,
+  sameSite: 'strict' as const,
+  path: '/',
+  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+};

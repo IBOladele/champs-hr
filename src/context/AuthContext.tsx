@@ -7,7 +7,7 @@ interface AuthContextValue {
   isLoading: boolean
   login: (email: string, password: string) => Promise<AuthUser>
   signup: (data: { email: string; password: string; fullName: string; companyName: string }) => Promise<AuthUser>
-  logout: () => void
+  logout: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
@@ -16,51 +16,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
-  // On mount: if we have a valid token, validate it with the server
+  // On mount: optimistically load cached profile, then confirm with server via cookie
   useEffect(() => {
     const stored = auth.getStoredUser()
-    const token = auth.getToken()
-
-    if (!token) {
-      // No valid token — clear any stale user cache and stop loading
-      setUser(null)
-      setIsLoading(false)
-      return
-    }
-
-    // Token exists and hasn't expired client-side — verify with server
-    if (stored) setUser(stored) // Optimistic pre-fill so the page loads fast
+    if (stored) setUser(stored) // pre-fill so UI renders immediately
 
     auth.me()
       .then((fresh) => setUser(fresh))
       .catch((err) => {
-        // 401 = token rejected by server; clear everything
+        // 401 means the cookie is missing or expired — log out
         if (err instanceof ApiError && err.status === 401) {
-          auth.logout()
           setUser(null)
         }
-        // Any other error (network down) — keep the stored user so app still works offline
+        // Network error — keep cached profile so app works offline
       })
       .finally(() => setIsLoading(false))
   }, [])
 
   const login = useCallback(async (email: string, password: string): Promise<AuthUser> => {
-    const res = await auth.login(email, password)
-    setUser(res.user)
-    return res.user
+    const { user } = await auth.login(email, password)
+    setUser(user)
+    return user
   }, [])
 
   const signup = useCallback(
     async (data: { email: string; password: string; fullName: string; companyName: string }): Promise<AuthUser> => {
-      const res = await auth.signup(data)
-      setUser(res.user)
-      return res.user
+      const { user } = await auth.signup(data)
+      setUser(user)
+      return user
     },
     [],
   )
 
-  const logout = useCallback(() => {
-    auth.logout()
+  const logout = useCallback(async () => {
+    await auth.logout()
     setUser(null)
   }, [])
 

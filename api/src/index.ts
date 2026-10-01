@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { runMigrations } from './db/migrate';
@@ -59,7 +60,8 @@ app.use(
   }),
 );
 
-// ── Body parsing (explicit size limits) ──────────────────────────────────────
+// ── Cookie + Body parsing ─────────────────────────────────────────────────────
+app.use(cookieParser());
 app.use(express.json({ limit: '50kb' }));
 app.use(express.urlencoded({ extended: true, limit: '50kb' }));
 
