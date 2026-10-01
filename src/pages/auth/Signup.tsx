@@ -1,11 +1,50 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react'
+import { useAuth } from '../../context/AuthContext'
+import { ApiError } from '../../lib/api'
 
 export default function Signup() {
-  const [showPassword, setShowPassword] = useState(false)
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
+  const [companyName, setCompanyName] = useState('')
   const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
+
+  const { signup } = useAuth()
   const navigate = useNavigate()
+
+  async function handleSubmit() {
+    setError(null)
+    const fullName = `${firstName.trim()} ${lastName.trim()}`.trim()
+    if (!firstName || !lastName) { setError('Please enter your first and last name'); return }
+    if (!companyName) { setError('Please enter your company name'); return }
+    if (!email) { setError('Please enter your email address'); return }
+    if (!password) { setError('Please enter a password'); return }
+
+    setLoading(true)
+    try {
+      await signup({ email, password, fullName, companyName })
+      navigate('/onboarding')
+    } catch (err) {
+      if (err instanceof ApiError) {
+        if (Array.isArray((err as { message: unknown }).message)) {
+          // Zod validation array — extract first message
+          const first = (err as unknown as { message: { message: string }[] }).message[0]
+          setError(first?.message ?? 'Validation failed')
+        } else {
+          setError(err.message)
+        }
+      } else {
+        setError('Something went wrong. Please try again.')
+      }
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <div className="min-h-screen flex">
@@ -15,12 +54,10 @@ export default function Signup() {
         <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full bg-[#bbf7d0] opacity-10 -translate-x-1/4 translate-y-1/4" />
         <div className="absolute top-1/2 left-1/2 w-48 h-48 rounded-full bg-[#22c55e] opacity-10 -translate-x-1/2 -translate-y-1/2" />
 
-        {/* Logo */}
         <div className="relative z-10 px-10 pt-10">
           <span className="text-2xl font-bold text-white tracking-widest">CHAMP</span>
         </div>
 
-        {/* Illustration */}
         <div className="relative z-10 flex-1 flex flex-col justify-center px-10">
           <div className="bg-white/10 rounded-2xl p-5 mb-6 max-w-xs">
             <p className="text-xs text-white/60 mb-3">Attendance hours</p>
@@ -37,7 +74,6 @@ export default function Signup() {
           </div>
         </div>
 
-        {/* Bottom copy */}
         <div className="relative z-10 px-10 pb-12">
           <h2 className="text-3xl font-bold text-white leading-tight mb-3">
             Real-time HR insights<br />
@@ -60,13 +96,14 @@ export default function Signup() {
           <p className="text-sm text-gray-500 mb-7">Please enter your personal information</p>
 
           <div className="space-y-4">
-            {/* First + Last name */}
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1.5">First name</label>
                 <input
                   type="text"
                   placeholder="First name"
+                  value={firstName}
+                  onChange={e => setFirstName(e.target.value)}
                   className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[#22c55e]"
                 />
               </div>
@@ -75,30 +112,43 @@ export default function Signup() {
                 <input
                   type="text"
                   placeholder="Last name"
+                  value={lastName}
+                  onChange={e => setLastName(e.target.value)}
                   className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[#22c55e]"
                 />
               </div>
             </div>
 
-            {/* Email */}
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1.5">Company name</label>
+              <input
+                type="text"
+                placeholder="Acme Corp"
+                value={companyName}
+                onChange={e => setCompanyName(e.target.value)}
+                className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[#22c55e]"
+              />
+            </div>
+
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1.5">Email Address</label>
               <input
                 type="email"
-                placeholder="Enter email address"
+                placeholder="you@company.com"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[#22c55e]"
               />
             </div>
 
-            {/* Password */}
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1.5">Password</label>
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
-                  placeholder="••••••••••••••"
+                  placeholder="Min 8 chars, upper, lower, number, symbol"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
                   className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[#22c55e] pr-10"
                 />
                 <button
@@ -112,11 +162,17 @@ export default function Signup() {
             </div>
           </div>
 
+          {error && (
+            <p className="mt-4 text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{error}</p>
+          )}
+
           <button
-            onClick={() => navigate('/otp', { state: { email } })}
-            className="w-full mt-7 bg-[#22c55e] hover:bg-green-600 text-white font-semibold py-3 rounded-xl transition-colors text-sm"
+            onClick={handleSubmit}
+            disabled={loading}
+            className="w-full mt-7 bg-[#22c55e] hover:bg-green-600 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-xl transition-colors text-sm flex items-center justify-center gap-2"
           >
-            Continue
+            {loading && <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />}
+            {loading ? 'Creating account…' : 'Continue'}
           </button>
 
           <p className="text-center text-sm text-gray-500 mt-4">

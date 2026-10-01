@@ -1,9 +1,10 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { AuthProvider } from './context/AuthContext'
+import RequireAuth from './components/RequireAuth'
 
 // Auth
 import RoleSelect from './pages/auth/RoleSelect'
 import Signup from './pages/auth/Signup'
-import OtpVerify from './pages/auth/OtpVerify'
 import Login from './pages/auth/Login'
 import Onboarding from './pages/auth/Onboarding'
 
@@ -46,53 +47,77 @@ import EmployeeConfig from './pages/employee/Config'
 export default function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        {/* Auth flow */}
-        <Route path="/" element={<Navigate to="/get-started" replace />} />
-        <Route path="/get-started" element={<RoleSelect />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/otp" element={<OtpVerify />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/onboarding" element={<Onboarding />} />
+      <AuthProvider>
+        <Routes>
+          {/* Public auth flow */}
+          <Route path="/" element={<Navigate to="/get-started" replace />} />
+          <Route path="/get-started" element={<RoleSelect />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/login" element={<Login />} />
 
-        {/* Employer flow */}
-        <Route path="/employer" element={<EmployerLayout />}>
-          <Route index element={<Dashboard />} />
-          <Route path="analytics"   element={<Analytics />} />
-          <Route path="employees"        element={<Employees />} />
-          <Route path="employees/add"    element={<AddEmployee />} />
-          <Route path="employees/:id"    element={<EmployeeDetail />} />
-          <Route path="hr-ops"           element={<HrOps />} />
-          <Route path="hr-ops/employee/:id" element={<HrOpsEmployeeDetail />} />
-          <Route path="payroll"          element={<Payroll />} />
-          <Route path="payroll/run"      element={<PayrollRun />} />
-          <Route path="payroll/:runId"   element={<PayrollDetail />} />
-          <Route path="user-access" element={<UserAccess />} />
-          <Route path="reports"          element={<Reports />} />
-          <Route path="reports/create"   element={<CreateReport />} />
-          <Route path="documents"        element={<Documents />} />
-          <Route path="documents/upload" element={<UploadDocument />} />
-          <Route path="benefits"         element={<Benefits />} />
-          <Route path="benefits/create"  element={<CreateBenefitPlan />} />
-          <Route path="user-access/add"  element={<AddUserAccess />} />
-          <Route path="config"           element={<Config />} />
-          <Route path="config/settings"  element={<ConfigSettings />} />
-        </Route>
+          {/* Onboarding — requires auth (employer only) */}
+          <Route
+            path="/onboarding"
+            element={
+              <RequireAuth role="employer">
+                <Onboarding />
+              </RequireAuth>
+            }
+          />
 
-        {/* Employee flow */}
-        <Route path="/employee" element={<EmployeeLayout />}>
-          <Route index element={<EmployeeDashboard />} />
-          <Route path="attendance"        element={<Attendance />} />
-          <Route path="attendance/detail" element={<AttendanceDetail />} />
-          <Route path="payslips"          element={<Payslips />} />
-          <Route path="payslips/:id"      element={<PayslipDetail />} />
-          <Route path="leave"             element={<LeaveRequests />} />
-          <Route path="leave/submit"      element={<SubmitLeave />} />
-          <Route path="benefits"          element={<EmployeeBenefits />} />
-          <Route path="benefits/:planId"  element={<BenefitDetail />} />
-          <Route path="config"            element={<EmployeeConfig />} />
-        </Route>
-      </Routes>
+          {/* Employer dashboard — requires auth + employer role */}
+          <Route
+            path="/employer"
+            element={
+              <RequireAuth role="employer">
+                <EmployerLayout />
+              </RequireAuth>
+            }
+          >
+            <Route index element={<Dashboard />} />
+            <Route path="analytics"            element={<Analytics />} />
+            <Route path="employees"            element={<Employees />} />
+            <Route path="employees/add"        element={<AddEmployee />} />
+            <Route path="employees/:id"        element={<EmployeeDetail />} />
+            <Route path="hr-ops"               element={<HrOps />} />
+            <Route path="hr-ops/employee/:id"  element={<HrOpsEmployeeDetail />} />
+            <Route path="payroll"              element={<Payroll />} />
+            <Route path="payroll/run"          element={<PayrollRun />} />
+            <Route path="payroll/:runId"       element={<PayrollDetail />} />
+            <Route path="user-access"          element={<UserAccess />} />
+            <Route path="user-access/add"      element={<AddUserAccess />} />
+            <Route path="reports"              element={<Reports />} />
+            <Route path="reports/create"       element={<CreateReport />} />
+            <Route path="documents"            element={<Documents />} />
+            <Route path="documents/upload"     element={<UploadDocument />} />
+            <Route path="benefits"             element={<Benefits />} />
+            <Route path="benefits/create"      element={<CreateBenefitPlan />} />
+            <Route path="config"               element={<Config />} />
+            <Route path="config/settings"      element={<ConfigSettings />} />
+          </Route>
+
+          {/* Employee dashboard — requires auth + employee role */}
+          <Route
+            path="/employee"
+            element={
+              <RequireAuth role="employee">
+                <EmployeeLayout />
+              </RequireAuth>
+            }
+          >
+            <Route index element={<EmployeeDashboard />} />
+            <Route path="attendance"        element={<Attendance />} />
+            <Route path="attendance/detail" element={<AttendanceDetail />} />
+            <Route path="payslips"          element={<Payslips />} />
+            <Route path="payslips/:id"      element={<PayslipDetail />} />
+            <Route path="leave"             element={<LeaveRequests />} />
+            <Route path="leave/submit"      element={<SubmitLeave />} />
+            <Route path="benefits"          element={<EmployeeBenefits />} />
+            <Route path="benefits/:planId"  element={<BenefitDetail />} />
+            <Route path="config"            element={<EmployeeConfig />} />
+          </Route>
+        </Routes>
+      </AuthProvider>
     </BrowserRouter>
   )
 }

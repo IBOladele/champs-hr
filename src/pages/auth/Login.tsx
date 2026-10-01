@@ -1,10 +1,55 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react'
+import { useAuth } from '../../context/AuthContext'
+import { ApiError } from '../../lib/api'
 
 export default function Login() {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
+
+  const { login, user } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+
+  // If already authenticated, go straight to their dashboard
+  if (user) {
+    const dest = user.role === 'employer' ? '/employer' : '/employee'
+    navigate(dest, { replace: true })
+    return null
+  }
+
+  async function handleSubmit() {
+    setError(null)
+    if (!email) { setError('Please enter your email address'); return }
+    if (!password) { setError('Please enter your password'); return }
+
+    setLoading(true)
+    try {
+      await login(email, password)
+      // After login the user is set in context — navigate to intended destination or role dashboard
+      const from = (location.state as { from?: { pathname: string } })?.from?.pathname
+      if (from && from !== '/login') {
+        navigate(from, { replace: true })
+      }
+      // useEffect in App will handle redirect via RequireAuth if user state updates
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setError(err.message)
+      } else {
+        setError('Something went wrong. Please try again.')
+      }
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (e.key === 'Enter') handleSubmit()
+  }
 
   return (
     <div className="min-h-screen flex">
@@ -14,12 +59,10 @@ export default function Login() {
         <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full bg-[#f0f4c3] opacity-10 -translate-x-1/4 translate-y-1/4" />
         <div className="absolute top-1/2 right-1/4 w-40 h-40 rounded-full bg-[#22c55e] opacity-10" />
 
-        {/* Logo */}
         <div className="relative z-10 px-10 pt-10">
           <span className="text-2xl font-bold text-white tracking-widest">CHAMP</span>
         </div>
 
-        {/* Illustration */}
         <div className="relative z-10 flex-1 flex flex-col justify-center px-10">
           <div className="bg-white/10 rounded-2xl p-5 shadow-xl mb-6 max-w-sm">
             <div className="flex items-center justify-between mb-4">
@@ -42,7 +85,6 @@ export default function Login() {
           </div>
         </div>
 
-        {/* Bottom copy */}
         <div className="relative z-10 px-10 pb-12">
           <h2 className="text-3xl font-bold text-white leading-tight mb-3">
             Run your{' '}
@@ -70,7 +112,11 @@ export default function Login() {
               <label className="block text-xs font-medium text-gray-700 mb-1.5">Email Address</label>
               <input
                 type="email"
-                placeholder="Enter email address"
+                placeholder="you@company.com"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                onKeyDown={handleKeyDown}
+                autoComplete="email"
                 className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[#22c55e]"
               />
             </div>
@@ -78,12 +124,16 @@ export default function Login() {
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label className="text-xs font-medium text-gray-700">Password</label>
-                <button className="text-xs text-[#22c55e] hover:underline">Forgot password?</button>
+                <button className="text-xs text-[#22c55e] hover:underline" type="button">Forgot password?</button>
               </div>
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
                   placeholder="••••••••••••••"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  autoComplete="current-password"
                   className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[#22c55e] pr-10"
                 />
                 <button
@@ -97,11 +147,17 @@ export default function Login() {
             </div>
           </div>
 
+          {error && (
+            <p className="mt-4 text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{error}</p>
+          )}
+
           <button
-            onClick={() => navigate('/employer')}
-            className="w-full mt-7 bg-[#22c55e] hover:bg-green-600 text-white font-semibold py-3 rounded-xl transition-colors text-sm"
+            onClick={handleSubmit}
+            disabled={loading}
+            className="w-full mt-7 bg-[#22c55e] hover:bg-green-600 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-xl transition-colors text-sm flex items-center justify-center gap-2"
           >
-            Login
+            {loading && <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />}
+            {loading ? 'Logging in…' : 'Login'}
           </button>
 
           <p className="text-center text-sm text-gray-500 mt-4">

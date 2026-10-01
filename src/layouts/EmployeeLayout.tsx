@@ -1,7 +1,8 @@
-import { NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import {
-  LayoutDashboard, Clock, FileText, CalendarDays, Gift, Settings, Bell, Search
+  LayoutDashboard, Clock, FileText, CalendarDays, Gift, Settings, Bell, Search, LogOut
 } from 'lucide-react'
+import { useAuth } from '../context/AuthContext'
 
 const NAV_ITEMS = [
   { label: 'Dashboard',      path: '/employee',            icon: LayoutDashboard },
@@ -12,13 +13,30 @@ const NAV_ITEMS = [
   { label: 'Configuration',  path: '/employee/config',     icon: Settings },
 ]
 
+function initials(name: string): string {
+  return name
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map(n => n[0].toUpperCase())
+    .join('')
+}
+
 export default function EmployeeLayout() {
+  const { user, logout } = useAuth()
+  const navigate = useNavigate()
+
+  function handleLogout() {
+    logout()
+    navigate('/login', { replace: true })
+  }
+
+  const avatarText = user ? initials(user.fullName) : '?'
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      {/* Dark header */}
       <div className="bg-[#1b2838] flex flex-col">
 
-        {/* Row 1: logo + search + icons */}
         <div className="px-8 py-3 flex items-center gap-4">
           <span className="text-white font-bold text-xl tracking-widest shrink-0">CHAMP</span>
 
@@ -36,13 +54,26 @@ export default function EmployeeLayout() {
               <Bell size={20} />
               <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-[#22c55e] rounded-full" />
             </button>
-            <div className="w-8 h-8 rounded-full bg-[#22c55e] flex items-center justify-center text-white text-sm font-semibold select-none">
-              R
+
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-[#22c55e] flex items-center justify-center text-white text-sm font-semibold select-none">
+                {avatarText}
+              </div>
+              {user && (
+                <span className="hidden xl:block text-sm text-gray-300 max-w-[120px] truncate">{user.fullName}</span>
+              )}
             </div>
+
+            <button
+              onClick={handleLogout}
+              title="Log out"
+              className="text-gray-400 hover:text-white transition-colors"
+            >
+              <LogOut size={18} />
+            </button>
           </div>
         </div>
 
-        {/* Row 2: nav tabs */}
         <div className="px-4 pb-2 flex items-center gap-1 overflow-x-auto">
           {NAV_ITEMS.map(({ label, path, icon: Icon }) => (
             <NavLink
@@ -63,7 +94,6 @@ export default function EmployeeLayout() {
 
       </div>
 
-      {/* Page content */}
       <main className="flex-1 bg-gray-50">
         <Outlet />
       </main>
