@@ -303,6 +303,33 @@ export const benefits = {
     request<unknown>(`/benefits/${id}/enrol`, { method: 'POST', body: JSON.stringify({ employeeId }) }),
 }
 
+// ── Onboarding ────────────────────────────────────────────────────────────────
+
+export interface OnboardingState {
+  step: number
+  completed: boolean
+  settings: Record<string, unknown>
+}
+
+export const onboarding = {
+  get: (): Promise<OnboardingState> => request<OnboardingState>('/onboarding'),
+
+  saveStep: (step: number, data: Record<string, string>): Promise<{ ok: boolean; step: number }> =>
+    request<{ ok: boolean; step: number }>(`/onboarding/step/${step}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
+
+  invite: (emails: string[]): Promise<{ ok: boolean; sent: string[]; skipped: string[] }> =>
+    request<{ ok: boolean; sent: string[]; skipped: string[] }>('/onboarding/invite', {
+      method: 'POST',
+      body: JSON.stringify({ emails }),
+    }),
+
+  complete: (): Promise<{ ok: boolean }> =>
+    request<{ ok: boolean }>('/onboarding/complete', { method: 'POST' }),
+}
+
 // ── Stats ─────────────────────────────────────────────────────────────────────
 
 export const stats = {

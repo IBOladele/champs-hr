@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import authRouter from './auth';
+import onboardingRouter from './onboarding';
 import employeesRouter from './employees';
 import departmentsRouter from './departments';
 import leaveRouter from './leave';
@@ -16,6 +17,7 @@ import payslipsRouter from './payslips';
 const router = Router();
 
 router.use('/auth', authRouter);
+router.use('/onboarding', onboardingRouter);
 router.use('/employees', employeesRouter);
 router.use('/departments', departmentsRouter);
 router.use('/leave', leaveRouter);

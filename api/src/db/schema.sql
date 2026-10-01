@@ -247,3 +247,7 @@ CREATE INDEX IF NOT EXISTS idx_direct_deposit_employee_id ON employee_direct_dep
 ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified             BOOLEAN NOT NULL DEFAULT FALSE;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verification_token   TEXT;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verification_sent_at TIMESTAMPTZ;
+
+ALTER TABLE tenants ADD COLUMN IF NOT EXISTS settings            JSONB        NOT NULL DEFAULT '{}';
+ALTER TABLE tenants ADD COLUMN IF NOT EXISTS onboarding_step     INTEGER      NOT NULL DEFAULT 0;
+ALTER TABLE tenants ADD COLUMN IF NOT EXISTS onboarding_completed BOOLEAN     NOT NULL DEFAULT FALSE;
