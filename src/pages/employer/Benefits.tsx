@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Search, ChevronDown } from 'lucide-react'
+import { Search, ChevronDown, Gift } from 'lucide-react'
 import { usePageTitle } from '../../hooks/usePageTitle'
 
 type SubTab = 'Benefit plans' | 'Benefit sync' | 'Benefit requests'
@@ -19,17 +19,6 @@ interface Benefit {
 }
 
 const subTabs: SubTab[] = ['Benefit plans', 'Benefit sync', 'Benefit requests']
-
-const benefits: Benefit[] = [
-  { id: '1', dateCreated: 'Jan 1, 2025',  provider: 'John Insurance', providerInitial: 'J', providerColor: 'bg-yellow-400', planName: 'Valucar/Silver',         monthlyCost: '$995,457', documentRequired: true,  status: 'Active'   },
-  { id: '2', dateCreated: 'Feb 14, 2025', provider: 'Lada care',      providerInitial: 'L', providerColor: 'bg-blue-400',   planName: 'Dental plan Fn',         monthlyCost: '$925,457', documentRequired: false, status: 'Inactive' },
-  { id: '3', dateCreated: 'Feb 14, 2025', provider: 'Kaya health',    providerInitial: 'K', providerColor: 'bg-green-500',  planName: 'Life Insurance Basic',   monthlyCost: '$995,457', documentRequired: false, status: 'Active'   },
-  { id: '4', dateCreated: 'Feb 14, 2025', provider: 'Kaya health',    providerInitial: 'K', providerColor: 'bg-green-500',  planName: 'Disability Adv.',        monthlyCost: '$995,457', documentRequired: false, status: 'Disable'  },
-  { id: '5', dateCreated: 'Feb 14, 2025', provider: 'Kaya health',    providerInitial: 'K', providerColor: 'bg-green-500',  planName: 'Retirement Gold 401k',   monthlyCost: '$995,457', documentRequired: false, status: 'Disable'  },
-  { id: '6', dateCreated: 'Feb 14, 2025', provider: 'Kaya health',    providerInitial: 'K', providerColor: 'bg-green-500',  planName: 'PTO Enhanced',           monthlyCost: '$995,457', documentRequired: false, status: 'Disable'  },
-  { id: '7', dateCreated: 'Feb 14, 2025', provider: 'Kaya health',    providerInitial: 'K', providerColor: 'bg-green-500',  planName: 'Wellness Platinum',      monthlyCost: '$905,457', documentRequired: false, status: 'Inactive' },
-  { id: '8', dateCreated: 'Feb 14, 2025', provider: 'Kaya health',    providerInitial: 'K', providerColor: 'bg-green-500',  planName: 'Wellness Platinum',      monthlyCost: '$905,457', documentRequired: false, status: 'Inactive' },
-]
 
 function StatusPill({ status }: { status: BenefitStatus }) {
   const cls =
@@ -51,6 +40,7 @@ export default function Benefits() {
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<SubTab>('Benefit plans')
   const [search, setSearch] = useState('')
+  const [benefits] = useState<Benefit[]>([])
 
   const filtered = benefits.filter((b) =>
     b.planName.toLowerCase().includes(search.toLowerCase()) ||
@@ -159,8 +149,10 @@ export default function Benefits() {
           </table>
 
           {filtered.length === 0 && (
-            <div className="text-center py-12 text-gray-400">
-              <p className="text-sm">No benefits found.</p>
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <Gift size={40} className="text-gray-300 mb-3" />
+              <p className="text-sm font-medium text-gray-500">No benefit plans yet</p>
+              <p className="text-xs text-gray-400 mt-1">Create your first plan to get started</p>
             </div>
           )}
         </div>

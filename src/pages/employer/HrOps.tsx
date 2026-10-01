@@ -16,17 +16,6 @@ interface EmployeeRow {
   status: EmpStatus
 }
 
-const employees: EmployeeRow[] = [
-  { name: 'Smith Meyer',    initials: 'S',  color: 'bg-yellow-400',  id: '87568454',   totalWorked: '35-80 hours', totalClockIn: '31-80 hours', totalClockOut: '36-78 hours', status: 'Online'   },
-  { name: 'Lara Mikus',     initials: 'L',  color: 'bg-blue-400',    id: '4b67868v',   totalWorked: '08-80 rows',  totalClockIn: '31-80 hours', totalClockOut: '36-50 hours', status: 'Active'   },
-  { name: 'Keishy Locklear', initials: 'K', color: 'bg-amber-500',   id: '78901975',   totalWorked: '38-80 nours', totalClockIn: '31-98 hours', totalClockOut: 'Data analyst',status: 'Active'   },
-  { name: 'Riley Utte',     initials: 'R',  color: 'bg-green-500',   id: '416703057',  totalWorked: '36-80 hou',   totalClockIn: '32-88 hours', totalClockOut: '36-50 hours', status: 'Online'   },
-  { name: 'Carl Vakil',     initials: 'C',  color: 'bg-orange-400',  id: '48192775',   totalWorked: '36-80 nours', totalClockIn: '31-80 hours', totalClockOut: '35-50 hours', status: 'Away'     },
-  { name: 'Hugo i Hully',   initials: 'H',  color: 'bg-blue-500',    id: '4b67868v',   totalWorked: '08-80 hours', totalClockIn: '31-88 hours', totalClockOut: '36-59 hours', status: 'Active'   },
-  { name: 'Daria Mavis',    initials: 'D',  color: 'bg-purple-500',  id: '33345557',   totalWorked: '35-80 rows',  totalClockIn: '31-88 hours', totalClockOut: '35-78 hours', status: 'Online'   },
-  { name: 'Joan Gombo',     initials: 'J',  color: 'bg-pink-400',    id: '416703027',  totalWorked: '36-80 nours', totalClockIn: '31-98 hours', totalClockOut: '36-98 hours', status: 'Active'   },
-]
-
 function StatusPill({ status }: { status: EmpStatus }) {
   const cls =
     status === 'Online'
@@ -47,6 +36,7 @@ export default function HrOps() {
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<HrTab>('Attendance')
   const [search, setSearch] = useState('')
+  const [employees] = useState<EmployeeRow[]>([])
 
   const filtered = employees.filter(e =>
     e.name.toLowerCase().includes(search.toLowerCase())
@@ -88,10 +78,10 @@ export default function HrOps() {
           {/* Stat cards */}
           <div className="grid grid-cols-4 gap-4 mb-6">
             {[
-              { label: 'Total employees',  value: '54,567', icon: Users,       iconCls: 'text-green-500',  bg: 'bg-green-50'  },
-              { label: 'Active employees', value: '24,585', icon: UserCheck,   iconCls: 'text-amber-500',  bg: 'bg-amber-50'  },
-              { label: 'Late arrivals',    value: '958',    icon: Clock,       iconCls: 'text-blue-500',   bg: 'bg-blue-50'   },
-              { label: 'Early employees', value: '30',     icon: Calendar,    iconCls: 'text-blue-400',   bg: 'bg-blue-50'   },
+              { label: 'Total employees',  value: '0', icon: Users,       iconCls: 'text-green-500',  bg: 'bg-green-50'  },
+              { label: 'Active employees', value: '0', icon: UserCheck,   iconCls: 'text-amber-500',  bg: 'bg-amber-50'  },
+              { label: 'Late arrivals',    value: '0', icon: Clock,       iconCls: 'text-blue-500',   bg: 'bg-blue-50'   },
+              { label: 'Early employees', value: '0',  icon: Calendar,    iconCls: 'text-blue-400',   bg: 'bg-blue-50'   },
             ].map(({ label, value, icon: Icon, iconCls, bg }) => (
               <div key={label} className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 flex items-start justify-between">
                 <div>
@@ -123,7 +113,7 @@ export default function HrOps() {
           </div>
 
           {/* Counter */}
-          <p className="text-sm text-gray-500 mb-3">{filtered.length} of 58 employees</p>
+          <p className="text-sm text-gray-500 mb-3">{filtered.length} employees</p>
 
           {/* Table */}
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
@@ -167,6 +157,14 @@ export default function HrOps() {
                 </tbody>
               </table>
             </div>
+
+            {filtered.length === 0 && (
+              <div className="flex flex-col items-center justify-center py-16 text-center">
+                <Users size={40} className="text-gray-300 mb-3" />
+                <p className="text-sm font-medium text-gray-500">No employees yet</p>
+                <p className="text-xs text-gray-400 mt-1">Attendance records will appear once employees are added</p>
+              </div>
+            )}
           </div>
         </>
       )}

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FileText, Download, Search, ChevronDown, Eye } from 'lucide-react'
 import { usePageTitle } from '../../hooks/usePageTitle'
@@ -11,18 +12,6 @@ interface PayslipRow {
   accountNumber: string
   status: PayslipStatus
 }
-
-const rows: PayslipRow[] = [
-  { period: 'October 2024',   payDate: 'Oct 1 - 31, 2024',  netPay: '$24,900', accountNumber: '24567326', status: 'Loaded'  },
-  { period: 'Sector Pay 2024',payDate: 'Oct 1 - 29, 2024',  netPay: '$74,500', accountNumber: '24567326', status: 'Loaded'  },
-  { period: 'August 2024',    payDate: 'Oct 1 - 31, 2024',  netPay: '$24,900', accountNumber: '24567326', status: 'Refund'  },
-  { period: 'July 2024',      payDate: 'Oct 1 - 24, 2024',  netPay: '$81,980', accountNumber: '07108122', status: 'Pending' },
-  { period: 'July 2024',      payDate: 'Oct 1 - 24, 2024',  netPay: '$18,980', accountNumber: '24567026', status: 'Loaded'  },
-  { period: 'June 2024',      payDate: 'Oct 1 - 29, 2024',  netPay: '$37,590', accountNumber: '24567026', status: 'Pending' },
-  { period: 'May 2024',       payDate: 'Oct 1 - 30, 2024',  netPay: '$31,900', accountNumber: '34087026', status: 'Refund'  },
-  { period: 'April 2024',     payDate: 'Oct 1 - 31, 2024',  netPay: '$33,980', accountNumber: '34087026', status: 'Loaded'  },
-  { period: 'May 2021',       payDate: 'Dec 1 - 31, 2014',  netPay: '$37,980', accountNumber: '34087026', status: 'Loaded'  },
-]
 
 function StatusPill({ status }: { status: PayslipStatus }) {
   const cls =
@@ -42,6 +31,7 @@ export default function Payslips() {
   usePageTitle('My Payslips')
 
   const navigate = useNavigate()
+  const [rows] = useState<PayslipRow[]>([])
 
   return (
     <div className="px-8 py-6">
@@ -52,9 +42,9 @@ export default function Payslips() {
       {/* Stat cards */}
       <div className="grid grid-cols-3 gap-4 mb-6">
         {[
-          { label: 'Last pay',       value: '$385,045', iconCls: 'text-green-500',  bg: 'bg-green-50'  },
-          { label: 'Total sync avg', value: '$342,645', iconCls: 'text-blue-500',   bg: 'bg-blue-50'   },
-          { label: 'Top collection', value: '$82,645',  iconCls: 'text-amber-500',  bg: 'bg-amber-50'  },
+          { label: 'Last pay',       value: '£0', iconCls: 'text-green-500',  bg: 'bg-green-50'  },
+          { label: 'Total sync avg', value: '£0', iconCls: 'text-blue-500',   bg: 'bg-blue-50'   },
+          { label: 'Top collection', value: '£0', iconCls: 'text-amber-500',  bg: 'bg-amber-50'  },
         ].map(({ label, value, iconCls, bg }) => (
           <div key={label} className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 flex items-start justify-between">
             <div>
@@ -107,7 +97,7 @@ export default function Payslips() {
                 <tr
                   key={i}
                   className="hover:bg-gray-50 transition-colors cursor-pointer"
-                  onClick={() => navigate('/employee/payslips/feb-2025')}
+                  onClick={() => navigate('/employee/payslips/detail')}
                 >
                   <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">{row.period}</td>
                   <td className="px-6 py-4 text-gray-600 whitespace-nowrap">{row.payDate}</td>
@@ -118,7 +108,7 @@ export default function Payslips() {
                     <div className="flex items-center gap-3">
                       <button
                         className="flex items-center gap-1 text-xs text-gray-600 hover:text-gray-900"
-                        onClick={e => { e.stopPropagation(); navigate('/employee/payslips/feb-2025') }}
+                        onClick={e => { e.stopPropagation(); navigate('/employee/payslips/detail') }}
                       >
                         <Eye size={12} /> View details
                       </button>
@@ -134,6 +124,13 @@ export default function Payslips() {
               ))}
             </tbody>
           </table>
+          {rows.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <FileText size={40} className="text-gray-300 mb-3" />
+              <p className="text-sm font-medium text-gray-500">No payslips yet</p>
+              <p className="text-xs text-gray-400 mt-1">Payslips will appear here after payroll has been run</p>
+            </div>
+          )}
         </div>
       </div>
 

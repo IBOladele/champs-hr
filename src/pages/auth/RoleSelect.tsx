@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Building2, User } from 'lucide-react'
+import { Logo } from '../../components/Logo'
 
 export default function RoleSelect() {
   const [role, setRole] = useState<'business' | 'employee'>('business')
@@ -24,7 +25,7 @@ export default function RoleSelect() {
         <div className="absolute bottom-32 left-12 w-40 h-40 rounded-full bg-[#22c55e] opacity-15" />
 
         <div className="relative z-10 px-10 pt-10">
-          <span className="text-2xl font-bold text-white tracking-widest">CHAMP</span>
+          <Logo theme="dark" size={28} />
         </div>
 
         <div className="relative z-10 flex-1 flex flex-col justify-center px-10">
@@ -65,10 +66,10 @@ export default function RoleSelect() {
       <div className="flex-1 flex items-center justify-center px-8 py-12 bg-white">
         <div className="w-full max-w-sm">
           <div className="lg:hidden mb-8">
-            <span className="text-2xl font-bold text-gray-900 tracking-widest">CHAMP</span>
+            <Logo size={28} />
           </div>
 
-          <h1 className="text-2xl font-bold text-gray-900 mb-1">How will you use CHAMP</h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-1">How will you use PayChamps</h1>
           <p className="text-sm text-gray-500 mb-6">Please select an option below</p>
 
           <p className="text-xs font-medium text-gray-500 mb-3 uppercase tracking-wide">How do you plan to use us</p>

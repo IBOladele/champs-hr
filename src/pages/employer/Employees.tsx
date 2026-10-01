@@ -20,75 +20,6 @@ interface Employee {
   status: 'Active' | 'Invited' | 'Pending review' | 'Terminated'
 }
 
-const employees: Employee[] = [
-  {
-    id: '1',
-    employeeId: '67890434',
-    name: 'Smith meyer',
-    initial: 'J',
-    avatarColor: 'bg-orange-200 text-orange-800',
-    email: 'jamisondowling@gmail.com',
-    department: 'Design',
-    jobTitle: 'Project lead',
-    status: 'Active',
-  },
-  {
-    id: '2',
-    employeeId: '45678657',
-    name: 'Lana Mejias',
-    initial: 'L',
-    avatarColor: 'bg-purple-200 text-purple-800',
-    email: 'lana.mejias@gmail.com',
-    department: 'Engineering',
-    jobTitle: 'UX Architect',
-    status: 'Active',
-  },
-  {
-    id: '3',
-    employeeId: '78901975',
-    name: 'Keisha Locklear',
-    initial: 'K',
-    avatarColor: 'bg-green-200 text-green-800',
-    email: 'keishalocklear@gmail.com',
-    department: 'Product',
-    jobTitle: 'Data analyst',
-    status: 'Active',
-  },
-  {
-    id: '4',
-    employeeId: '89012975',
-    name: 'Miley Little',
-    initial: 'M',
-    avatarColor: 'bg-blue-200 text-blue-800',
-    email: 'mileylittle@gmail.com',
-    department: 'Marketing',
-    jobTitle: 'Software Engineer',
-    status: 'Active',
-  },
-  {
-    id: '5',
-    employeeId: '90123456',
-    name: 'Diana Torres',
-    initial: 'D',
-    avatarColor: 'bg-rose-200 text-rose-800',
-    email: 'diana.torres@gmail.com',
-    department: 'HR',
-    jobTitle: 'HR Manager',
-    status: 'Active',
-  },
-  {
-    id: '6',
-    employeeId: '01234567',
-    name: 'Aaron Blunt',
-    initial: 'A',
-    avatarColor: 'bg-teal-200 text-teal-800',
-    email: 'aaron.blunt@gmail.com',
-    department: 'Finance',
-    jobTitle: 'Financial Analyst',
-    status: 'Active',
-  },
-]
-
 const tabs: { key: Tab; label: string }[] = [
   { key: 'active', label: 'Active' },
   { key: 'invited', label: 'Invited' },
@@ -101,6 +32,7 @@ export default function Employees() {
 
   const [activeTab, setActiveTab] = useState<Tab>('active')
   const [search, setSearch] = useState('')
+  const [employees] = useState<Employee[]>([])
   const navigate = useNavigate()
 
   const filtered = employees.filter(
@@ -140,7 +72,7 @@ export default function Employees() {
             </div>
           </div>
           <p className="text-sm text-gray-500 mb-1">Total employees</p>
-          <p className="text-2xl font-bold text-gray-900">54,567</p>
+          <p className="text-2xl font-bold text-gray-900">0</p>
         </div>
 
         {/* Active employees */}
@@ -151,7 +83,7 @@ export default function Employees() {
             </div>
           </div>
           <p className="text-sm text-gray-500 mb-1">Active employees</p>
-          <p className="text-2xl font-bold text-gray-900">24,585</p>
+          <p className="text-2xl font-bold text-gray-900">0</p>
         </div>
 
         {/* Invited employees */}
@@ -162,7 +94,7 @@ export default function Employees() {
             </div>
           </div>
           <p className="text-sm text-gray-500 mb-1">Invited employees</p>
-          <p className="text-2xl font-bold text-gray-900">958</p>
+          <p className="text-2xl font-bold text-gray-900">0</p>
         </div>
 
         {/* Pending review */}
@@ -173,7 +105,7 @@ export default function Employees() {
             </div>
           </div>
           <p className="text-sm text-gray-500 mb-1">Pending review</p>
-          <p className="text-2xl font-bold text-gray-900">30</p>
+          <p className="text-2xl font-bold text-gray-900">0</p>
         </div>
       </div>
 
@@ -226,7 +158,7 @@ export default function Employees() {
 
         {/* Count label */}
         <div className="px-4 py-3 border-b border-gray-100">
-          <span className="text-xs text-gray-400">10 of 50 employees</span>
+          <span className="text-xs text-gray-400">{employees.length} employees</span>
         </div>
 
         {/* Table */}
@@ -318,14 +250,15 @@ export default function Employees() {
 
         {filtered.length === 0 && (
           <div className="py-16 text-center text-gray-400">
-            <Users size={32} className="mx-auto mb-3 opacity-30" />
-            <p className="text-sm">No employees match your search</p>
+            <Users size={40} className="mx-auto mb-3 text-gray-300" />
+            <p className="text-sm font-medium text-gray-500">No employees yet</p>
+            <p className="text-xs text-gray-400 mt-1">Add your first employee to get started</p>
           </div>
         )}
 
         {/* Pagination */}
         <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100">
-          <p className="text-sm text-gray-500">Showing 1-6 of 50</p>
+          <p className="text-sm text-gray-500">{employees.length} employees</p>
           <div className="flex items-center gap-2">
             <button
               className="flex items-center gap-1 px-3 py-1.5 text-sm border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"

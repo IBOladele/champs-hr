@@ -1,24 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronLeft, Check } from 'lucide-react'
+import { ChevronLeft, Check, Users, PoundSterling } from 'lucide-react'
 
 const STEPS = ['Review employees', 'Review deductions', 'Confirm & submit']
-
-const employeeRows = [
-  { name: 'Smith Meyer', dept: 'Marketing', basePay: '$29,000', adjustments: '$0', net: '$29,000' },
-  { name: 'Lana Mejias', dept: 'Engineering', basePay: '$31,000', adjustments: '$0', net: '$31,000' },
-  { name: 'Keisha Locklear', dept: 'Product', basePay: '$27,500', adjustments: '$0', net: '$27,500' },
-  { name: 'Miley Little', dept: 'Marketing', basePay: '$25,000', adjustments: '$0', net: '$25,000' },
-  { name: 'Diana Torres', dept: 'HR', basePay: '$32,500', adjustments: '$0', net: '$32,500' },
-]
-
-const deductionRows = [
-  { name: 'Smith Meyer', incomeTax: '$1,740', ni: '$870', pension: '$290', total: '$2,900' },
-  { name: 'Lana Mejias', incomeTax: '$1,860', ni: '$930', pension: '$310', total: '$3,100' },
-  { name: 'Keisha Locklear', incomeTax: '$1,650', ni: '$825', pension: '$275', total: '$2,750' },
-  { name: 'Miley Little', incomeTax: '$1,500', ni: '$750', pension: '$250', total: '$2,500' },
-  { name: 'Diana Torres', incomeTax: '$1,950', ni: '$975', pension: '$325', total: '$3,250' },
-]
 
 function StepIndicator({ currentStep }: { currentStep: number }) {
   return (
@@ -78,30 +62,27 @@ function ReviewEmployeesStep() {
           </tr>
         </thead>
         <tbody>
-          {employeeRows.map((row) => (
-            <tr key={row.name} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-              <td className="px-4 py-3.5 text-sm font-medium text-gray-800">{row.name}</td>
-              <td className="px-4 py-3.5 text-sm text-gray-600">{row.dept}</td>
-              <td className="px-4 py-3.5 text-sm text-gray-700 text-right">{row.basePay}</td>
-              <td className="px-4 py-3.5 text-sm text-gray-700 text-right">{row.adjustments}</td>
-              <td className="px-4 py-3.5 text-sm text-gray-700 text-right">{row.net}</td>
-              <td className="px-4 py-3.5">
-                <button className="text-xs font-medium hover:underline" style={{ color: '#22c55e' }}>
-                  Add adjustment
-                </button>
-              </td>
-            </tr>
-          ))}
-          {/* Total row */}
+          <tr>
+            <td colSpan={6}>
+              <div className="flex flex-col items-center justify-center py-16 text-center">
+                <Users size={40} className="text-gray-300 mb-3" />
+                <p className="text-sm font-medium text-gray-500">No employees to review</p>
+                <p className="text-xs text-gray-400 mt-1">Add employees before running payroll</p>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+        {/* Total row */}
+        <tfoot>
           <tr className="bg-gray-50 border-t border-gray-200">
             <td className="px-4 py-3.5 text-sm font-bold text-gray-900">Total</td>
             <td className="px-4 py-3.5 text-sm text-gray-400">—</td>
-            <td className="px-4 py-3.5 text-sm font-bold text-gray-900 text-right">$145,000</td>
-            <td className="px-4 py-3.5 text-sm font-bold text-gray-900 text-right">$0</td>
-            <td className="px-4 py-3.5 text-sm font-bold text-gray-900 text-right">$145,000</td>
+            <td className="px-4 py-3.5 text-sm font-bold text-gray-900 text-right">£0</td>
+            <td className="px-4 py-3.5 text-sm font-bold text-gray-900 text-right">£0</td>
+            <td className="px-4 py-3.5 text-sm font-bold text-gray-900 text-right">£0</td>
             <td className="px-4 py-3.5"></td>
           </tr>
-        </tbody>
+        </tfoot>
       </table>
     </div>
   )
@@ -121,24 +102,26 @@ function ReviewDeductionsStep() {
           </tr>
         </thead>
         <tbody>
-          {deductionRows.map((row) => (
-            <tr key={row.name} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-              <td className="px-4 py-3.5 text-sm font-medium text-gray-800">{row.name}</td>
-              <td className="px-4 py-3.5 text-sm text-gray-700 text-right">{row.incomeTax}</td>
-              <td className="px-4 py-3.5 text-sm text-gray-700 text-right">{row.ni}</td>
-              <td className="px-4 py-3.5 text-sm text-gray-700 text-right">{row.pension}</td>
-              <td className="px-4 py-3.5 text-sm font-semibold text-gray-800 text-right">{row.total}</td>
-            </tr>
-          ))}
-          {/* Totals row */}
-          <tr className="bg-gray-50 border-t border-gray-200">
-            <td className="px-4 py-3.5 text-sm font-bold text-gray-900">Totals</td>
-            <td className="px-4 py-3.5 text-sm font-bold text-gray-900 text-right">$8,700</td>
-            <td className="px-4 py-3.5 text-sm font-bold text-gray-900 text-right">$4,350</td>
-            <td className="px-4 py-3.5 text-sm font-bold text-gray-900 text-right">$1,450</td>
-            <td className="px-4 py-3.5 text-sm font-bold text-gray-900 text-right">$14,500</td>
+          <tr>
+            <td colSpan={5}>
+              <div className="flex flex-col items-center justify-center py-16 text-center">
+                <PoundSterling size={40} className="text-gray-300 mb-3" />
+                <p className="text-sm font-medium text-gray-500">No deductions to review</p>
+                <p className="text-xs text-gray-400 mt-1">Deductions will appear once employees are added</p>
+              </div>
+            </td>
           </tr>
         </tbody>
+        {/* Totals row */}
+        <tfoot>
+          <tr className="bg-gray-50 border-t border-gray-200">
+            <td className="px-4 py-3.5 text-sm font-bold text-gray-900">Totals</td>
+            <td className="px-4 py-3.5 text-sm font-bold text-gray-900 text-right">£0</td>
+            <td className="px-4 py-3.5 text-sm font-bold text-gray-900 text-right">£0</td>
+            <td className="px-4 py-3.5 text-sm font-bold text-gray-900 text-right">£0</td>
+            <td className="px-4 py-3.5 text-sm font-bold text-gray-900 text-right">£0</td>
+          </tr>
+        </tfoot>
       </table>
     </div>
   )
@@ -146,12 +129,12 @@ function ReviewDeductionsStep() {
 
 function ConfirmStep() {
   const summaryRows = [
-    { label: 'Pay period', value: 'March 2025' },
-    { label: 'Total employees', value: '40' },
-    { label: 'Total gross pay', value: '$453,300' },
-    { label: 'Total deductions', value: '$45,330' },
-    { label: 'Net pay', value: '$407,970' },
-    { label: 'Processing date', value: '28th March 2025' },
+    { label: 'Pay period', value: '—' },
+    { label: 'Total employees', value: '—' },
+    { label: 'Total gross pay', value: '—' },
+    { label: 'Total deductions', value: '—' },
+    { label: 'Net pay', value: '—' },
+    { label: 'Processing date', value: '—' },
   ]
 
   return (
@@ -165,7 +148,7 @@ function ConfirmStep() {
               className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0"
             >
               <span className="text-sm text-gray-600">{row.label}</span>
-              <span className="text-sm font-semibold text-gray-900">{row.value}</span>
+              <span className="text-sm font-semibold text-gray-400">{row.value}</span>
             </div>
           ))}
         </div>
@@ -216,7 +199,7 @@ export default function PayrollRun() {
       {/* Header */}
       <div className="mb-2">
         <h1 className="text-2xl font-bold text-gray-900">Run Payroll</h1>
-        <p className="text-sm text-gray-500 mt-1">Period: March 2025</p>
+        <p className="text-sm text-gray-500 mt-1">Period: —</p>
       </div>
 
       {/* Step indicator */}

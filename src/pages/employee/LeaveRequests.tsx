@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CalendarDays, Plus, ChevronDown, ChevronLeft, ChevronRight, Eye } from 'lucide-react'
 import { usePageTitle } from '../../hooks/usePageTitle'
@@ -12,15 +13,6 @@ interface LeaveRow {
   totalDays: string
   status: LeaveStatus
 }
-
-const rows: LeaveRow[] = [
-  { name: 'Health check-up',   type: 'Sick day',     startDate: 'Aug 15, 2025', endDate: 'Aug 15, 2025', totalDays: '1 day',   status: 'Pending'  },
-  { name: 'Project deadline',  type: 'Vacation',     startDate: 'Jun 20, 2025', endDate: 'Jun 27, 2025', totalDays: '7 days',  status: 'Approved' },
-  { name: 'Team meeting',      type: 'Personal day', startDate: 'Jul 1, 2025',  endDate: 'Jul 1, 2025',  totalDays: '1 day',   status: 'Pending'  },
-  { name: 'Doctor visit',      type: 'Sick day',     startDate: 'Jul 10, 2025', endDate: 'Jul 10, 2025', totalDays: '1 day',   status: 'Approved' },
-  { name: 'Family event',      type: 'Personal day', startDate: 'Aug 1, 2025',  endDate: 'Aug 3, 2025',  totalDays: '3 days',  status: 'Denied'   },
-  { name: 'Annual leave',      type: 'Vacation',     startDate: 'Sep 1, 2025',  endDate: 'Sep 14, 2025', totalDays: '14 days', status: 'Pending'  },
-]
 
 function StatusPill({ status }: { status: LeaveStatus }) {
   const cls =
@@ -40,6 +32,7 @@ export default function LeaveRequests() {
   usePageTitle('Leave Requests')
 
   const navigate = useNavigate()
+  const [rows] = useState<LeaveRow[]>([])
 
   return (
     <div className="px-8 py-6">
@@ -59,9 +52,9 @@ export default function LeaveRequests() {
       {/* Stat cards */}
       <div className="grid grid-cols-3 gap-4 mb-6">
         {[
-          { label: 'Annual leave', value: '100', iconCls: 'text-green-500', bg: 'bg-green-50' },
-          { label: 'Sick leave',   value: '35',  iconCls: 'text-red-400',   bg: 'bg-red-50'   },
-          { label: 'Unpaid leave', value: '20',  iconCls: 'text-amber-500', bg: 'bg-amber-50' },
+          { label: 'Annual leave', value: '0', iconCls: 'text-green-500', bg: 'bg-green-50' },
+          { label: 'Sick leave',   value: '0', iconCls: 'text-red-400',   bg: 'bg-red-50'   },
+          { label: 'Unpaid leave', value: '0', iconCls: 'text-amber-500', bg: 'bg-amber-50' },
         ].map(({ label, value, iconCls, bg }) => (
           <div key={label} className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 flex items-start justify-between">
             <div>
@@ -116,6 +109,13 @@ export default function LeaveRequests() {
               ))}
             </tbody>
           </table>
+          {rows.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <CalendarDays size={40} className="text-gray-300 mb-3" />
+              <p className="text-sm font-medium text-gray-500">No leave requests yet</p>
+              <p className="text-xs text-gray-400 mt-1">Submit a leave request to see it here</p>
+            </div>
+          )}
         </div>
       </div>
 
@@ -124,13 +124,6 @@ export default function LeaveRequests() {
         <button className="flex items-center gap-1 px-3 py-1.5 text-sm text-gray-500 hover:text-gray-700">
           <ChevronLeft size={14} /> Previous
         </button>
-        {[1, 2, 3, 4].map(p => (
-          <button key={p} className={`w-8 h-8 rounded text-sm font-medium ${p === 1 ? 'bg-gray-900 text-white' : 'text-gray-500 hover:bg-gray-100'}`}>
-            {p}
-          </button>
-        ))}
-        <span className="px-1 text-gray-400 text-sm">...</span>
-        <button className="w-8 h-8 rounded text-sm text-gray-500 hover:bg-gray-100">10</button>
         <button className="flex items-center gap-1 px-3 py-1.5 text-sm text-gray-500 hover:text-gray-700">
           Next <ChevronRight size={14} />
         </button>

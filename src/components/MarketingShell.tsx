@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Menu, X, ChevronDown } from 'lucide-react'
+import { Logo } from './Logo'
 
 interface MarketingShellProps {
   children: React.ReactNode
@@ -19,16 +20,8 @@ export default function MarketingShell({ children }: MarketingShellProps) {
       <header className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2">
-            <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center"
-              style={{ backgroundColor: '#22c55e' }}
-            >
-              <span className="text-white text-sm font-bold">P</span>
-            </div>
-            <span className="text-lg font-bold text-gray-900">
-              Pay<span style={{ color: '#22c55e' }}>Champs</span>
-            </span>
+          <Link to="/" className="flex items-center">
+            <Logo size={28} />
           </Link>
 
           {/* Desktop nav */}
@@ -154,16 +147,8 @@ export default function MarketingShell({ children }: MarketingShellProps) {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-10">
             {/* Brand */}
             <div className="md:col-span-2">
-              <Link to="/" className="flex items-center gap-2 mb-3">
-                <div
-                  className="w-7 h-7 rounded-lg flex items-center justify-center"
-                  style={{ backgroundColor: '#22c55e' }}
-                >
-                  <span className="text-white text-xs font-bold">P</span>
-                </div>
-                <span className="text-sm font-bold text-gray-900">
-                  Pay<span style={{ color: '#22c55e' }}>Champs</span>
-                </span>
+              <Link to="/" className="inline-flex mb-3">
+                <Logo size={24} />
               </Link>
               <p className="text-xs text-gray-500 leading-relaxed max-w-xs">
                 Payroll and HR software for teams of 10–500. Built for the UK, ready for the world.

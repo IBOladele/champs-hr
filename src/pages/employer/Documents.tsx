@@ -19,59 +19,6 @@ interface DocRow {
 
 const subTabs: SubTab[] = ['Documents uploaded', 'Assigned documents', 'Archived documents']
 
-const documents: DocRow[] = [
-  {
-    id: '1',
-    name: 'Company handbook',
-    type: 'Policy, pov...',
-    uploadedBy: 'J Smith meyer',
-    uploadedByInitial: 'J',
-    uploadedByColor: 'bg-[#22c55e]',
-    expiryDate: 'Jan 1, 2025',
-    status: 'Live',
-  },
-  {
-    id: '2',
-    name: 'Company handbook',
-    type: 'Budget plan',
-    uploadedBy: 'L Lana Mejias',
-    uploadedByInitial: 'L',
-    uploadedByColor: 'bg-blue-500',
-    expiryDate: 'Feb 14, 2025',
-    status: '',
-  },
-  {
-    id: '3',
-    name: 'Company handbook',
-    type: 'Handbook',
-    uploadedBy: 'K Keisha Locklear',
-    uploadedByInitial: 'K',
-    uploadedByColor: 'bg-purple-500',
-    expiryDate: 'Feb 14, 2025',
-    status: 'Live',
-  },
-  {
-    id: '4',
-    name: 'Company handbook',
-    type: 'Verification docs',
-    uploadedBy: 'M Miley Little',
-    uploadedByInitial: 'M',
-    uploadedByColor: 'bg-pink-500',
-    expiryDate: 'Feb 14, 2025',
-    status: '',
-  },
-  {
-    id: '5',
-    name: 'Company handbook',
-    type: 'Handbook',
-    uploadedBy: 'C Cyril Madril',
-    uploadedByInitial: 'C',
-    uploadedByColor: 'bg-orange-500',
-    expiryDate: 'Feb 14, 2035',
-    status: '',
-  },
-]
-
 function StatusPill({ status }: { status: DocStatus }) {
   if (status === 'Live') {
     return (
@@ -103,6 +50,7 @@ export default function Documents() {
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<SubTab>('Documents uploaded')
   const [search, setSearch] = useState('')
+  const [documents] = useState<DocRow[]>([])
 
   const filtered = documents.filter((d) =>
     d.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -150,7 +98,7 @@ export default function Documents() {
             <FileText size={18} className="text-[#22c55e]" />
           </div>
           <div>
-            <p className="text-2xl font-bold text-gray-900">54,567</p>
+            <p className="text-2xl font-bold text-gray-900">0</p>
             <p className="text-xs text-gray-500 mt-0.5">Total documents</p>
           </div>
         </div>
@@ -160,7 +108,7 @@ export default function Documents() {
             <History size={18} className="text-orange-400" />
           </div>
           <div>
-            <p className="text-2xl font-bold text-gray-900">24,585</p>
+            <p className="text-2xl font-bold text-gray-900">0</p>
             <p className="text-xs text-gray-500 mt-0.5">Uploaded this month</p>
           </div>
         </div>
@@ -170,7 +118,7 @@ export default function Documents() {
             <Clock size={18} className="text-blue-500" />
           </div>
           <div>
-            <p className="text-2xl font-bold text-gray-900">958</p>
+            <p className="text-2xl font-bold text-gray-900">0</p>
             <p className="text-xs text-gray-500 mt-0.5">Pending review</p>
           </div>
         </div>
@@ -183,7 +131,7 @@ export default function Documents() {
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search for an employee"
+            placeholder="Search for a document"
             className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[#22c55e] focus:ring-1 focus:ring-[#22c55e]"
           />
         </div>
@@ -194,7 +142,7 @@ export default function Documents() {
       </div>
 
       {/* Counter */}
-      <p className="text-sm text-gray-500 mb-4">10 documents</p>
+      <p className="text-sm text-gray-500 mb-4">{filtered.length} documents</p>
 
       {/* Table */}
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
@@ -270,9 +218,10 @@ export default function Documents() {
           </table>
 
           {filtered.length === 0 && (
-            <div className="text-center py-12 text-gray-400">
-              <FileText size={28} className="mx-auto mb-2 opacity-30" />
-              <p className="text-sm">No documents found.</p>
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <FileText size={40} className="text-gray-300 mb-3" />
+              <p className="text-sm font-medium text-gray-500">No documents yet</p>
+              <p className="text-xs text-gray-400 mt-1">Upload your first document to get started</p>
             </div>
           )}
         </div>

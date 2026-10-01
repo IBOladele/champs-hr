@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Users, DollarSign, Gift, Calendar, Umbrella, Lock } from 'lucide-react'
+import { Users, DollarSign, Gift, Calendar, Umbrella, Lock, FileText } from 'lucide-react'
 import { usePageTitle } from '../../hooks/usePageTitle'
 
 type SubTab = 'All reports' | 'My reports'
@@ -46,17 +46,12 @@ const reportCards: ReportCard[] = [
   },
 ]
 
-const myReportCards = [
-  { title: 'Q1 Payroll Summary', subtitle: 'Payroll · Jan – Mar 2025' },
-  { title: 'Annual Leave Analysis', subtitle: 'Leave · FY 2024' },
-  { title: 'Headcount Report', subtitle: 'Employees · Q4 2024' },
-]
-
 export default function Reports() {
   usePageTitle('Reports')
 
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<SubTab>('All reports')
+  const [myReportCards] = useState<{ title: string; subtitle: string }[]>([])
 
   return (
     <div className="px-8 py-6">
@@ -124,31 +119,38 @@ export default function Reports() {
           {/* Sub-section heading */}
           <h2 className="text-base font-semibold text-gray-900 mb-5">My reports</h2>
 
-          {/* Saved report cards */}
-          <div className="grid grid-cols-3 gap-5">
-            {myReportCards.map((card) => (
-              <div
-                key={card.title}
-                className="bg-white rounded-xl border border-gray-100 p-6 shadow-sm flex flex-col gap-3"
-              >
-                <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center">
-                  <Users size={18} className="text-gray-500" />
+          {myReportCards.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <FileText size={40} className="text-gray-300 mb-3" />
+              <p className="text-sm font-medium text-gray-500">No saved reports yet</p>
+              <p className="text-xs text-gray-400 mt-1">Create and save a report to see it here</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-3 gap-5">
+              {myReportCards.map((card) => (
+                <div
+                  key={card.title}
+                  className="bg-white rounded-xl border border-gray-100 p-6 shadow-sm flex flex-col gap-3"
+                >
+                  <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center">
+                    <Users size={18} className="text-gray-500" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900">{card.title}</p>
+                    <p className="text-xs text-gray-500 mt-0.5">{card.subtitle}</p>
+                  </div>
+                  <div className="flex items-center gap-4 mt-auto pt-2 border-t border-gray-100">
+                    <button className="text-sm text-[#22c55e] font-medium hover:underline">
+                      View
+                    </button>
+                    <button className="text-sm text-gray-500 font-medium hover:underline">
+                      Customize
+                    </button>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm font-semibold text-gray-900">{card.title}</p>
-                  <p className="text-xs text-gray-500 mt-0.5">{card.subtitle}</p>
-                </div>
-                <div className="flex items-center gap-4 mt-auto pt-2 border-t border-gray-100">
-                  <button className="text-sm text-[#22c55e] font-medium hover:underline">
-                    View
-                  </button>
-                  <button className="text-sm text-gray-500 font-medium hover:underline">
-                    Customize
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </>
       )}
     </div>

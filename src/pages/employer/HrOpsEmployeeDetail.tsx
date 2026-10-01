@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { CheckSquare, Clock, Calendar, AlertCircle } from 'lucide-react'
+import { useNavigate, useParams } from 'react-router-dom'
+import { CheckSquare, Clock, Calendar, AlertCircle, ClipboardList } from 'lucide-react'
 
 type DetailTab = 'attendance' | 'leave'
 
@@ -21,27 +21,6 @@ interface LeaveRow {
   requestedOn: string
   status: 'Approved' | 'Pending'
 }
-
-const attendanceData: AttendanceRow[] = [
-  { date: 'Jun 2, 2025',  day: 'Mon', clockIn: '08:58 AM', clockOut: '05:02 PM', totalHours: '8h 04m',  status: 'Present' },
-  { date: 'Jun 3, 2025',  day: 'Tue', clockIn: '09:12 AM', clockOut: '05:00 PM', totalHours: '7h 48m',  status: 'Late'    },
-  { date: 'Jun 4, 2025',  day: 'Wed', clockIn: '08:55 AM', clockOut: '05:10 PM', totalHours: '8h 15m',  status: 'Present' },
-  { date: 'Jun 5, 2025',  day: 'Thu', clockIn: '08:47 AM', clockOut: '05:03 PM', totalHours: '8h 16m',  status: 'Present' },
-  { date: 'Jun 6, 2025',  day: 'Fri', clockIn: '09:25 AM', clockOut: '05:00 PM', totalHours: '7h 35m',  status: 'Late'    },
-  { date: 'Jun 9, 2025',  day: 'Mon', clockIn: '08:59 AM', clockOut: '05:01 PM', totalHours: '8h 02m',  status: 'Present' },
-  { date: 'Jun 10, 2025', day: 'Tue', clockIn: '—',        clockOut: '—',        totalHours: '—',       status: 'Absent'  },
-  { date: 'Jun 11, 2025', day: 'Wed', clockIn: '08:52 AM', clockOut: '05:08 PM', totalHours: '8h 16m',  status: 'Present' },
-  { date: 'Jun 12, 2025', day: 'Thu', clockIn: '09:18 AM', clockOut: '05:00 PM', totalHours: '7h 42m',  status: 'Late'    },
-  { date: 'Jun 13, 2025', day: 'Fri', clockIn: '08:50 AM', clockOut: '05:05 PM', totalHours: '8h 15m',  status: 'Present' },
-]
-
-const leaveData: LeaveRow[] = [
-  { leaveType: 'Annual leave',    from: 'Mar 10, 2025', to: 'Mar 14, 2025', days: 5, requestedOn: 'Mar 1, 2025',  status: 'Approved' },
-  { leaveType: 'Sick leave',      from: 'Apr 2, 2025',  to: 'Apr 3, 2025',  days: 2, requestedOn: 'Apr 2, 2025',  status: 'Approved' },
-  { leaveType: 'Annual leave',    from: 'May 26, 2025', to: 'May 30, 2025', days: 5, requestedOn: 'May 10, 2025', status: 'Approved' },
-  { leaveType: 'Personal leave',  from: 'Jun 20, 2025', to: 'Jun 20, 2025', days: 1, requestedOn: 'Jun 14, 2025', status: 'Pending'  },
-  { leaveType: 'Annual leave',    from: 'Jul 14, 2025', to: 'Jul 18, 2025', days: 5, requestedOn: 'Jun 15, 2025', status: 'Pending'  },
-]
 
 function AttendanceStatusBadge({ status }: { status: AttendanceRow['status'] }) {
   const cls =
@@ -71,7 +50,10 @@ function LeaveStatusBadge({ status }: { status: LeaveRow['status'] }) {
 
 export default function HrOpsEmployeeDetail() {
   const navigate = useNavigate()
+  const { id } = useParams<{ id: string }>()
   const [activeTab, setActiveTab] = useState<DetailTab>('attendance')
+  const [attendanceData] = useState<AttendanceRow[]>([])
+  const [leaveData] = useState<LeaveRow[]>([])
 
   return (
     <div className="px-8 py-6">
@@ -84,9 +66,9 @@ export default function HrOpsEmployeeDetail() {
           >
             ← Back to HR operations
           </button>
-          <h1 className="text-2xl font-bold text-gray-900">Smith Meyer — Attendance history</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Employee #{id} — Attendance history</h1>
           <p className="text-sm text-gray-500 mt-1">
-            Employee ID: 67890434 · Design · Project lead
+            Attendance and leave records
           </p>
         </div>
         <button className="px-4 py-2 text-sm text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
@@ -97,10 +79,10 @@ export default function HrOpsEmployeeDetail() {
       {/* Stat cards */}
       <div className="grid grid-cols-4 gap-4 mb-6">
         {[
-          { label: 'Total days worked', value: '22', icon: CheckSquare, iconCls: 'text-green-500',  bg: 'bg-green-50'  },
-          { label: 'On time',           value: '18', icon: Clock,        iconCls: 'text-blue-500',   bg: 'bg-blue-50'   },
-          { label: 'Late arrivals',     value: '3',  icon: Calendar,     iconCls: 'text-amber-500',  bg: 'bg-amber-50'  },
-          { label: 'Absent',            value: '1',  icon: AlertCircle,  iconCls: 'text-red-400',    bg: 'bg-red-50'    },
+          { label: 'Total days worked', value: '0', icon: CheckSquare, iconCls: 'text-green-500',  bg: 'bg-green-50'  },
+          { label: 'On time',           value: '0', icon: Clock,        iconCls: 'text-blue-500',   bg: 'bg-blue-50'   },
+          { label: 'Late arrivals',     value: '0', icon: Calendar,     iconCls: 'text-amber-500',  bg: 'bg-amber-50'  },
+          { label: 'Absent',            value: '0', icon: AlertCircle,  iconCls: 'text-red-400',    bg: 'bg-red-50'    },
         ].map(({ label, value, icon: Icon, iconCls, bg }) => (
           <div key={label} className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 flex items-start justify-between">
             <div>
@@ -159,6 +141,14 @@ export default function HrOpsEmployeeDetail() {
               </tbody>
             </table>
           </div>
+
+          {attendanceData.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <ClipboardList size={40} className="text-gray-300 mb-3" />
+              <p className="text-sm font-medium text-gray-500">No attendance records</p>
+              <p className="text-xs text-gray-400 mt-1">Records will appear as the employee clocks in</p>
+            </div>
+          )}
         </div>
       )}
 
@@ -195,6 +185,14 @@ export default function HrOpsEmployeeDetail() {
               </tbody>
             </table>
           </div>
+
+          {leaveData.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <Calendar size={40} className="text-gray-300 mb-3" />
+              <p className="text-sm font-medium text-gray-500">No leave requests</p>
+              <p className="text-xs text-gray-400 mt-1">Leave requests will appear here once submitted</p>
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -3,6 +3,7 @@ import {
   LayoutDashboard, Clock, FileText, CalendarDays, Gift, Settings, Bell, Search, LogOut
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
+import { Logo } from '../components/Logo'
 
 const NAV_ITEMS = [
   { label: 'Dashboard',      path: '/employee',            icon: LayoutDashboard },
@@ -38,7 +39,7 @@ export default function EmployeeLayout() {
       <div className="bg-[#1b2838] flex flex-col">
 
         <div className="px-8 py-3 flex items-center gap-4">
-          <span className="text-white font-bold text-xl tracking-widest shrink-0">CHAMP</span>
+          <Logo theme="dark" size={28} className="shrink-0" />
 
           <div className="flex-1 max-w-xl relative">
             <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />

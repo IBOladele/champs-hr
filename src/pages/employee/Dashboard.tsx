@@ -1,5 +1,7 @@
-import { Clock, FileText, CalendarDays, Gift, Settings, ChevronRight, Download, MapPin } from 'lucide-react'
+import { useState } from 'react'
+import { Clock, FileText, CalendarDays, Gift, Settings, ChevronRight, MapPin } from 'lucide-react'
 import { usePageTitle } from '../../hooks/usePageTitle'
+import { useAuth } from '../../context/AuthContext'
 
 function StatusPill({ status }: { status: string }) {
   const cls =
@@ -25,39 +27,22 @@ const quickActions = [
   { label: 'Configure settings',    icon: Settings },
 ]
 
-const benefits = [
-  { name: 'Dental plan premium', sub: 'Meyers inc · 2 dependants', status: 'Active',   action: 'View details' },
-  { name: 'Dental plan premium', sub: 'Meyers inc · 2 dependants', status: 'Active',   action: 'View details' },
-  { name: 'Dental plan premium', sub: 'Meyers inc · 2 dependants', status: 'Pending',  action: 'Edit benefit' },
-]
-
-const payslips = [
-  { name: 'March 2025 payslips',    info: '$470,100 paid · March 1, 2025' },
-  { name: 'Feburary 2025 payslips', info: '$470,100 paid · Feb 1, 2025' },
-  { name: 'January 2025 payslips',  info: '$470,100 paid · Jan 1, 2025' },
-]
-
-const leaveRequests = [
-  { name: 'Health check-up',  sub: 'Sick day · August 15 - August 15',  status: 'Pending',  action: 'Edit request'  },
-  { name: 'Project deadline', sub: 'Vacation · June 20 - June 27',       status: 'Approved', action: 'View details'  },
-  { name: 'Team meeting',     sub: 'Personal day · July 1 - July 1',     status: 'Pending',  action: 'Edit request'  },
-]
-
-const attendance = [
-  { time: '09:00 AM - 18:00 PM', sub: 'Mar 8, 2024 · Los Angeles, USA', status: 'Early'    },
-  { time: '09:00 AM - 18:00 PM', sub: 'Mar 7, 2024 · Los Angeles, USA', status: 'Overtime' },
-  { time: '09:00 AM - 18:00 PM', sub: 'Mar 6, 2024 · Los Angeles, USA', status: 'Absent'   },
-]
-
 export default function EmployeeDashboard() {
   usePageTitle('My Dashboard')
+  const { user } = useAuth()
+  const firstName = user?.fullName?.split(' ')[0] ?? 'there'
+
+  const [benefits] = useState<{ name: string; sub: string; status: string; action: string }[]>([])
+  const [payslips] = useState<{ name: string; info: string }[]>([])
+  const [leaveRequests] = useState<{ name: string; sub: string; status: string; action: string }[]>([])
+  const [attendance] = useState<{ time: string; sub: string; status: string }[]>([])
 
   return (
     <div className="px-8 py-6">
 
       {/* Welcome row */}
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Welcome Rolan</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Welcome {firstName}</h1>
         <button className="flex items-center gap-2 bg-[#22c55e] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-600 transition-colors">
           <Clock size={14} />
           Clock in time
@@ -76,10 +61,10 @@ export default function EmployeeDashboard() {
         </div>
 
         {[
-          { label: 'Total worked',  value: '100 hrs',   icon: Clock,        iconCls: 'text-blue-500',  bg: 'bg-blue-50'  },
-          { label: 'Total paid',    value: '100 hours', icon: FileText,     iconCls: 'text-amber-500', bg: 'bg-amber-50' },
-          { label: 'Leave days',    value: '100 hours', icon: CalendarDays, iconCls: 'text-blue-500',  bg: 'bg-blue-50'  },
-          { label: 'Benefit plans', value: '8 plans',   icon: Gift,         iconCls: 'text-green-500', bg: 'bg-green-50' },
+          { label: 'Total worked',  value: '0 hrs',   icon: Clock,        iconCls: 'text-blue-500',  bg: 'bg-blue-50'  },
+          { label: 'Total paid',    value: '—',        icon: FileText,     iconCls: 'text-amber-500', bg: 'bg-amber-50' },
+          { label: 'Leave days',    value: '0',        icon: CalendarDays, iconCls: 'text-blue-500',  bg: 'bg-blue-50'  },
+          { label: 'Benefit plans', value: '0',        icon: Gift,         iconCls: 'text-green-500', bg: 'bg-green-50' },
         ].map(({ label, value, icon: Icon, iconCls, bg }) => (
           <div key={label} className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex items-start justify-between">
             <div>
@@ -121,28 +106,36 @@ export default function EmployeeDashboard() {
           {/* Your benefits */}
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
             <h2 className="text-sm font-semibold text-gray-900 mb-4">Your benefits</h2>
-            <div className="divide-y divide-gray-50">
-              {benefits.map((item, i) => (
-                <div key={i} className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Gift size={14} className="text-gray-500" />
+            {benefits.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <Gift size={32} className="text-gray-300 mb-2" />
+                <p className="text-sm font-medium text-gray-500">No benefits enrolled</p>
+                <p className="text-xs text-gray-400 mt-0.5">Your enrolled benefit plans will appear here</p>
+              </div>
+            ) : (
+              <div className="divide-y divide-gray-50">
+                {benefits.map((item, i) => (
+                  <div key={i} className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <Gift size={14} className="text-gray-500" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">{item.name}</p>
+                        <p className="text-xs text-gray-400">{item.sub}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">{item.name}</p>
-                      <p className="text-xs text-gray-400">{item.sub}</p>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <StatusPill status={item.status} />
+                      <button className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700">
+                        <ChevronRight size={11} />
+                        {item.action}
+                      </button>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <StatusPill status={item.status} />
-                    <button className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700">
-                      <ChevronRight size={11} />
-                      {item.action}
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
             <button className="mt-4 text-sm text-gray-500 hover:text-gray-700 w-full text-center border-t border-gray-50 pt-3">
               View all benefits
             </button>
@@ -151,25 +144,33 @@ export default function EmployeeDashboard() {
           {/* Leave requests */}
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
             <h2 className="text-sm font-semibold text-gray-900 mb-4">Leave requests</h2>
-            <div className="divide-y divide-gray-50">
-              {leaveRequests.map((item, i) => (
-                <div key={i} className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <CalendarDays size={14} className="text-gray-500" />
+            {leaveRequests.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <CalendarDays size={32} className="text-gray-300 mb-2" />
+                <p className="text-sm font-medium text-gray-500">No leave requests</p>
+                <p className="text-xs text-gray-400 mt-0.5">Your leave requests will appear here</p>
+              </div>
+            ) : (
+              <div className="divide-y divide-gray-50">
+                {leaveRequests.map((item, i) => (
+                  <div key={i} className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <CalendarDays size={14} className="text-gray-500" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">{item.name}</p>
+                        <p className="text-xs text-gray-400">{item.sub}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">{item.name}</p>
-                      <p className="text-xs text-gray-400">{item.sub}</p>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <StatusPill status={item.status} />
+                      <button className="text-xs text-gray-500 hover:text-gray-700">{item.action}</button>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <StatusPill status={item.status} />
-                    <button className="text-xs text-gray-500 hover:text-gray-700">{item.action}</button>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
             <button className="mt-4 text-sm text-gray-500 hover:text-gray-700 w-full text-center border-t border-gray-50 pt-3">
               View all tasks
             </button>
@@ -183,25 +184,29 @@ export default function EmployeeDashboard() {
           {/* Payslips */}
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
             <h2 className="text-sm font-semibold text-gray-900 mb-4">Payslips</h2>
-            <div className="divide-y divide-gray-50">
-              {payslips.map((item, i) => (
-                <div key={i} className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <FileText size={14} className="text-gray-500" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">{item.name}</p>
-                      <p className="text-xs text-gray-400">{item.info}</p>
+            {payslips.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <FileText size={32} className="text-gray-300 mb-2" />
+                <p className="text-sm font-medium text-gray-500">No recent payslips</p>
+                <p className="text-xs text-gray-400 mt-0.5">Payslips will appear here after payroll is run</p>
+              </div>
+            ) : (
+              <div className="divide-y divide-gray-50">
+                {payslips.map((item, i) => (
+                  <div key={i} className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <FileText size={14} className="text-gray-500" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">{item.name}</p>
+                        <p className="text-xs text-gray-400">{item.info}</p>
+                      </div>
                     </div>
                   </div>
-                  <button className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700 flex-shrink-0">
-                    <Download size={12} />
-                    Download payslips
-                  </button>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
             <button className="mt-4 text-sm text-gray-500 hover:text-gray-700 w-full text-center border-t border-gray-50 pt-3">
               View all payslips
             </button>
@@ -210,28 +215,35 @@ export default function EmployeeDashboard() {
           {/* Attendance */}
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
             <h2 className="text-sm font-semibold text-gray-900 mb-4">Attendance</h2>
-            <div className="divide-y divide-gray-50">
-              {attendance.map((item, i) => (
-                <div key={i} className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <CalendarDays size={14} className="text-gray-500" />
+            {attendance.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <CalendarDays size={32} className="text-gray-300 mb-2" />
+                <p className="text-sm font-medium text-gray-500">No attendance records</p>
+                <p className="text-xs text-gray-400 mt-0.5">Records will appear as you clock in</p>
+              </div>
+            ) : (
+              <div className="divide-y divide-gray-50">
+                {attendance.map((item, i) => (
+                  <div key={i} className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <CalendarDays size={14} className="text-gray-500" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">{item.time}</p>
+                        <p className="text-xs text-gray-400 flex items-center gap-1">
+                          <MapPin size={10} />
+                          {item.sub}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">{item.time}</p>
-                      <p className="text-xs text-gray-400 flex items-center gap-1">
-                        <MapPin size={10} />
-                        {item.sub}
-                      </p>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <StatusPill status={item.status} />
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <StatusPill status={item.status} />
-                    <button className="text-xs text-gray-500 hover:text-gray-700">View details</button>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
             <button className="mt-4 text-sm text-gray-500 hover:text-gray-700 w-full text-center border-t border-gray-50 pt-3">
               View all attendance
             </button>

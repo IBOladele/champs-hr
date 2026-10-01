@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Pencil, Trash2, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Pencil, Trash2, ChevronLeft, ChevronRight, Users } from 'lucide-react'
 
 type SubTab =
   | 'User accounts'
@@ -33,84 +33,10 @@ const subTabs: SubTab[] = [
   'Logs',
 ]
 
-const users: UserRow[] = [
-  {
-    id: '1',
-    initial: 'J',
-    name: 'Smith meyer',
-    employeeId: '67890434',
-    jobTitle: 'Project lead',
-    access: 'All',
-    avatarColor: 'bg-[#22c55e]',
-  },
-  {
-    id: '2',
-    initial: 'L',
-    name: 'Lana Mejias',
-    employeeId: '67890434',
-    jobTitle: 'UX Architect',
-    access: 'HR, Employee, Payroll, Reports',
-    avatarColor: 'bg-blue-500',
-  },
-  {
-    id: '3',
-    initial: 'K',
-    name: 'Keisha Locklear',
-    employeeId: '67890434',
-    jobTitle: 'Data analyst',
-    access: 'HR, Employee, Payroll, Reports',
-    avatarColor: 'bg-purple-500',
-  },
-  {
-    id: '4',
-    initial: 'M',
-    name: 'Miley Little',
-    employeeId: '67890434',
-    jobTitle: 'Software engineer',
-    access: 'All',
-    avatarColor: 'bg-pink-500',
-  },
-  {
-    id: '5',
-    initial: 'C',
-    name: 'Cyril Madril',
-    employeeId: '67890434',
-    jobTitle: 'Accountant',
-    access: 'All',
-    avatarColor: 'bg-orange-500',
-  },
-  {
-    id: '6',
-    initial: 'R',
-    name: 'Rayan Petty',
-    employeeId: '67890434',
-    jobTitle: 'Financial advisor',
-    access: 'HR, Employee, Payroll, Reports',
-    avatarColor: 'bg-teal-500',
-  },
-  {
-    id: '7',
-    initial: 'D',
-    name: 'Dania Navas',
-    employeeId: '67890434',
-    jobTitle: 'Marketing manager',
-    access: 'HR, Employee, Payroll, Reports',
-    avatarColor: 'bg-indigo-500',
-  },
-  {
-    id: '8',
-    initial: 'J',
-    name: 'John Doesite',
-    employeeId: '67890434',
-    jobTitle: 'Sales representative',
-    access: 'All',
-    avatarColor: 'bg-[#22c55e]',
-  },
-]
-
 export default function UserAccess() {
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<SubTab>('User accounts')
+  const [users] = useState<UserRow[]>([])
 
   return (
     <div className="px-8 py-6">
@@ -146,7 +72,7 @@ export default function UserAccess() {
       </div>
 
       {/* Counter */}
-      <p className="text-sm text-gray-500 mb-4">10 of 50 accounts</p>
+      <p className="text-sm text-gray-500 mb-4">{users.length} accounts</p>
 
       {/* Table */}
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
@@ -209,6 +135,14 @@ export default function UserAccess() {
             </tbody>
           </table>
         </div>
+
+        {users.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <Users size={40} className="text-gray-300 mb-3" />
+            <p className="text-sm font-medium text-gray-500">No user accounts yet</p>
+            <p className="text-xs text-gray-400 mt-1">Add accounts to grant system access</p>
+          </div>
+        )}
       </div>
 
       {/* Pagination */}
@@ -216,25 +150,6 @@ export default function UserAccess() {
         <button className="flex items-center gap-1 px-3 py-1.5 text-sm text-gray-500 hover:text-gray-700 transition-colors">
           <ChevronLeft size={14} />
           Previous
-        </button>
-        {[1, 2, 3, 4].map((page) => (
-          <button
-            key={page}
-            className={`w-8 h-8 rounded text-sm font-medium transition-colors ${
-              page === 2
-                ? 'bg-gray-900 text-white'
-                : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'
-            }`}
-          >
-            {page}
-          </button>
-        ))}
-        <span className="px-1 text-gray-400 text-sm">...</span>
-        <button className="w-8 h-8 rounded text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors">
-          10
-        </button>
-        <button className="w-8 h-8 rounded text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors">
-          11
         </button>
         <button className="flex items-center gap-1 px-3 py-1.5 text-sm text-gray-500 hover:text-gray-700 transition-colors">
           Next

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Check, ChevronDown, Mail, RefreshCw, Loader2 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { auth, onboarding } from '../../lib/api'
+import { Logo } from '../../components/Logo'
 import { usePageTitle } from '../../hooks/usePageTitle'
 
 // ── Shared field components ───────────────────────────────────────────────────
@@ -573,7 +574,7 @@ export default function Onboarding() {
       {/* Left — step sidebar */}
       <div className="w-72 flex-shrink-0 bg-[#0d1b2a] flex flex-col">
         <div className="px-8 pt-10 pb-8">
-          <span className="text-2xl font-bold text-white tracking-widest">CHAMP</span>
+          <Logo theme="dark" size={28} />
         </div>
 
         <div className="px-6 flex-1 overflow-y-auto">

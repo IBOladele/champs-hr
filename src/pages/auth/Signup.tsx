@@ -4,6 +4,7 @@ import { Eye, EyeOff } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { ApiError } from '../../lib/api'
 import { usePageTitle } from '../../hooks/usePageTitle'
+import { Logo } from '../../components/Logo'
 
 export default function Signup() {
   usePageTitle('Get started')
@@ -58,7 +59,7 @@ export default function Signup() {
         <div className="absolute top-1/2 left-1/2 w-48 h-48 rounded-full bg-[#22c55e] opacity-10 -translate-x-1/2 -translate-y-1/2" />
 
         <div className="relative z-10 px-10 pt-10">
-          <span className="text-2xl font-bold text-white tracking-widest">CHAMP</span>
+          <Logo theme="dark" size={28} />
         </div>
 
         <div className="relative z-10 flex-1 flex flex-col justify-center px-10">
@@ -92,7 +93,7 @@ export default function Signup() {
       <div className="flex-1 flex items-center justify-center px-8 py-12 bg-white">
         <div className="w-full max-w-sm">
           <div className="lg:hidden mb-8">
-            <span className="text-2xl font-bold text-gray-900 tracking-widest">CHAMP</span>
+            <Logo size={28} />
           </div>
 
           <h1 className="text-2xl font-bold text-gray-900 mb-1">Create your account</h1>

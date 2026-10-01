@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Gift, ChevronRight } from 'lucide-react'
+import { usePageTitle } from '../../hooks/usePageTitle'
 
 type BenefitStatus = 'Active' | 'Pending' | 'Inactive'
 type SideSection = 'plans' | 'dependants'
@@ -13,15 +15,6 @@ interface BenefitItem {
   status: BenefitStatus
   planId: string
 }
-
-const benefits: BenefitItem[] = [
-  { name: 'Dental plan premium',  provider: 'Meyers Inc', dependants: 2, coverage: '$5,000/yr',  renewalDate: 'Jan 1, 2026',  status: 'Active',   planId: 'dental'  },
-  { name: 'Dental plan premium',  provider: 'Meyers Inc', dependants: 2, coverage: '$5,000/yr',  renewalDate: 'Jan 1, 2026',  status: 'Active',   planId: 'dental'  },
-  { name: 'Dental plan premium',  provider: 'Meyers Inc', dependants: 2, coverage: '$5,000/yr',  renewalDate: 'Mar 1, 2026',  status: 'Pending',  planId: 'dental'  },
-  { name: 'Health Insurance',     provider: 'BlueCross',  dependants: 3, coverage: '$20,000/yr', renewalDate: 'Jun 1, 2026',  status: 'Active',   planId: 'health'  },
-  { name: 'Life Insurance',       provider: 'AXA Group',  dependants: 0, coverage: '$50,000',    renewalDate: 'Dec 1, 2025',  status: 'Active',   planId: 'pension' },
-  { name: 'Gym Membership',       provider: 'Fitness Co', dependants: 0, coverage: 'Unlimited',  renewalDate: 'Feb 1, 2026',  status: 'Inactive', planId: 'leave'   },
-]
 
 function StatusPill({ status }: { status: BenefitStatus }) {
   const cls =
@@ -37,18 +30,16 @@ function StatusPill({ status }: { status: BenefitStatus }) {
   )
 }
 
-import { useState } from 'react'
-import { usePageTitle } from '../../hooks/usePageTitle'
-
 export default function Benefits() {
   usePageTitle('My Benefits')
 
   const navigate = useNavigate()
   const [activeSection, setActiveSection] = useState<SideSection>('plans')
+  const [benefits] = useState<BenefitItem[]>([])
 
-  const sidebarItems: { key: SideSection; label: string; sub: string }[] = [
-    { key: 'plans',     label: 'Benefit plans',         sub: 'This is the list of benefits that the employer qualifies for' },
-    { key: 'dependants', label: 'Dependant information', sub: 'Manage your dependant details here' },
+  const sidebarItems: { key: SideSection; label: string }[] = [
+    { key: 'plans',      label: 'Benefit plans'         },
+    { key: 'dependants', label: 'Dependant information'  },
   ]
 
   return (
@@ -83,40 +74,48 @@ export default function Benefits() {
                 <h2 className="text-sm font-semibold text-gray-900">Benefit plans</h2>
                 <p className="text-xs text-gray-400 mt-0.5">This is the list of benefits that the employer qualifies for</p>
               </div>
-              <div className="divide-y divide-gray-100">
-                {benefits.map((item, i) => (
-                  <div key={i} className="flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition-colors">
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 bg-green-50 rounded-xl flex items-center justify-center flex-shrink-0">
-                        <Gift size={18} className="text-green-600" />
+              {benefits.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-16 text-center">
+                  <Gift size={40} className="text-gray-300 mb-3" />
+                  <p className="text-sm font-medium text-gray-500">No benefit plans enrolled</p>
+                  <p className="text-xs text-gray-400 mt-1">Your employer will enrol you in benefit plans once they are set up</p>
+                </div>
+              ) : (
+                <div className="divide-y divide-gray-100">
+                  {benefits.map((item, i) => (
+                    <div key={i} className="flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition-colors">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 bg-green-50 rounded-xl flex items-center justify-center flex-shrink-0">
+                          <Gift size={18} className="text-green-600" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">{item.name}</p>
+                          <p className="text-xs text-gray-400 mt-0.5">
+                            {item.provider} · {item.dependants > 0 ? `${item.dependants} dependants` : 'No dependants'}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">{item.name}</p>
-                        <p className="text-xs text-gray-400 mt-0.5">
-                          {item.provider} · {item.dependants > 0 ? `${item.dependants} dependants` : 'No dependants'}
-                        </p>
+                      <div className="flex items-center gap-8">
+                        <div className="text-center">
+                          <p className="text-xs text-gray-400">Coverage</p>
+                          <p className="text-sm font-medium text-gray-700">{item.coverage}</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-xs text-gray-400">Renewal date</p>
+                          <p className="text-sm font-medium text-gray-700">{item.renewalDate}</p>
+                        </div>
+                        <StatusPill status={item.status} />
+                        <button
+                          onClick={() => navigate(`/employee/benefits/${item.planId}`)}
+                          className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700"
+                        >
+                          View details <ChevronRight size={14} />
+                        </button>
                       </div>
                     </div>
-                    <div className="flex items-center gap-8">
-                      <div className="text-center">
-                        <p className="text-xs text-gray-400">Coverage</p>
-                        <p className="text-sm font-medium text-gray-700">{item.coverage}</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-xs text-gray-400">Renewal date</p>
-                        <p className="text-sm font-medium text-gray-700">{item.renewalDate}</p>
-                      </div>
-                      <StatusPill status={item.status} />
-                      <button
-                        onClick={() => navigate(`/employee/benefits/${item.planId}`)}
-                        className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700"
-                      >
-                        View details <ChevronRight size={14} />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 

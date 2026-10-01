@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { Logo } from '../../components/Logo'
 
 function maskEmail(email: string): string {
   const [user, domain] = email.split('@')
@@ -31,7 +32,7 @@ export default function OtpVerify() {
 
         {/* Logo */}
         <div className="relative z-10 px-10 pt-10">
-          <span className="text-2xl font-bold text-white tracking-widest">CHAMP</span>
+          <Logo theme="dark" size={28} />
         </div>
 
         {/* Illustration */}
@@ -73,7 +74,7 @@ export default function OtpVerify() {
       <div className="flex-1 flex items-center justify-center px-8 py-12 bg-white">
         <div className="w-full max-w-sm">
           <div className="lg:hidden mb-8">
-            <span className="text-2xl font-bold text-gray-900 tracking-widest">CHAMP</span>
+            <Logo size={28} />
           </div>
 
           {/* Icon */}

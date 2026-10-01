@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Clock, MapPin, ChevronLeft, ChevronRight, ChevronDown, FileText } from 'lucide-react'
 import { usePageTitle } from '../../hooks/usePageTitle'
@@ -12,17 +13,6 @@ interface AttendanceRow {
   location: string
   status: AttendanceStatus
 }
-
-const rows: AttendanceRow[] = [
-  { date: 'Jan 1, 2025',   clockIn: '03:00', clockOut: '17:00', hours: '40 hours', location: 'New York, USA',     status: 'Early'    },
-  { date: 'Feb 14, 2025',  clockIn: '03:00', clockOut: '17:00', hours: '35 hours', location: 'Los Angeles, USA',  status: 'Overtime' },
-  { date: 'Feb 14, 2025',  clockIn: '05:00', clockOut: '17:00', hours: '35 hours', location: 'Los Angeles, USA',  status: 'Absent'   },
-  { date: 'Feb 14, 2025',  clockIn: '05:00', clockOut: '17:00', hours: '35 hours', location: 'Los Angeles, USA',  status: 'Overtime' },
-  { date: 'Feb 14, 2025',  clockIn: '05:00', clockOut: '17:00', hours: '35 hours', location: 'Los Angeles, USA',  status: 'Early'    },
-  { date: 'Feb 14, 2025',  clockIn: '05:30', clockOut: '17:00', hours: '35 hours', location: 'Los Angeles, USA',  status: 'Overtime' },
-  { date: 'Feb 14, 2025',  clockIn: '05:30', clockOut: '17:00', hours: '35 hours', location: 'Los Angeles, USA',  status: 'Absent'   },
-  { date: 'Feb 14, 2025',  clockIn: '05:30', clockOut: '17:00', hours: '35 hours', location: 'Los Angeles, USA',  status: 'Early'    },
-]
 
 function StatusPill({ status }: { status: AttendanceStatus }) {
   const cls =
@@ -44,6 +34,7 @@ export default function Attendance() {
   usePageTitle('Attendance')
 
   const navigate = useNavigate()
+  const [rows] = useState<AttendanceRow[]>([])
 
   return (
     <div className="px-8 py-6">
@@ -67,9 +58,9 @@ export default function Attendance() {
           </div>
         </div>
         {[
-          { label: 'Total worked',  value: '100 hrs',   icon: Clock,    iconCls: 'text-blue-500',  bg: 'bg-blue-50'  },
-          { label: 'Leave days',    value: '10 days',   icon: FileText, iconCls: 'text-amber-500', bg: 'bg-amber-50' },
-          { label: 'Overtime work', value: '30 hrs',    icon: Clock,    iconCls: 'text-amber-500', bg: 'bg-amber-50' },
+          { label: 'Total worked',  value: '0 hrs',   icon: Clock,    iconCls: 'text-blue-500',  bg: 'bg-blue-50'  },
+          { label: 'Leave days',    value: '0 days',  icon: FileText, iconCls: 'text-amber-500', bg: 'bg-amber-50' },
+          { label: 'Overtime work', value: '0 hrs',   icon: Clock,    iconCls: 'text-amber-500', bg: 'bg-amber-50' },
         ].map(({ label, value, icon: Icon, iconCls, bg }) => (
           <div key={label} className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex items-start justify-between">
             <div>
@@ -85,7 +76,7 @@ export default function Attendance() {
 
       {/* Filters */}
       <div className="flex items-center gap-3 mb-4">
-        <div className="text-sm text-gray-500">Jan 2025 – Feb 2025</div>
+        <div className="text-sm text-gray-500">All dates</div>
         <button
           onClick={() => navigate('/employee/attendance/detail')}
           className="ml-auto flex items-center gap-1.5 text-sm text-[#22c55e] font-medium border border-[#22c55e] rounded-lg px-3 py-1.5 hover:bg-green-50 transition-colors"
@@ -136,6 +127,13 @@ export default function Attendance() {
               ))}
             </tbody>
           </table>
+          {rows.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <Clock size={40} className="text-gray-300 mb-3" />
+              <p className="text-sm font-medium text-gray-500">No attendance records yet</p>
+              <p className="text-xs text-gray-400 mt-1">Records will appear once you start clocking in</p>
+            </div>
+          )}
         </div>
       </div>
 
@@ -144,14 +142,6 @@ export default function Attendance() {
         <button className="flex items-center gap-1 px-3 py-1.5 text-sm text-gray-500 hover:text-gray-700 transition-colors">
           <ChevronLeft size={14} /> Previous
         </button>
-        {[1, 2, 3, 4].map(p => (
-          <button key={p} className={`w-8 h-8 rounded text-sm font-medium transition-colors ${p === 2 ? 'bg-gray-900 text-white' : 'text-gray-500 hover:bg-gray-100'}`}>
-            {p}
-          </button>
-        ))}
-        <span className="px-1 text-gray-400 text-sm">...</span>
-        <button className="w-8 h-8 rounded text-sm text-gray-500 hover:bg-gray-100">10</button>
-        <button className="w-8 h-8 rounded text-sm text-gray-500 hover:bg-gray-100">11</button>
         <button className="flex items-center gap-1 px-3 py-1.5 text-sm text-gray-500 hover:text-gray-700 transition-colors">
           Next <ChevronRight size={14} />
         </button>

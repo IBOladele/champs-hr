@@ -2,10 +2,12 @@ import React from 'react'
 import {
   Users, CreditCard, FileText, Key,
   Briefcase, BarChart2, Gift, ShieldCheck, Settings,
-  FolderOpen, ChevronRight, Calendar, Mail
+  FolderOpen, ChevronRight, Calendar
 } from 'lucide-react'
 
 import { usePageTitle } from '../../hooks/usePageTitle'
+import { useAuth } from '../../context/AuthContext'
+
 // ── To-do card ────────────────────────────────────────────────────────
 
 interface TodoCardProps {
@@ -55,128 +57,6 @@ function QuickActionCard({ icon: Icon, iconBg, iconColor, label }: QuickActionCa
   )
 }
 
-// ── Task item (Your tasks card) ────────────────────────────────────────
-
-interface TaskItemProps {
-  icon: React.ElementType
-  iconBg: string
-  iconColor: string
-  title: string
-  subtitle: string
-}
-
-function TaskItem({ icon: Icon, iconBg, iconColor, title, subtitle }: TaskItemProps) {
-  return (
-    <div className="flex items-center gap-3 py-3 border-b border-gray-100 last:border-0">
-      <div className={`w-9 h-9 rounded-full ${iconBg} flex items-center justify-center shrink-0`}>
-        <Icon size={16} className={iconColor} />
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-gray-800 truncate">{title}</p>
-        <p className="text-xs text-gray-400 mt-0.5">{subtitle}</p>
-      </div>
-      <div className="flex items-center gap-2 shrink-0">
-        <span className="text-xs bg-yellow-100 text-yellow-700 font-medium px-2 py-0.5 rounded-full">
-          Pending
-        </span>
-        <button className="text-xs text-gray-600 border border-gray-200 rounded-lg px-2.5 py-1 hover:bg-gray-50 transition-colors whitespace-nowrap">
-          + Start task
-        </button>
-      </div>
-    </div>
-  )
-}
-
-// ── Team overview item (document requests) ────────────────────────────
-
-interface TeamOverviewItemProps {
-  title: string
-  person: string
-  lastSent: string
-}
-
-function TeamOverviewItem({ title, person, lastSent }: TeamOverviewItemProps) {
-  return (
-    <div className="flex items-center gap-3 py-3 border-b border-gray-100 last:border-0">
-      <div className="w-9 h-9 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
-        <FileText size={16} className="text-blue-500" />
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-gray-800 truncate">{title}</p>
-        <p className="text-xs text-gray-400 mt-0.5">{person} • {lastSent}</p>
-      </div>
-      <div className="flex items-center gap-2 shrink-0">
-        <span className="text-xs bg-amber-100 text-amber-700 font-medium px-2 py-0.5 rounded-full">
-          Action needed
-        </span>
-        <button className="flex items-center gap-1 text-xs text-gray-600 border border-gray-200 rounded-lg px-2.5 py-1 hover:bg-gray-50 transition-colors whitespace-nowrap">
-          <Mail size={11} />
-          Request to resend
-        </button>
-      </div>
-    </div>
-  )
-}
-
-// ── Team related task item ─────────────────────────────────────────────
-
-interface TeamRelatedTaskItemProps {
-  icon: React.ElementType
-  iconBg: string
-  iconColor: string
-  name: string
-  subtitle: string
-  badge: { label: string; className: string }
-  action: { label: string; icon?: React.ElementType }
-}
-
-function TeamRelatedTaskItem({ icon: Icon, iconBg, iconColor, name, subtitle, badge, action }: TeamRelatedTaskItemProps) {
-  return (
-    <div className="flex items-center gap-3 py-3 border-b border-gray-100 last:border-0">
-      <div className={`w-9 h-9 rounded-full ${iconBg} flex items-center justify-center shrink-0`}>
-        <Icon size={16} className={iconColor} />
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-gray-800 truncate">{name}</p>
-        <p className="text-xs text-gray-400 mt-0.5">{subtitle}</p>
-      </div>
-      <div className="flex items-center gap-2 shrink-0">
-        <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${badge.className}`}>
-          {badge.label}
-        </span>
-        <button className="flex items-center gap-1 text-xs text-gray-600 border border-gray-200 rounded-lg px-2.5 py-1 hover:bg-gray-50 transition-colors whitespace-nowrap">
-          {action.icon && <action.icon size={11} />}
-          {action.label}
-        </button>
-      </div>
-    </div>
-  )
-}
-
-// ── Payslip item ──────────────────────────────────────────────────────
-
-interface PayslipItemProps {
-  label: string
-  subtitle: string
-}
-
-function PayslipItem({ label, subtitle }: PayslipItemProps) {
-  return (
-    <div className="flex items-center gap-3 py-3 border-b border-gray-100 last:border-0">
-      <div className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
-        <FolderOpen size={16} className="text-gray-500" />
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-gray-800">{label}</p>
-        <p className="text-xs text-gray-400 mt-0.5">{subtitle}</p>
-      </div>
-      <button className="flex items-center gap-1 text-xs text-gray-600 border border-gray-200 rounded-lg px-2.5 py-1 hover:bg-gray-50 transition-colors whitespace-nowrap">
-        ⊙ Download payslips
-      </button>
-    </div>
-  )
-}
-
 // ── View all button ───────────────────────────────────────────────────
 
 function ViewAllButton({ label }: { label: string }) {
@@ -187,16 +67,30 @@ function ViewAllButton({ label }: { label: string }) {
   )
 }
 
+// ── Empty section state ───────────────────────────────────────────────
+
+function EmptySection({ icon: Icon, message, sub }: { icon: React.ElementType; message: string; sub?: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-10 text-center">
+      <Icon size={32} className="text-gray-300 mb-3" />
+      <p className="text-sm font-medium text-gray-500">{message}</p>
+      {sub && <p className="text-xs text-gray-400 mt-1">{sub}</p>}
+    </div>
+  )
+}
+
 // ── Main Dashboard ────────────────────────────────────────────────────
 
 export default function EmployerDashboard() {
   usePageTitle('Dashboard')
+  const { user } = useAuth()
+  const firstName = user?.fullName?.split(' ')[0] ?? 'there'
 
   return (
     <div className="max-w-full px-8 py-6 space-y-6">
 
       {/* Greeting */}
-      <h1 className="text-2xl font-bold text-gray-900">Hello Skywrapper</h1>
+      <h1 className="text-2xl font-bold text-gray-900">Hello {firstName}</h1>
 
       {/* Section 1: To-do items */}
       <section className="bg-white rounded-xl border border-gray-100 p-6">
@@ -258,48 +152,14 @@ export default function EmployerDashboard() {
         {/* Your tasks */}
         <div className="bg-white rounded-xl border border-gray-100 p-6">
           <h2 className="text-base font-semibold text-gray-900 mb-2">Your tasks</h2>
-          <TaskItem
-            icon={Briefcase}
-            iconBg="bg-blue-50"
-            iconColor="text-blue-500"
-            title="Feburary 2025 payroll"
-            subtitle="$453,300 paid • 40 employees"
-          />
-          <TaskItem
-            icon={Gift}
-            iconBg="bg-purple-50"
-            iconColor="text-purple-500"
-            title="February benefit sync"
-            subtitle="$453,300 deducted • 20 plans"
-          />
-          <TaskItem
-            icon={CreditCard}
-            iconBg="bg-green-50"
-            iconColor="text-green-500"
-            title="January 2025 payroll"
-            subtitle="$453,300 paid • 40 employees"
-          />
+          <EmptySection icon={Briefcase} message="No team tasks" sub="Tasks assigned to you will appear here" />
           <ViewAllButton label="View all tasks" />
         </div>
 
         {/* Team overview */}
         <div className="bg-white rounded-xl border border-gray-100 p-6">
           <h2 className="text-base font-semibold text-gray-900 mb-2">Team overview</h2>
-          <TeamOverviewItem
-            title="Document missing - I-9 form"
-            person="Kemi Adebayo"
-            lastSent="Last sent Mar 1"
-          />
-          <TeamOverviewItem
-            title="Missing - W-2 form"
-            person="Kailash Balaji"
-            lastSent="Last sent Mar 1"
-          />
-          <TeamOverviewItem
-            title="Document missing - Handbook"
-            person="Kemi Adebayo"
-            lastSent="Last sent Mar 1"
-          />
+          <EmptySection icon={Users} message="No recent payroll activity" sub="Payroll activity will appear here" />
           <ViewAllButton label="View all team tasks" />
         </div>
 
@@ -311,51 +171,14 @@ export default function EmployerDashboard() {
         {/* Team related tasks */}
         <div className="bg-white rounded-xl border border-gray-100 p-6">
           <h2 className="text-base font-semibold text-gray-900 mb-2">Team related tasks</h2>
-          <TeamRelatedTaskItem
-            icon={CreditCard}
-            iconBg="bg-blue-50"
-            iconColor="text-blue-500"
-            name="Marcus smith - 12838444"
-            subtitle="Ava health plan • 3 dependants"
-            badge={{ label: 'Pending review', className: 'bg-amber-100 text-amber-700' }}
-            action={{ label: '+ Start task' }}
-          />
-          <TeamRelatedTaskItem
-            icon={Calendar}
-            iconBg="bg-purple-50"
-            iconColor="text-purple-500"
-            name="John doe - 12838444"
-            subtitle="Paternal leave • April 4 - June 16"
-            badge={{ label: 'Pending review', className: 'bg-amber-100 text-amber-700' }}
-            action={{ label: '+ Start task' }}
-          />
-          <TeamRelatedTaskItem
-            icon={Users}
-            iconBg="bg-gray-100"
-            iconColor="text-gray-500"
-            name="Aaliyah stanson - 12838444"
-            subtitle="Product designer • $67k salary"
-            badge={{ label: 'Not filled', className: 'bg-gray-100 text-gray-500' }}
-            action={{ label: '✉ Resend invite', icon: undefined }}
-          />
+          <EmptySection icon={Calendar} message="No team tasks" sub="Team related tasks will appear here" />
           <ViewAllButton label="View all tasks" />
         </div>
 
         {/* Last 3 months payslips */}
         <div className="bg-white rounded-xl border border-gray-100 p-6">
           <h2 className="text-base font-semibold text-gray-900 mb-2">Last 3 months payslips</h2>
-          <PayslipItem
-            label="March 2025 payslips"
-            subtitle="$470,100 paid • March 1, 2025"
-          />
-          <PayslipItem
-            label="Feburary 2025 payslips"
-            subtitle="$470,100 paid • Feb 1, 2025"
-          />
-          <PayslipItem
-            label="January 2025 payslips"
-            subtitle="$470,100 paid • Jan 1, 2025"
-          />
+          <EmptySection icon={FolderOpen} message="No recent payslips" sub="Payslips will appear here once payroll has been run" />
           <ViewAllButton label="View all payslips" />
         </div>
 

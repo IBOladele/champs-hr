@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  Download, Plus, ChevronDown, MoreHorizontal,
+  Download, Plus, ChevronDown,
   ChevronLeft, ChevronRight, PoundSterling, Users, Clock, Calendar, Play
 } from 'lucide-react'
 
@@ -19,79 +19,31 @@ interface PayCycle {
   status: CycleStatus
 }
 
-const payCycles: PayCycle[] = [
-  {
-    id: '1',
-    cycleMonth: 'November 2024',
-    payDate: 'Nov 30, 2024',
-    numEmployees: 231,
-    totalGross: '£52,340',
-    totalNet: '£48,250',
-    status: 'Completed',
-  },
-  {
-    id: '2',
-    cycleMonth: 'October 2024',
-    payDate: 'Oct 31, 2024',
-    numEmployees: 228,
-    totalGross: '£51,890',
-    totalNet: '£47,800',
-    status: 'Completed',
-  },
-  {
-    id: '3',
-    cycleMonth: 'September 2024',
-    payDate: 'Sep 30, 2024',
-    numEmployees: 225,
-    totalGross: '£50,720',
-    totalNet: '£46,660',
-    status: 'Completed',
-  },
-  {
-    id: '4',
-    cycleMonth: 'August 2024',
-    payDate: 'Aug 31, 2024',
-    numEmployees: 225,
-    totalGross: '£50,320',
-    totalNet: '£46,295',
-    status: 'Completed',
-  },
-  {
-    id: '5',
-    cycleMonth: 'December 2024',
-    payDate: 'Dec 31, 2024',
-    numEmployees: 231,
-    totalGross: null,
-    totalNet: null,
-    status: 'Pending',
-  },
-]
-
 const statCards = [
   {
     label: 'Total payroll',
-    value: '£48,250',
+    value: '£0',
     sub: 'this month',
     icon: <PoundSterling size={18} className="text-emerald-600" />,
     iconBg: 'bg-emerald-50',
   },
   {
     label: 'Employees paid',
-    value: '231',
+    value: '0',
     sub: null,
     icon: <Users size={18} className="text-blue-600" />,
     iconBg: 'bg-blue-50',
   },
   {
     label: 'Pending approvals',
-    value: '3',
+    value: '0',
     sub: null,
     icon: <Clock size={18} className="text-amber-600" />,
     iconBg: 'bg-amber-50',
   },
   {
     label: 'Next pay date',
-    value: 'Dec 31, 2024',
+    value: '—',
     sub: null,
     icon: <Calendar size={18} className="text-purple-600" />,
     iconBg: 'bg-purple-50',
@@ -134,6 +86,7 @@ export default function Payroll() {
 
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<PayTab>('cycle')
+  const [payCycles] = useState<PayCycle[]>([])
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -194,7 +147,7 @@ export default function Payroll() {
       <div className="flex items-center justify-between mb-5">
         {/* Left: Pay cycle dropdown */}
         <button className="flex items-center gap-2 px-3 py-2 text-sm border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50">
-          <span>November 2024</span>
+          <span>Select pay cycle</span>
           <ChevronDown size={14} className="text-gray-400" />
         </button>
 
@@ -248,35 +201,22 @@ export default function Payroll() {
                     onClick={() => navigate(`/employer/payroll/feb-2025`)}
                     className="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer"
                   >
-                    {/* Cycle month */}
                     <td className="px-4 py-3.5 text-sm font-medium text-gray-800">
                       {cycle.cycleMonth}
                     </td>
-
-                    {/* Pay date */}
                     <td className="px-4 py-3.5 text-sm text-gray-600">{cycle.payDate}</td>
-
-                    {/* No of employees */}
                     <td className="px-4 py-3.5 text-sm text-gray-600">
                       {cycle.numEmployees ?? '—'}
                     </td>
-
-                    {/* Total Gross */}
                     <td className="px-4 py-3.5 text-sm text-gray-600">
                       {cycle.totalGross ?? '—'}
                     </td>
-
-                    {/* Total Net */}
                     <td className="px-4 py-3.5 text-sm text-gray-600">
                       {cycle.totalNet ?? '—'}
                     </td>
-
-                    {/* Status */}
                     <td className="px-4 py-3.5">
                       <StatusPill status={cycle.status} />
                     </td>
-
-                    {/* Actions */}
                     <td className="px-4 py-3.5">
                       <div className="flex items-center gap-2">
                         {cycle.status === 'Completed' && (
@@ -289,20 +229,25 @@ export default function Payroll() {
                             Process
                           </button>
                         )}
-                        <button className="p-1 rounded hover:bg-gray-100 text-gray-400 transition-colors">
-                          <MoreHorizontal size={16} />
-                        </button>
                       </div>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+
+            {payCycles.length === 0 && (
+              <div className="py-16 text-center">
+                <PoundSterling size={40} className="mx-auto mb-3 text-gray-300" />
+                <p className="text-sm font-medium text-gray-500">No payroll runs yet</p>
+                <p className="text-xs text-gray-400 mt-1">Run your first payroll to get started</p>
+              </div>
+            )}
           </div>
 
           {/* Pagination */}
           <div className="flex items-center justify-between mt-4">
-            <p className="text-sm text-gray-500">Showing 1-5 of 12</p>
+            <p className="text-sm text-gray-500">{payCycles.length} payroll runs</p>
             <div className="flex items-center gap-2">
               <button
                 className="flex items-center gap-1 px-3 py-1.5 text-sm border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"

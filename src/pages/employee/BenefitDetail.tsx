@@ -1,21 +1,6 @@
+import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, CheckCircle2, Download } from 'lucide-react'
-
-const planTitles: Record<string, string> = {
-  health:  'Health Plan',
-  pension: 'Pension Plan',
-  leave:   'Paid Time Off',
-}
-
-const coverageItems = [
-  'GP visits',
-  'Specialist consultations',
-  'Hospital stays',
-  'Dental (basic)',
-  'Prescription drugs',
-  'Mental health support',
-  'Emergency abroad',
-]
+import { ArrowLeft, Gift, Download } from 'lucide-react'
 
 interface ClaimRow {
   date: string
@@ -23,12 +8,6 @@ interface ClaimRow {
   amount: string
   status: 'Approved' | 'Pending' | 'Rejected'
 }
-
-const claims: ClaimRow[] = [
-  { date: 'Jun 2025', description: 'GP visit',     amount: '£45.00',  status: 'Approved' },
-  { date: 'Mar 2025', description: 'Specialist',   amount: '£200.00', status: 'Approved' },
-  { date: 'Jan 2025', description: 'Prescription', amount: '£18.50',  status: 'Approved' },
-]
 
 function ClaimStatusPill({ status }: { status: ClaimRow['status'] }) {
   const cls =
@@ -45,8 +24,41 @@ function ClaimStatusPill({ status }: { status: ClaimRow['status'] }) {
 export default function BenefitDetail() {
   const navigate = useNavigate()
   const { planId } = useParams<{ planId: string }>()
+  const [claims] = useState<ClaimRow[]>([])
 
-  const planTitle = planId && planTitles[planId] ? planTitles[planId] : 'Benefit Plan'
+  // planId must match a known plan — otherwise show not-found state
+  const knownPlans: Record<string, string> = {
+    health:  'Health Plan',
+    pension: 'Pension Plan',
+    leave:   'Paid Time Off',
+    dental:  'Dental Plan',
+  }
+
+  const planTitle = planId && knownPlans[planId] ? knownPlans[planId] : null
+
+  if (!planTitle) {
+    return (
+      <div className="px-8 py-6">
+        <button
+          onClick={() => navigate('/employee/benefits')}
+          className="flex items-center gap-1.5 text-sm text-[#22c55e] font-medium hover:text-green-700 mb-4"
+        >
+          <ArrowLeft size={14} /> Back to benefits
+        </button>
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-16 flex flex-col items-center justify-center text-center">
+          <Gift size={48} className="text-gray-300 mb-4" />
+          <p className="text-base font-semibold text-gray-700">Plan not found</p>
+          <p className="text-sm text-gray-400 mt-1 mb-6">This benefit plan does not exist or you are not enrolled.</p>
+          <button
+            onClick={() => navigate('/employee/benefits')}
+            className="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors"
+          >
+            Back to benefits
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="px-8 py-6">
@@ -65,9 +77,9 @@ export default function BenefitDetail() {
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 mb-5 flex items-center justify-between">
         <div>
           <h2 className="text-xl font-bold text-gray-900">{planTitle}</h2>
-          <p className="text-sm text-gray-500 mt-0.5">Provider: Aviva</p>
-          <span className="inline-flex items-center mt-2 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
-            Active
+          <p className="text-sm text-gray-500 mt-0.5">Provider: —</p>
+          <span className="inline-flex items-center mt-2 px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-500">
+            No data
           </span>
         </div>
         <button className="flex items-center gap-2 border border-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors">
@@ -82,17 +94,17 @@ export default function BenefitDetail() {
           <h3 className="text-sm font-semibold text-gray-900 mb-4">Plan details</h3>
           <div className="space-y-3">
             {[
-              { label: 'Coverage',              value: 'Employee + Family' },
-              { label: 'Start date',            value: '1st January 2025' },
-              { label: 'Renewal date',          value: '31st December 2025' },
-              { label: 'Monthly premium',       value: '£120' },
-              { label: 'Employer contribution', value: '£96' },
-              { label: 'Employee contribution', value: '£24' },
-              { label: 'Policy number',         value: 'AVV-2025-SM-4821' },
+              { label: 'Coverage',              value: '—' },
+              { label: 'Start date',            value: '—' },
+              { label: 'Renewal date',          value: '—' },
+              { label: 'Monthly premium',       value: '—' },
+              { label: 'Employer contribution', value: '—' },
+              { label: 'Employee contribution', value: '—' },
+              { label: 'Policy number',         value: '—' },
             ].map(({ label, value }) => (
               <div key={label} className="flex justify-between text-sm">
                 <span className="text-gray-500">{label}</span>
-                <span className="font-medium text-gray-900">{value}</span>
+                <span className="font-medium text-gray-400">{value}</span>
               </div>
             ))}
           </div>
@@ -101,14 +113,10 @@ export default function BenefitDetail() {
         {/* Coverage includes */}
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
           <h3 className="text-sm font-semibold text-gray-900 mb-4">Coverage includes</h3>
-          <ul className="space-y-2.5">
-            {coverageItems.map(item => (
-              <li key={item} className="flex items-center gap-2.5 text-sm text-gray-700">
-                <CheckCircle2 size={16} className="text-[#22c55e] flex-shrink-0" />
-                {item}
-              </li>
-            ))}
-          </ul>
+          <div className="flex flex-col items-center justify-center py-8 text-center">
+            <Gift size={32} className="text-gray-300 mb-2" />
+            <p className="text-sm text-gray-500">No coverage details available</p>
+          </div>
         </div>
       </div>
 
@@ -139,6 +147,13 @@ export default function BenefitDetail() {
               ))}
             </tbody>
           </table>
+          {claims.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <Gift size={40} className="text-gray-300 mb-3" />
+              <p className="text-sm font-medium text-gray-500">No claims yet</p>
+              <p className="text-xs text-gray-400 mt-1">Claims you submit will appear here</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
