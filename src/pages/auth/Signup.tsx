@@ -27,8 +27,8 @@ export default function Signup() {
 
     setLoading(true)
     try {
-      await signup({ email, password, fullName, companyName })
-      navigate('/onboarding')
+      const newUser = await signup({ email, password, fullName, companyName })
+      navigate(newUser.role === 'employer' ? '/onboarding' : '/employee')
     } catch (err) {
       if (err instanceof ApiError) {
         if (Array.isArray((err as { message: unknown }).message)) {

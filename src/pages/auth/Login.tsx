@@ -29,13 +29,14 @@ export default function Login() {
 
     setLoading(true)
     try {
-      await login(email, password)
-      // After login the user is set in context — navigate to intended destination or role dashboard
+      const loggedInUser = await login(email, password)
+      // Honour the page they were trying to reach (RequireAuth sets location.state.from)
       const from = (location.state as { from?: { pathname: string } })?.from?.pathname
       if (from && from !== '/login') {
         navigate(from, { replace: true })
+      } else {
+        navigate(loggedInUser.role === 'employer' ? '/employer' : '/employee', { replace: true })
       }
-      // useEffect in App will handle redirect via RequireAuth if user state updates
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message)
