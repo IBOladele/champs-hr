@@ -56,7 +56,7 @@ export default function HrOpsEmployeeDetail() {
   const [leaveData] = useState<LeaveRow[]>([])
 
   return (
-    <div className="px-8 py-6">
+    <div className="">
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div>

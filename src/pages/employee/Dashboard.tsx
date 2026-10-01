@@ -38,7 +38,7 @@ export default function EmployeeDashboard() {
   const [attendance] = useState<{ time: string; sub: string; status: string }[]>([])
 
   return (
-    <div className="px-8 py-6">
+    <div className="">
 
       {/* Welcome row */}
       <div className="flex items-center justify-between mb-6">

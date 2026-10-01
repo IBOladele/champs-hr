@@ -1,8 +1,9 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   Users, CreditCard, FileText, Key,
   Briefcase, BarChart2, Gift, ShieldCheck, Settings,
-  FolderOpen, ChevronRight, Calendar
+  FolderOpen, ChevronRight, Calendar, AlertCircle
 } from 'lucide-react'
 
 import { usePageTitle } from '../../hooks/usePageTitle'
@@ -81,16 +82,62 @@ function EmptySection({ icon: Icon, message, sub }: { icon: React.ElementType; m
 
 // ── Main Dashboard ────────────────────────────────────────────────────
 
+const ONBOARDING_STEPS = [
+  'Company profile',
+  'Compliance',
+  'Pay schedule',
+  'Pay elements',
+  'Work locations',
+  'Invite employees',
+]
+
 export default function EmployerDashboard() {
   usePageTitle('Dashboard')
   const { user } = useAuth()
+  const navigate = useNavigate()
   const firstName = user?.fullName?.split(' ')[0] ?? 'there'
+  const onboardingDone = user?.onboardingCompleted === true
 
   return (
-    <div className="max-w-full px-8 py-6 space-y-6">
+    <div className="space-y-6">
 
       {/* Greeting */}
       <h1 className="text-2xl font-bold text-gray-900">Hello {firstName}</h1>
+
+      {/* Onboarding banner */}
+      {!onboardingDone && (
+        <section className="bg-amber-50 border border-amber-200 rounded-xl p-5">
+          <div className="flex items-start gap-3 mb-4">
+            <AlertCircle size={20} className="text-amber-500 mt-0.5 shrink-0" />
+            <div>
+              <p className="text-sm font-semibold text-amber-900">Complete your account setup</p>
+              <p className="text-xs text-amber-700 mt-0.5">Finish onboarding to unlock payroll and invite your team.</p>
+            </div>
+            <button
+              onClick={() => navigate('/onboarding')}
+              className="ml-auto shrink-0 px-4 py-1.5 text-sm font-medium text-white rounded-lg"
+              style={{ backgroundColor: '#22c55e' }}
+            >
+              Continue setup →
+            </button>
+          </div>
+          <div className="flex items-center gap-2">
+            {ONBOARDING_STEPS.map((step, i) => (
+              <div key={step} className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-5 h-5 rounded-full border-2 border-amber-300 bg-white flex items-center justify-center">
+                    <span className="text-[10px] font-semibold text-amber-500">{i + 1}</span>
+                  </div>
+                  <span className="text-xs text-amber-800 whitespace-nowrap">{step}</span>
+                </div>
+                {i < ONBOARDING_STEPS.length - 1 && (
+                  <div className="w-6 h-px bg-amber-200" />
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Section 1: To-do items */}
       <section className="bg-white rounded-xl border border-gray-100 p-6">

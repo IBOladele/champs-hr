@@ -60,7 +60,7 @@ export default function Analytics() {
 
   return (
     <div className="bg-gray-50 min-h-full">
-      <div className="max-w-7xl mx-auto px-6 py-6 space-y-6">
+      <div className="space-y-6">
 
         {/* Page title */}
         <h1 className="text-2xl font-bold text-gray-900">Analytics</h1>

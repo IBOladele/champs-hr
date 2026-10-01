@@ -35,7 +35,7 @@ export default function LeaveRequests() {
   const [rows] = useState<LeaveRow[]>([])
 
   return (
-    <div className="px-8 py-6">
+    <div className="">
 
       {/* Page heading */}
       <div className="flex items-center justify-between mb-6">

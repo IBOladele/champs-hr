@@ -100,8 +100,10 @@ export default function EmployerLayout() {
 
       </div>
 
-      <main className="flex-1 bg-gray-50">
-        <Outlet />
+      <main className="flex-1 bg-gray-50 p-6">
+        <div className="max-w-7xl mx-auto">
+          <Outlet />
+        </div>
       </main>
     </div>
   )

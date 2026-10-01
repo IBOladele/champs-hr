@@ -40,7 +40,7 @@ export default function AttendanceDetail() {
   const [records] = useState<AttendanceRecord[]>([])
 
   return (
-    <div className="px-8 py-6">
+    <div className="">
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">My attendance</h1>

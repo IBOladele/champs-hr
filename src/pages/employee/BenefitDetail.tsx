@@ -38,7 +38,7 @@ export default function BenefitDetail() {
 
   if (!planTitle) {
     return (
-      <div className="px-8 py-6">
+      <div className="">
         <button
           onClick={() => navigate('/employee/benefits')}
           className="flex items-center gap-1.5 text-sm text-[#22c55e] font-medium hover:text-green-700 mb-4"
@@ -61,7 +61,7 @@ export default function BenefitDetail() {
   }
 
   return (
-    <div className="px-8 py-6">
+    <div className="">
       {/* Header */}
       <div className="mb-6">
         <button

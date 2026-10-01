@@ -185,7 +185,7 @@ export default function PayrollRun() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="">
       {/* Breadcrumb */}
       <button
         onClick={() => navigate('/employer/payroll')}

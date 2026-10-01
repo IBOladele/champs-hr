@@ -165,10 +165,12 @@ router.get('/me', requireAuth, async (req: Request, res: Response, next: NextFun
     const result = await pool.query<{
       id: string; email: string; role: string; tenant_id: string;
       full_name: string; phone: string | null; avatar_url: string | null;
-      email_verified: boolean; created_at: string;
+      email_verified: boolean; created_at: string; onboarding_completed: boolean;
     }>(
-      `SELECT id, email, role, tenant_id, full_name, phone, avatar_url, email_verified, created_at
-       FROM users WHERE id = $1 AND tenant_id = $2`,
+      `SELECT u.id, u.email, u.role, u.tenant_id, u.full_name, u.phone, u.avatar_url,
+              u.email_verified, u.created_at, t.onboarding_completed
+       FROM users u JOIN tenants t ON t.id = u.tenant_id
+       WHERE u.id = $1 AND u.tenant_id = $2`,
       [req.user!.userId, req.user!.tenantId],
     );
 
@@ -176,15 +178,16 @@ router.get('/me', requireAuth, async (req: Request, res: Response, next: NextFun
     if (!user) { res.status(404).json({ error: 'User not found' }); return; }
 
     res.json({
-      id:            user.id,
-      email:         user.email,
-      role:          user.role,
-      tenantId:      user.tenant_id,
-      fullName:      user.full_name,
-      phone:         user.phone,
-      avatarUrl:     user.avatar_url,
-      emailVerified: user.email_verified,
-      createdAt:     user.created_at,
+      id:                   user.id,
+      email:                user.email,
+      role:                 user.role,
+      tenantId:             user.tenant_id,
+      fullName:             user.full_name,
+      phone:                user.phone,
+      avatarUrl:            user.avatar_url,
+      emailVerified:        user.email_verified,
+      createdAt:            user.created_at,
+      onboardingCompleted:  user.onboarding_completed,
     });
   } catch (err) {
     next(err);

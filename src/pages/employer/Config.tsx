@@ -164,7 +164,7 @@ export default function Config() {
   const [activeSection, setActiveSection] = useState<SidebarKey>('organisation')
 
   return (
-    <div className="px-8 py-6 max-w-6xl">
+    <div className="max-w-4xl">
       {/* Page title */}
       <div className="flex items-center justify-between mb-5">
         <h1 className="text-2xl font-bold text-gray-900">Configuration</h1>

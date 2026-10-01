@@ -77,6 +77,7 @@ export interface AuthUser {
   avatarUrl?: string | null
   emailVerified: boolean
   createdAt?: string
+  onboardingCompleted?: boolean
 }
 
 export interface Employee {

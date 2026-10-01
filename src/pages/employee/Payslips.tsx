@@ -34,7 +34,7 @@ export default function Payslips() {
   const [rows] = useState<PayslipRow[]>([])
 
   return (
-    <div className="px-8 py-6">
+    <div className="">
 
       {/* Page heading */}
       <h1 className="text-2xl font-bold text-gray-900 mb-6">Payslips</h1>

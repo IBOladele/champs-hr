@@ -39,7 +39,7 @@ export default function UserAccess() {
   const [users] = useState<UserRow[]>([])
 
   return (
-    <div className="px-8 py-6">
+    <div className="">
       {/* Page heading */}
       <h1 className="text-2xl font-bold text-gray-900 mb-6">User Access</h1>
 

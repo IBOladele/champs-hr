@@ -43,7 +43,7 @@ export default function Benefits() {
   ]
 
   return (
-    <div className="px-8 py-6">
+    <div className="">
       <h1 className="text-2xl font-bold text-gray-900 mb-6">Benefits</h1>
 
       <div className="flex gap-5">

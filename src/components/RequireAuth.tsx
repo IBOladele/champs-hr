@@ -28,5 +28,14 @@ export default function RequireAuth({ children, role }: Props) {
     return <Navigate to={user.role === 'employer' ? '/employer' : '/employee'} replace />
   }
 
+  // Employer hasn't completed onboarding — gate the entire employer area
+  if (
+    user.role === 'employer' &&
+    user.onboardingCompleted === false &&
+    location.pathname !== '/onboarding'
+  ) {
+    return <Navigate to="/onboarding" replace />
+  }
+
   return <>{children}</>
 }

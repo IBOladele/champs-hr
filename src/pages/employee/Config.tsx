@@ -92,7 +92,7 @@ export default function EmployeeConfig() {
   const [activeSection, setActiveSection] = useState<SidebarKey>('account')
 
   return (
-    <div className="px-8 py-6 max-w-5xl">
+    <div className="max-w-3xl">
       <h1 className="text-2xl font-bold text-gray-900 mb-6">Configuration</h1>
 
       <div className="flex gap-5">

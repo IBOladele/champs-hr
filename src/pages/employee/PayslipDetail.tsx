@@ -5,7 +5,7 @@ export default function PayslipDetail() {
   const navigate = useNavigate()
 
   return (
-    <div className="px-8 py-6">
+    <div className="">
       {/* Header */}
       <div className="mb-6">
         <button

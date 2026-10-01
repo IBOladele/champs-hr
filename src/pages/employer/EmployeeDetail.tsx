@@ -141,7 +141,7 @@ export default function EmployeeDetail() {
 
   if (!emp) {
     return (
-      <div className="max-w-full px-8 py-6">
+      <div className="">
         <button
           onClick={() => navigate('/employer/employees')}
           className="flex items-center gap-1 text-sm text-[#22c55e] hover:text-green-600 transition-colors mb-6"
@@ -166,7 +166,7 @@ export default function EmployeeDetail() {
   }
 
   return (
-    <div className="max-w-full px-8 py-6">
+    <div className="">
 
       {/* Breadcrumb */}
       <button

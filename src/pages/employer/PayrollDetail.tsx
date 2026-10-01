@@ -192,7 +192,7 @@ export default function PayrollDetail() {
   const [activeTab, setActiveTab] = useState<DetailTab>('summary')
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="">
       {/* Breadcrumb */}
       <button
         onClick={() => navigate('/employer/payroll')}
