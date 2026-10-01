@@ -25,10 +25,17 @@ function signToken(payload: {
 
 // POST /auth/signup
 const signupSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(8),
-  fullName: z.string().min(1),
-  companyName: z.string().min(1),
+  email: z.string().email().max(254).transform((e) => e.toLowerCase().trim()),
+  password: z
+    .string()
+    .min(8,  'Password must be at least 8 characters')
+    .max(128, 'Password too long')
+    .regex(/[A-Z]/,         'Password must contain at least one uppercase letter')
+    .regex(/[a-z]/,         'Password must contain at least one lowercase letter')
+    .regex(/[0-9]/,         'Password must contain at least one number')
+    .regex(/[^A-Za-z0-9]/, 'Password must contain at least one special character'),
+  fullName:    z.string().min(1).max(120).trim(),
+  companyName: z.string().min(1).max(200).trim(),
 });
 
 router.post(
@@ -106,8 +113,8 @@ router.post(
 
 // POST /auth/login
 const loginSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(1),
+  email:    z.string().email().max(254).transform((e) => e.toLowerCase().trim()),
+  password: z.string().min(1).max(128),
 });
 
 router.post(

@@ -1,35 +1,102 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import { runMigrations } from './db/migrate';
 import routes from './routes';
 import { errorHandler } from './middleware/errorHandler';
 
 const app = express();
 
-// CORS
+// Railway (and most PaaS) sit behind a reverse proxy — trust one hop so that
+// express-rate-limit sees the real client IP, not the proxy IP.
+app.set('trust proxy', 1);
+
+// ── Security headers (Helmet) ────────────────────────────────────────────────
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", 'data:', 'https:'],
+        connectSrc: ["'self'"],
+        fontSrc: ["'self'"],
+        objectSrc: ["'none'"],
+        upgradeInsecureRequests: [],
+      },
+    },
+    // Force HTTPS in production
+    hsts: process.env.NODE_ENV === 'production'
+      ? { maxAge: 31536000, includeSubDomains: true, preload: true }
+      : false,
+    referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+    crossOriginEmbedderPolicy: false,
+  }),
+);
+
+// ── CORS ─────────────────────────────────────────────────────────────────────
+const ALLOWED_ORIGINS = (process.env.CORS_ORIGIN ?? '')
+  .split(',')
+  .map((o) => o.trim())
+  .filter(Boolean);
+
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN || '*',
+    origin: (origin, cb) => {
+      // Allow requests with no origin (curl, mobile apps, same-origin)
+      if (!origin) return cb(null, true);
+      if (ALLOWED_ORIGINS.length === 0 || ALLOWED_ORIGINS.includes(origin)) {
+        return cb(null, true);
+      }
+      cb(new Error(`Origin ${origin} not allowed by CORS`));
+    },
     methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
-  })
+  }),
 );
 
-// Body parsing
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// ── Body parsing (explicit size limits) ──────────────────────────────────────
+app.use(express.json({ limit: '50kb' }));
+app.use(express.urlencoded({ extended: true, limit: '50kb' }));
 
-// Health check
+// ── Rate limiting ─────────────────────────────────────────────────────────────
+// Auth endpoints: strict — 10 attempts per IP per 15 min
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: { error: 'Too many requests — please try again in 15 minutes' },
+  skipSuccessfulRequests: false,
+});
+
+// General API: 300 req / 15 min per IP
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 300,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: { error: 'Too many requests — please slow down' },
+  skip: (req) => req.method === 'OPTIONS',
+});
+
+app.use('/api/v1/auth/signup', authLimiter);
+app.use('/api/v1/auth/login', authLimiter);
+app.use('/api/v1', apiLimiter);
+
+// ── Health check ──────────────────────────────────────────────────────────────
 app.get('/health', (_req, res) => {
   res.json({ ok: true, timestamp: new Date().toISOString() });
 });
 
-// API routes
+// ── API routes ────────────────────────────────────────────────────────────────
 app.use('/api/v1', routes);
 
-// Global error handler (must be last)
+// ── Global error handler (must be last) ──────────────────────────────────────
 app.use(errorHandler);
 
 const PORT = parseInt(process.env.PORT || '3000', 10);
@@ -48,7 +115,6 @@ async function bootstrap() {
   }
 }
 
-// Only call bootstrap when this file is run directly, not when imported by tests
 if (require.main === module) {
   bootstrap();
 }
