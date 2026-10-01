@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { Clock, MapPin, ChevronLeft, ChevronRight, ChevronDown, FileText } from 'lucide-react'
+import { usePageTitle } from '../../hooks/usePageTitle'
 
 type AttendanceStatus = 'Early' | 'Overtime' | 'Absent' | 'Late'
 
@@ -40,6 +41,8 @@ function StatusPill({ status }: { status: AttendanceStatus }) {
 }
 
 export default function Attendance() {
+  usePageTitle('Attendance')
+
   const navigate = useNavigate()
 
   return (

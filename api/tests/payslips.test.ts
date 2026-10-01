@@ -12,16 +12,16 @@ describe('Payslips Routes', () => {
   let employer: TestEmployer;
   let empRecord: TestEmployee;
   let empRecord2: TestEmployee;
-  let empToken: string;
-  let empToken2: string;
+  let empCookie: string[];
+  let empCookie2: string[];
 
   beforeAll(async () => {
     const ts = Date.now();
     employer   = await createTestEmployer(`payslips-${ts}`);
-    empRecord  = await createTestEmployee(employer.token, `payslips-emp-${ts}`);
-    empRecord2 = await createTestEmployee(employer.token, `payslips-emp2-${ts}`);
-    empToken   = await loginAsEmployee(empRecord.email);
-    empToken2  = await loginAsEmployee(empRecord2.email);
+    empRecord  = await createTestEmployee(employer.cookie, `payslips-emp-${ts}`);
+    empRecord2 = await createTestEmployee(employer.cookie, `payslips-emp2-${ts}`);
+    empCookie   = await loginAsEmployee(empRecord.email);
+    empCookie2  = await loginAsEmployee(empRecord2.email);
   }, 30_000);
 
   afterAll(async () => {
@@ -31,7 +31,7 @@ describe('Payslips Routes', () => {
   it('GET /employees/:id/payslips returns empty array before any payroll runs', async () => {
     const res = await request
       .get(`/api/v1/employees/${empRecord.id}/payslips`)
-      .set('Authorization', `Bearer ${employer.token}`);
+      .set('Cookie', employer.cookie);
 
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
@@ -41,7 +41,7 @@ describe('Payslips Routes', () => {
   it('employee can see their own payslips', async () => {
     const res = await request
       .get(`/api/v1/employees/${empRecord.id}/payslips`)
-      .set('Authorization', `Bearer ${empToken}`);
+      .set('Cookie', empCookie);
 
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
@@ -50,7 +50,7 @@ describe('Payslips Routes', () => {
   it('employee cannot see another employee payslips → 403', async () => {
     const res = await request
       .get(`/api/v1/employees/${empRecord.id}/payslips`)
-      .set('Authorization', `Bearer ${empToken2}`);
+      .set('Cookie', empCookie2);
 
     expect(res.status).toBe(403);
   });
@@ -58,7 +58,7 @@ describe('Payslips Routes', () => {
   it('GET /employees/:id/payslips with invalid year param → 400', async () => {
     const res = await request
       .get(`/api/v1/employees/${empRecord.id}/payslips?year=not-a-year`)
-      .set('Authorization', `Bearer ${employer.token}`);
+      .set('Cookie', employer.cookie);
 
     expect(res.status).toBe(400);
   });
@@ -73,7 +73,7 @@ describe('Payslips Routes', () => {
   it('GET /employees/:id/payslips for unknown employee → 404', async () => {
     const res = await request
       .get('/api/v1/employees/00000000-0000-0000-0000-000000000000/payslips')
-      .set('Authorization', `Bearer ${employer.token}`);
+      .set('Cookie', employer.cookie);
 
     expect(res.status).toBe(404);
   });
@@ -85,7 +85,7 @@ describe('Payslips Routes', () => {
       // Create and approve a payroll run so payslips exist
       const runRes = await request
         .post('/api/v1/payroll')
-        .set('Authorization', `Bearer ${employer.token}`)
+        .set('Cookie', employer.cookie)
         .send({ periodStart: '2025-01-01', periodEnd: '2025-01-31' });
 
       if (runRes.status !== 201) return;
@@ -93,13 +93,13 @@ describe('Payslips Routes', () => {
 
       await request
         .patch(`/api/v1/payroll/${runId}/approve`)
-        .set('Authorization', `Bearer ${employer.token}`);
+        .set('Cookie', employer.cookie);
     }, 30_000);
 
     it('employee sees payslips after a completed run', async () => {
       const res = await request
         .get(`/api/v1/employees/${empRecord.id}/payslips`)
-        .set('Authorization', `Bearer ${empToken}`);
+        .set('Cookie', empCookie);
 
       expect(res.status).toBe(200);
       expect(Array.isArray(res.body)).toBe(true);
@@ -120,7 +120,7 @@ describe('Payslips Routes', () => {
 
       const res = await request
         .get(`/api/v1/employees/${empRecord.id}/payslips/${payslipItemId}`)
-        .set('Authorization', `Bearer ${empToken}`);
+        .set('Cookie', empCookie);
 
       expect(res.status).toBe(200);
       expect(res.body.id).toBe(payslipItemId);
@@ -133,7 +133,7 @@ describe('Payslips Routes', () => {
 
       const res = await request
         .get(`/api/v1/employees/${empRecord.id}/payslips/${payslipItemId}`)
-        .set('Authorization', `Bearer ${employer.token}`);
+        .set('Cookie', employer.cookie);
 
       expect(res.status).toBe(200);
     });
@@ -141,7 +141,7 @@ describe('Payslips Routes', () => {
     it('year filter returns payslips for that year only', async () => {
       const res = await request
         .get(`/api/v1/employees/${empRecord.id}/payslips?year=2025`)
-        .set('Authorization', `Bearer ${empToken}`);
+        .set('Cookie', empCookie);
 
       expect(res.status).toBe(200);
     });
@@ -149,7 +149,7 @@ describe('Payslips Routes', () => {
     it('year filter for a future year returns empty', async () => {
       const res = await request
         .get(`/api/v1/employees/${empRecord.id}/payslips?year=2099`)
-        .set('Authorization', `Bearer ${empToken}`);
+        .set('Cookie', empCookie);
 
       expect(res.status).toBe(200);
       expect(res.body).toHaveLength(0);

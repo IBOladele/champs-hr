@@ -12,14 +12,14 @@ describe('Leave — Cancel', () => {
   let employer: TestEmployer;
   let empRecord: TestEmployee;
   let empRecord2: TestEmployee;
-  let empToken: string;
-  let empToken2: string;
+  let empToken: string[];
+  let empToken2: string[];
 
   beforeAll(async () => {
     const ts = Date.now();
     employer   = await createTestEmployer(`lv-cancel-${ts}`);
-    empRecord  = await createTestEmployee(employer.token, `lv-cancel-emp-${ts}`);
-    empRecord2 = await createTestEmployee(employer.token, `lv-cancel-emp2-${ts}`);
+    empRecord  = await createTestEmployee(employer.cookie, `lv-cancel-emp-${ts}`);
+    empRecord2 = await createTestEmployee(employer.cookie, `lv-cancel-emp2-${ts}`);
     empToken   = await loginAsEmployee(empRecord.email);
     empToken2  = await loginAsEmployee(empRecord2.email);
   }, 30_000);
@@ -28,10 +28,10 @@ describe('Leave — Cancel', () => {
     await cleanupTestData(employer.tenantId);
   });
 
-  async function createLeaveRequest(token: string) {
+  async function createLeaveRequest(cookie: string[]) {
     const res = await request
       .post('/api/v1/leave')
-      .set('Authorization', `Bearer ${token}`)
+      .set('Cookie', cookie)
       .send({
         leaveType:     'annual_leave',
         startDate:     '2026-12-01',
@@ -48,7 +48,7 @@ describe('Leave — Cancel', () => {
 
     const res = await request
       .patch(`/api/v1/leave/${leave.id}/cancel`)
-      .set('Authorization', `Bearer ${empToken}`);
+      .set('Cookie', empToken);
 
     expect(res.status).toBe(200);
     expect(res.body.status).toBe('cancelled');
@@ -59,7 +59,7 @@ describe('Leave — Cancel', () => {
 
     const res = await request
       .patch(`/api/v1/leave/${leave.id}/cancel`)
-      .set('Authorization', `Bearer ${empToken2}`);
+      .set('Cookie', empToken2);
 
     expect(res.status).toBe(403);
   });
@@ -69,7 +69,7 @@ describe('Leave — Cancel', () => {
 
     const res = await request
       .patch(`/api/v1/leave/${leave.id}/cancel`)
-      .set('Authorization', `Bearer ${employer.token}`);
+      .set('Cookie', employer.cookie);
 
     expect(res.status).toBe(200);
     expect(res.body.status).toBe('cancelled');
@@ -81,12 +81,12 @@ describe('Leave — Cancel', () => {
     // Approve it first
     await request
       .patch(`/api/v1/leave/${leave.id}/approve`)
-      .set('Authorization', `Bearer ${employer.token}`);
+      .set('Cookie', employer.cookie);
 
     // Attempt to cancel the approved request
     const res = await request
       .patch(`/api/v1/leave/${leave.id}/cancel`)
-      .set('Authorization', `Bearer ${employer.token}`);
+      .set('Cookie', employer.cookie);
 
     expect(res.status).toBe(409);
   });
@@ -94,7 +94,7 @@ describe('Leave — Cancel', () => {
   it('cancel unknown leave request → 404', async () => {
     const res = await request
       .patch('/api/v1/leave/00000000-0000-0000-0000-000000000000/cancel')
-      .set('Authorization', `Bearer ${employer.token}`);
+      .set('Cookie', employer.cookie);
 
     expect(res.status).toBe(404);
   });

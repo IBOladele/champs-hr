@@ -9,13 +9,13 @@ import {
 
 describe('Stats Routes', () => {
   let employer: TestEmployer;
-  let employeeToken: string;
+  let employeeCookie: string[];
 
   beforeAll(async () => {
     const ts = Date.now();
     employer = await createTestEmployer(`stats-${ts}`);
-    const emp = await createTestEmployee(employer.token, `stats-emp-${ts}`);
-    employeeToken = await loginAsEmployee(emp.email);
+    const emp = await createTestEmployee(employer.cookie, `stats-emp-${ts}`);
+    employeeCookie = await loginAsEmployee(emp.email);
   }, 30_000);
 
   afterAll(async () => {
@@ -25,7 +25,7 @@ describe('Stats Routes', () => {
   it('GET /stats returns aggregate stats for employer', async () => {
     const res = await request
       .get('/api/v1/stats')
-      .set('Authorization', `Bearer ${employer.token}`);
+      .set('Cookie', employer.cookie);
 
     expect(res.status).toBe(200);
     expect(res.body).toHaveProperty('employees');
@@ -42,7 +42,7 @@ describe('Stats Routes', () => {
   it('GET /stats reflects the employee we created', async () => {
     const res = await request
       .get('/api/v1/stats')
-      .set('Authorization', `Bearer ${employer.token}`);
+      .set('Cookie', employer.cookie);
 
     expect(res.status).toBe(200);
     expect(res.body.employees.total).toBeGreaterThanOrEqual(1);
@@ -51,7 +51,7 @@ describe('Stats Routes', () => {
   it('GET /stats requires employer role → 403 for employee', async () => {
     const res = await request
       .get('/api/v1/stats')
-      .set('Authorization', `Bearer ${employeeToken}`);
+      .set('Cookie', employeeCookie);
 
     expect(res.status).toBe(403);
   });

@@ -25,20 +25,20 @@ describe('Cascade Delete Behaviour (relational)', () => {
   async function deleteEmployee(empId: string) {
     return request
       .delete(`/api/v1/employees/${empId}`)
-      .set('Authorization', `Bearer ${employer.token}`);
+      .set('Cookie', employer.cookie);
   }
 
   // --- 1. Delete employee → leave requests are also gone (CASCADE) ---
   it('deleting employee cascades to leave_requests', async () => {
     const tag = `casc-leave-${Date.now()}`;
-    const emp = await createTestEmployee(employer.token, tag);
-    const empToken = await loginAsEmployee(emp.email);
+    const emp = await createTestEmployee(employer.cookie, tag);
+    const empCookieLocal = await loginAsEmployee(emp.email);
 
     // Submit 2 leave requests
     for (let i = 0; i < 2; i++) {
       const res = await request
         .post('/api/v1/leave')
-        .set('Authorization', `Bearer ${empToken}`)
+        .set('Cookie', empCookieLocal)
         .send({
           leaveType: 'annual',
           startDate: `2025-0${i + 1}-10`,
@@ -70,13 +70,13 @@ describe('Cascade Delete Behaviour (relational)', () => {
   // --- 2. Delete employee → attendance_records are gone ---
   it('deleting employee cascades to attendance_records', async () => {
     const tag = `casc-att-${Date.now()}`;
-    const emp = await createTestEmployee(employer.token, tag);
-    const empToken = await loginAsEmployee(emp.email);
+    const emp = await createTestEmployee(employer.cookie, tag);
+    const empCookieLocal = await loginAsEmployee(emp.email);
 
     // Clock in (creates 1 record for today)
     await request
       .post('/api/v1/attendance/clock-in')
-      .set('Authorization', `Bearer ${empToken}`);
+      .set('Cookie', empCookieLocal);
 
     // Manually insert 2 more rows for different dates via DB
     const today = new Date().toISOString().slice(0, 10);
@@ -114,16 +114,16 @@ describe('Cascade Delete Behaviour (relational)', () => {
 
     const benefitRes = await request
       .post('/api/v1/benefits')
-      .set('Authorization', `Bearer ${employer.token}`)
+      .set('Cookie', employer.cookie)
       .send({ name: `Cascade Benefit ${tag}`, benefitType: 'health', value: 200, currency: 'GBP' });
     expect(benefitRes.status).toBe(201);
     const benefitId = benefitRes.body.id;
 
-    const emp = await createTestEmployee(employer.token, tag);
+    const emp = await createTestEmployee(employer.cookie, tag);
 
     await request
       .post(`/api/v1/benefits/${benefitId}/enrol`)
-      .set('Authorization', `Bearer ${employer.token}`)
+      .set('Cookie', employer.cookie)
       .send({ employeeId: emp.id });
 
     const before = await pool.query(
@@ -145,12 +145,12 @@ describe('Cascade Delete Behaviour (relational)', () => {
   // --- 4. Delete employee → payroll_run_items are gone (employee_id FK ON DELETE CASCADE) ---
   it('deleting employee cascades to payroll_run_items', async () => {
     const tag = `casc-pay-${Date.now()}`;
-    const emp = await createTestEmployee(employer.token, tag);
+    const emp = await createTestEmployee(employer.cookie, tag);
 
     // Run payroll (creates items for all active employees, including this one)
     const payrollRes = await request
       .post('/api/v1/payroll')
-      .set('Authorization', `Bearer ${employer.token}`)
+      .set('Cookie', employer.cookie)
       .send({ periodStart: '2025-09-01', periodEnd: '2025-09-30' });
     expect(payrollRes.status).toBe(201);
     const runId = payrollRes.body.id;
@@ -182,22 +182,22 @@ describe('Cascade Delete Behaviour (relational)', () => {
 
     const deptRes = await request
       .post('/api/v1/departments')
-      .set('Authorization', `Bearer ${employer.token}`)
+      .set('Cookie', employer.cookie)
       .send({ name: `Cascade Dept ${tag}` });
     expect(deptRes.status).toBe(201);
     const deptId = deptRes.body.id;
 
     // Create 2 employees in this department
-    const emp1 = await createTestEmployee(employer.token, `cdept-e1-${tag}`);
+    const emp1 = await createTestEmployee(employer.cookie, `cdept-e1-${tag}`);
     await request
       .patch(`/api/v1/employees/${emp1.id}`)
-      .set('Authorization', `Bearer ${employer.token}`)
+      .set('Cookie', employer.cookie)
       .send({ departmentId: deptId });
 
-    const emp2 = await createTestEmployee(employer.token, `cdept-e2-${tag}`);
+    const emp2 = await createTestEmployee(employer.cookie, `cdept-e2-${tag}`);
     await request
       .patch(`/api/v1/employees/${emp2.id}`)
-      .set('Authorization', `Bearer ${employer.token}`)
+      .set('Cookie', employer.cookie)
       .send({ departmentId: deptId });
 
     // Confirm employees have this dept
@@ -210,7 +210,7 @@ describe('Cascade Delete Behaviour (relational)', () => {
     // Delete the department via API
     const delRes = await request
       .delete(`/api/v1/departments/${deptId}`)
-      .set('Authorization', `Bearer ${employer.token}`);
+      .set('Cookie', employer.cookie);
 
     // DB schema has ON DELETE SET NULL → deletion should succeed
     expect([204, 200]).toContain(delRes.status);
@@ -234,12 +234,12 @@ describe('Cascade Delete Behaviour (relational)', () => {
     const tenantId = tempEmployer.tenantId;
 
     // Create some data
-    const emp = await createTestEmployee(tempEmployer.token, suffix);
-    const empToken = await loginAsEmployee(emp.email);
+    const emp = await createTestEmployee(tempEmployer.cookie, suffix);
+    const empCookieLocal = await loginAsEmployee(emp.email);
 
     await request
       .post('/api/v1/leave')
-      .set('Authorization', `Bearer ${empToken}`)
+      .set('Cookie', empCookieLocal)
       .send({
         leaveType: 'annual',
         startDate: '2025-10-01',
@@ -249,7 +249,7 @@ describe('Cascade Delete Behaviour (relational)', () => {
 
     await request
       .post('/api/v1/attendance/clock-in')
-      .set('Authorization', `Bearer ${empToken}`);
+      .set('Cookie', empCookieLocal);
 
     // Run cleanup
     await cleanupTestData(tenantId);

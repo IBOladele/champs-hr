@@ -3,8 +3,11 @@ import { useNavigate } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { ApiError } from '../../lib/api'
+import { usePageTitle } from '../../hooks/usePageTitle'
 
 export default function Signup() {
+  usePageTitle('Get started')
+
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [companyName, setCompanyName] = useState('')
@@ -153,6 +156,7 @@ export default function Signup() {
                 />
                 <button
                   type="button"
+                  aria-label="Toggle password visibility"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >

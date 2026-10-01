@@ -11,12 +11,12 @@ import {
 describe('Employees Routes', () => {
   let employer: TestEmployer;
   let employeeRecord: TestEmployee;
-  let employeeToken: string;
+  let employeeCookie: string[];
 
   beforeAll(async () => {
     employer = await createTestEmployer(`emp-${Date.now()}`);
-    employeeRecord = await createTestEmployee(employer.token, `emp-${Date.now()}`);
-    employeeToken = await loginAsEmployee(employeeRecord.email);
+    employeeRecord = await createTestEmployee(employer.cookie, `emp-${Date.now()}`);
+    employeeCookie = await loginAsEmployee(employeeRecord.email);
   });
 
   afterAll(async () => {
@@ -30,7 +30,7 @@ describe('Employees Routes', () => {
     it('employer token → 200, returns array', async () => {
       const res = await request
         .get('/api/v1/employees')
-        .set('Authorization', `Bearer ${employer.token}`);
+        .set('Cookie', employer.cookie);
 
       expect(res.status).toBe(200);
       expect(Array.isArray(res.body)).toBe(true);
@@ -45,7 +45,7 @@ describe('Employees Routes', () => {
     it('employee token → 403 Employer access required', async () => {
       const res = await request
         .get('/api/v1/employees')
-        .set('Authorization', `Bearer ${employeeToken}`);
+        .set('Cookie', employeeCookie);
 
       expect(res.status).toBe(403);
       expect(res.body).toEqual({ error: 'Employer access required' });
@@ -67,7 +67,7 @@ describe('Employees Routes', () => {
       const tag = Date.now();
       const res = await request
         .post('/api/v1/employees')
-        .set('Authorization', `Bearer ${employer.token}`)
+        .set('Cookie', employer.cookie)
         .send({
           email: `new-emp-${tag}@test-champs.com`,
           fullName: 'Jane Smith',
@@ -98,7 +98,7 @@ describe('Employees Routes', () => {
     it('employee tries to create → 403', async () => {
       const res = await request
         .post('/api/v1/employees')
-        .set('Authorization', `Bearer ${employeeToken}`)
+        .set('Cookie', employeeCookie)
         .send({
           email: `blocked-${Date.now()}@test-champs.com`,
           fullName: 'Blocked',
@@ -115,7 +115,7 @@ describe('Employees Routes', () => {
     it('missing required fields → 400 with error array', async () => {
       const res = await request
         .post('/api/v1/employees')
-        .set('Authorization', `Bearer ${employer.token}`)
+        .set('Cookie', employer.cookie)
         .send({
           email: `missing-${Date.now()}@test-champs.com`,
           // missing fullName, jobTitle, employeeNumber, grossSalary, startDate
@@ -129,7 +129,7 @@ describe('Employees Routes', () => {
     it('negative grossSalary → 400', async () => {
       const res = await request
         .post('/api/v1/employees')
-        .set('Authorization', `Bearer ${employer.token}`)
+        .set('Cookie', employer.cookie)
         .send({
           email: `neg-sal-${Date.now()}@test-champs.com`,
           fullName: 'Bad Salary',
@@ -151,7 +151,7 @@ describe('Employees Routes', () => {
     it('employer gets any employee by id → 200 with employee object', async () => {
       const res = await request
         .get(`/api/v1/employees/${employeeRecord.id}`)
-        .set('Authorization', `Bearer ${employer.token}`);
+        .set('Cookie', employer.cookie);
 
       expect(res.status).toBe(200);
       expect(res.body).toMatchObject({
@@ -164,7 +164,7 @@ describe('Employees Routes', () => {
     it('employee can get their own record → 200', async () => {
       const res = await request
         .get(`/api/v1/employees/${employeeRecord.id}`)
-        .set('Authorization', `Bearer ${employeeToken}`);
+        .set('Cookie', employeeCookie);
 
       expect(res.status).toBe(200);
       expect(res.body.id).toBe(employeeRecord.id);
@@ -173,7 +173,7 @@ describe('Employees Routes', () => {
     it('nonexistent UUID → 404', async () => {
       const res = await request
         .get('/api/v1/employees/00000000-0000-0000-0000-000000000000')
-        .set('Authorization', `Bearer ${employer.token}`);
+        .set('Cookie', employer.cookie);
 
       expect(res.status).toBe(404);
       expect(res.body).toEqual({ error: 'Employee not found' });
@@ -187,7 +187,7 @@ describe('Employees Routes', () => {
     it('employer updates employee → 200 with updated data', async () => {
       const res = await request
         .patch(`/api/v1/employees/${employeeRecord.id}`)
-        .set('Authorization', `Bearer ${employer.token}`)
+        .set('Cookie', employer.cookie)
         .send({
           jobTitle: 'Senior Software Engineer',
           grossSalary: 65000,
@@ -201,7 +201,7 @@ describe('Employees Routes', () => {
     it('employer updates fullName via patch → 200', async () => {
       const res = await request
         .patch(`/api/v1/employees/${employeeRecord.id}`)
-        .set('Authorization', `Bearer ${employer.token}`)
+        .set('Cookie', employer.cookie)
         .send({ fullName: 'Updated Name' });
 
       expect(res.status).toBe(200);
@@ -211,7 +211,7 @@ describe('Employees Routes', () => {
     it('employee tries to patch → 403', async () => {
       const res = await request
         .patch(`/api/v1/employees/${employeeRecord.id}`)
-        .set('Authorization', `Bearer ${employeeToken}`)
+        .set('Cookie', employeeCookie)
         .send({ jobTitle: 'Hacker' });
 
       expect(res.status).toBe(403);
@@ -220,7 +220,7 @@ describe('Employees Routes', () => {
     it('patch nonexistent employee → 404', async () => {
       const res = await request
         .patch('/api/v1/employees/00000000-0000-0000-0000-000000000000')
-        .set('Authorization', `Bearer ${employer.token}`)
+        .set('Cookie', employer.cookie)
         .send({ jobTitle: 'Ghost' });
 
       expect(res.status).toBe(404);
@@ -235,13 +235,13 @@ describe('Employees Routes', () => {
     it('employer deletes employee → 204 no content', async () => {
       // Create a disposable employee to delete
       const disposable = await createTestEmployee(
-        employer.token,
+        employer.cookie,
         `del-${Date.now()}`
       );
 
       const res = await request
         .delete(`/api/v1/employees/${disposable.id}`)
-        .set('Authorization', `Bearer ${employer.token}`);
+        .set('Cookie', employer.cookie);
 
       expect(res.status).toBe(204);
       expect(res.text).toBe('');
@@ -249,16 +249,16 @@ describe('Employees Routes', () => {
 
     it('deleted employee no longer retrievable → 404', async () => {
       const disposable = await createTestEmployee(
-        employer.token,
+        employer.cookie,
         `del2-${Date.now()}`
       );
       await request
         .delete(`/api/v1/employees/${disposable.id}`)
-        .set('Authorization', `Bearer ${employer.token}`);
+        .set('Cookie', employer.cookie);
 
       const res = await request
         .get(`/api/v1/employees/${disposable.id}`)
-        .set('Authorization', `Bearer ${employer.token}`);
+        .set('Cookie', employer.cookie);
 
       expect(res.status).toBe(404);
     });
@@ -266,7 +266,7 @@ describe('Employees Routes', () => {
     it('employee tries to delete → 403', async () => {
       const res = await request
         .delete(`/api/v1/employees/${employeeRecord.id}`)
-        .set('Authorization', `Bearer ${employeeToken}`);
+        .set('Cookie', employeeCookie);
 
       expect(res.status).toBe(403);
     });
@@ -274,7 +274,7 @@ describe('Employees Routes', () => {
     it('delete nonexistent employee → 404', async () => {
       const res = await request
         .delete('/api/v1/employees/00000000-0000-0000-0000-000000000000')
-        .set('Authorization', `Bearer ${employer.token}`);
+        .set('Cookie', employer.cookie);
 
       expect(res.status).toBe(404);
       expect(res.body).toEqual({ error: 'Employee not found' });

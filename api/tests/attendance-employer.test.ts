@@ -11,13 +11,13 @@ import {
 describe('Attendance — Employer Manual Operations', () => {
   let employer: TestEmployer;
   let empRecord: TestEmployee;
-  let employeeToken: string;
+  let employeeCookie: string[];
 
   beforeAll(async () => {
     const ts = Date.now();
     employer    = await createTestEmployer(`att-emp-${ts}`);
-    empRecord   = await createTestEmployee(employer.token, `att-emp-emp-${ts}`);
-    employeeToken = await loginAsEmployee(empRecord.email);
+    empRecord   = await createTestEmployee(employer.cookie, `att-emp-emp-${ts}`);
+    employeeCookie = await loginAsEmployee(empRecord.email);
   }, 30_000);
 
   afterAll(async () => {
@@ -27,7 +27,7 @@ describe('Attendance — Employer Manual Operations', () => {
   it('employer can POST a manual attendance record', async () => {
     const res = await request
       .post('/api/v1/attendance')
-      .set('Authorization', `Bearer ${employer.token}`)
+      .set('Cookie', employer.cookie)
       .send({
         employeeId: empRecord.id,
         date:       '2025-03-15',
@@ -43,12 +43,12 @@ describe('Attendance — Employer Manual Operations', () => {
   it('employer POST is idempotent (upsert on same date)', async () => {
     await request
       .post('/api/v1/attendance')
-      .set('Authorization', `Bearer ${employer.token}`)
+      .set('Cookie', employer.cookie)
       .send({ employeeId: empRecord.id, date: '2025-03-20', status: 'present' });
 
     const res = await request
       .post('/api/v1/attendance')
-      .set('Authorization', `Bearer ${employer.token}`)
+      .set('Cookie', employer.cookie)
       .send({ employeeId: empRecord.id, date: '2025-03-20', status: 'absent' });
 
     expect(res.status).toBe(201);
@@ -58,7 +58,7 @@ describe('Attendance — Employer Manual Operations', () => {
   it('employee cannot POST a manual attendance record → 403', async () => {
     const res = await request
       .post('/api/v1/attendance')
-      .set('Authorization', `Bearer ${employeeToken}`)
+      .set('Cookie', employeeCookie)
       .send({ employeeId: empRecord.id, date: '2025-03-16', status: 'present' });
 
     expect(res.status).toBe(403);
@@ -67,7 +67,7 @@ describe('Attendance — Employer Manual Operations', () => {
   it('POST with invalid status → 400', async () => {
     const res = await request
       .post('/api/v1/attendance')
-      .set('Authorization', `Bearer ${employer.token}`)
+      .set('Cookie', employer.cookie)
       .send({ employeeId: empRecord.id, date: '2025-03-17', status: 'invalid_status' });
 
     expect(res.status).toBe(400);
@@ -76,7 +76,7 @@ describe('Attendance — Employer Manual Operations', () => {
   it('employer can PATCH an existing attendance record status', async () => {
     const createRes = await request
       .post('/api/v1/attendance')
-      .set('Authorization', `Bearer ${employer.token}`)
+      .set('Cookie', employer.cookie)
       .send({ employeeId: empRecord.id, date: '2025-04-01', status: 'present' });
 
     expect(createRes.status).toBe(201);
@@ -84,7 +84,7 @@ describe('Attendance — Employer Manual Operations', () => {
 
     const patchRes = await request
       .patch(`/api/v1/attendance/${recordId}`)
-      .set('Authorization', `Bearer ${employer.token}`)
+      .set('Cookie', employer.cookie)
       .send({ status: 'late', notes: 'Updated note' });
 
     expect(patchRes.status).toBe(200);
@@ -95,7 +95,7 @@ describe('Attendance — Employer Manual Operations', () => {
   it('PATCH unknown attendance record → 404', async () => {
     const res = await request
       .patch('/api/v1/attendance/00000000-0000-0000-0000-000000000000')
-      .set('Authorization', `Bearer ${employer.token}`)
+      .set('Cookie', employer.cookie)
       .send({ status: 'absent' });
 
     expect(res.status).toBe(404);
@@ -104,14 +104,14 @@ describe('Attendance — Employer Manual Operations', () => {
   it('employee cannot PATCH attendance records → 403', async () => {
     const createRes = await request
       .post('/api/v1/attendance')
-      .set('Authorization', `Bearer ${employer.token}`)
+      .set('Cookie', employer.cookie)
       .send({ employeeId: empRecord.id, date: '2025-04-05', status: 'present' });
 
     const recordId = createRes.body.id;
 
     const res = await request
       .patch(`/api/v1/attendance/${recordId}`)
-      .set('Authorization', `Bearer ${employeeToken}`)
+      .set('Cookie', employeeCookie)
       .send({ status: 'absent' });
 
     expect(res.status).toBe(403);

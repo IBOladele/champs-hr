@@ -74,6 +74,7 @@ const authLimiter = rateLimit({
   legacyHeaders: false,
   message: { error: 'Too many requests — please try again in 15 minutes' },
   skipSuccessfulRequests: false,
+  skip: () => process.env.NODE_ENV === 'test',
 });
 
 // General API: 300 req / 15 min per IP

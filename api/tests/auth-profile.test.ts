@@ -9,13 +9,13 @@ import {
 
 describe('Auth — Profile Update (PATCH /me)', () => {
   let employer: TestEmployer;
-  let employeeToken: string;
+  let employeeCookie: string[];
 
   beforeAll(async () => {
     const ts = Date.now();
     employer = await createTestEmployer(`auth-profile-${ts}`);
-    const emp = await createTestEmployee(employer.token, `auth-profile-emp-${ts}`);
-    employeeToken = await loginAsEmployee(emp.email);
+    const emp = await createTestEmployee(employer.cookie, `auth-profile-emp-${ts}`);
+    employeeCookie = await loginAsEmployee(emp.email);
   }, 30_000);
 
   afterAll(async () => {
@@ -25,7 +25,7 @@ describe('Auth — Profile Update (PATCH /me)', () => {
   it('employer can update their own full name', async () => {
     const res = await request
       .patch('/api/v1/auth/me')
-      .set('Authorization', `Bearer ${employer.token}`)
+      .set('Cookie', employer.cookie)
       .send({ fullName: 'Updated Employer Name' });
 
     expect(res.status).toBe(200);
@@ -35,7 +35,7 @@ describe('Auth — Profile Update (PATCH /me)', () => {
   it('employer can add a phone number', async () => {
     const res = await request
       .patch('/api/v1/auth/me')
-      .set('Authorization', `Bearer ${employer.token}`)
+      .set('Cookie', employer.cookie)
       .send({ phone: '+1-555-000-1234' });
 
     expect(res.status).toBe(200);
@@ -45,7 +45,7 @@ describe('Auth — Profile Update (PATCH /me)', () => {
   it('employee can update their own profile', async () => {
     const res = await request
       .patch('/api/v1/auth/me')
-      .set('Authorization', `Bearer ${employeeToken}`)
+      .set('Cookie', employeeCookie)
       .send({ fullName: 'Updated Employee Name' });
 
     expect(res.status).toBe(200);
@@ -55,7 +55,7 @@ describe('Auth — Profile Update (PATCH /me)', () => {
   it('PATCH /me with no fields → 400', async () => {
     const res = await request
       .patch('/api/v1/auth/me')
-      .set('Authorization', `Bearer ${employer.token}`)
+      .set('Cookie', employer.cookie)
       .send({});
 
     expect(res.status).toBe(400);
@@ -73,13 +73,13 @@ describe('Auth — Profile Update (PATCH /me)', () => {
     // Set phone first
     await request
       .patch('/api/v1/auth/me')
-      .set('Authorization', `Bearer ${employer.token}`)
+      .set('Cookie', employer.cookie)
       .send({ phone: '+44-20-7946-0958' });
 
     // Clear it
     const res = await request
       .patch('/api/v1/auth/me')
-      .set('Authorization', `Bearer ${employer.token}`)
+      .set('Cookie', employer.cookie)
       .send({ phone: null });
 
     expect(res.status).toBe(200);

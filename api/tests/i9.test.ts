@@ -11,17 +11,17 @@ import {
 describe('I-9 Routes', () => {
   let employer: TestEmployer;
   let empRecord: TestEmployee;
-  let empToken: string;
+  let empCookie: string[];
   let empRecord2: TestEmployee;
-  let empToken2: string;
+  let empCookie2: string[];
 
   beforeAll(async () => {
     const ts = Date.now();
     employer   = await createTestEmployer(`i9-${ts}`);
-    empRecord  = await createTestEmployee(employer.token, `i9-emp-${ts}`);
-    empRecord2 = await createTestEmployee(employer.token, `i9-emp2-${ts}`);
-    empToken   = await loginAsEmployee(empRecord.email);
-    empToken2  = await loginAsEmployee(empRecord2.email);
+    empRecord  = await createTestEmployee(employer.cookie, `i9-emp-${ts}`);
+    empRecord2 = await createTestEmployee(employer.cookie, `i9-emp2-${ts}`);
+    empCookie   = await loginAsEmployee(empRecord.email);
+    empCookie2  = await loginAsEmployee(empRecord2.email);
   }, 30_000);
 
   afterAll(async () => {
@@ -31,14 +31,14 @@ describe('I-9 Routes', () => {
   it('GET /employees/:id/i9 returns 404 before anything is filed', async () => {
     const res = await request
       .get(`/api/v1/employees/${empRecord.id}/i9`)
-      .set('Authorization', `Bearer ${employer.token}`);
+      .set('Cookie', employer.cookie);
     expect(res.status).toBe(404);
   });
 
   it('employee submits Section 1 → status remains pending', async () => {
     const res = await request
       .put(`/api/v1/employees/${empRecord.id}/i9/section1`)
-      .set('Authorization', `Bearer ${empToken}`)
+      .set('Cookie', empCookie)
       .send({ citizenshipStatus: 'us_citizen' });
 
     expect(res.status).toBe(200);
@@ -50,7 +50,7 @@ describe('I-9 Routes', () => {
   it('GET /employees/:id/i9 shows pending after Section 1', async () => {
     const res = await request
       .get(`/api/v1/employees/${empRecord.id}/i9`)
-      .set('Authorization', `Bearer ${employer.token}`);
+      .set('Cookie', employer.cookie);
 
     expect(res.status).toBe(200);
     expect(res.body.status).toBe('pending');
@@ -60,7 +60,7 @@ describe('I-9 Routes', () => {
   it('employee cannot complete Section 2 → 403', async () => {
     const res = await request
       .put(`/api/v1/employees/${empRecord.id}/i9/section2`)
-      .set('Authorization', `Bearer ${empToken}`)
+      .set('Cookie', empCookie)
       .send({
         docListUsed: 'list_a',
         docTitle: 'US Passport',
@@ -74,7 +74,7 @@ describe('I-9 Routes', () => {
   it('employer completes Section 2 → status becomes completed', async () => {
     const res = await request
       .put(`/api/v1/employees/${empRecord.id}/i9/section2`)
-      .set('Authorization', `Bearer ${employer.token}`)
+      .set('Cookie', employer.cookie)
       .send({
         docListUsed: 'list_a',
         docTitle: 'US Passport',
@@ -92,7 +92,7 @@ describe('I-9 Routes', () => {
   it('GET after Section 2 shows completed', async () => {
     const res = await request
       .get(`/api/v1/employees/${empRecord.id}/i9`)
-      .set('Authorization', `Bearer ${employer.token}`);
+      .set('Cookie', employer.cookie);
     expect(res.status).toBe(200);
     expect(res.body.status).toBe('completed');
   });
@@ -100,7 +100,7 @@ describe('I-9 Routes', () => {
   it('Section 2 without Section 1 first → 404', async () => {
     const res = await request
       .put(`/api/v1/employees/${empRecord2.id}/i9/section2`)
-      .set('Authorization', `Bearer ${employer.token}`)
+      .set('Cookie', employer.cookie)
       .send({
         docListUsed: 'list_b_c',
         docTitle: "Driver's License + Social Security Card",
@@ -113,7 +113,7 @@ describe('I-9 Routes', () => {
   it('alien_authorized citizenship includes authorized_through date', async () => {
     const res = await request
       .put(`/api/v1/employees/${empRecord2.id}/i9/section1`)
-      .set('Authorization', `Bearer ${empToken2}`)
+      .set('Cookie', empCookie2)
       .send({
         citizenshipStatus: 'alien_authorized',
         alienRegNumber: 'A123456789',
@@ -128,7 +128,7 @@ describe('I-9 Routes', () => {
   it('employee cannot read another employee I-9 (employer-only route) → 403', async () => {
     const res = await request
       .get(`/api/v1/employees/${empRecord.id}/i9`)
-      .set('Authorization', `Bearer ${empToken}`);
+      .set('Cookie', empCookie);
     expect(res.status).toBe(403);
   });
 });

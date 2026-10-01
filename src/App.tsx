@@ -1,6 +1,15 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import RequireAuth from './components/RequireAuth'
+
+// Marketing
+import LandingPage from './pages/LandingPage'
+import Pricing from './pages/marketing/Pricing'
+import Security from './pages/marketing/Security'
+import Switch from './pages/marketing/Switch'
+import CompareGusto from './pages/marketing/CompareGusto'
+import CompareADP from './pages/marketing/CompareADP'
+import CompareRippling from './pages/marketing/CompareRippling'
 
 // Auth
 import RoleSelect from './pages/auth/RoleSelect'
@@ -50,8 +59,16 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <Routes>
+          {/* Marketing pages — public, no auth */}
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/pricing" element={<Pricing />} />
+          <Route path="/security" element={<Security />} />
+          <Route path="/switch" element={<Switch />} />
+          <Route path="/compare/gusto" element={<CompareGusto />} />
+          <Route path="/compare/adp" element={<CompareADP />} />
+          <Route path="/compare/rippling" element={<CompareRippling />} />
+
           {/* Public auth flow */}
-          <Route path="/" element={<Navigate to="/get-started" replace />} />
           <Route path="/get-started" element={<RoleSelect />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />

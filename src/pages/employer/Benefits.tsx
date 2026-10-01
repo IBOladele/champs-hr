@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Search, ChevronDown } from 'lucide-react'
+import { usePageTitle } from '../../hooks/usePageTitle'
 
 type SubTab = 'Benefit plans' | 'Benefit sync' | 'Benefit requests'
 type BenefitStatus = 'Active' | 'Inactive' | 'Disable'
@@ -45,6 +46,8 @@ function StatusPill({ status }: { status: BenefitStatus }) {
 }
 
 export default function Benefits() {
+  usePageTitle('Benefits')
+
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<SubTab>('Benefit plans')
   const [search, setSearch] = useState('')

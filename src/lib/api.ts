@@ -26,9 +26,10 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   })
 
   if (res.status === 401) {
-    // Session expired or cookie missing — clear cached user and throw
+    const body401 = await res.json().catch(() => null)
     clearUser()
-    throw new ApiError(401, 'Session expired. Please log in again.')
+    const msg = typeof body401?.error === 'string' ? body401.error : 'Session expired. Please log in again.'
+    throw new ApiError(401, msg)
   }
 
   if (res.status === 204) return undefined as unknown as T
@@ -75,6 +76,7 @@ export interface AuthUser {
   phone?: string | null
   avatarUrl?: string | null
   emailVerified: boolean
+  createdAt?: string
 }
 
 export interface Employee {

@@ -71,7 +71,7 @@ export async function cleanupTestData(tenantId: string): Promise<void> {
 }
 
 export interface TestEmployer {
-  token: string;
+  cookie: string[];
   user: {
     id: string;
     email: string;
@@ -83,7 +83,7 @@ export interface TestEmployer {
 }
 
 /**
- * Sign up a unique employer and return their token, user object, and tenantId.
+ * Sign up a unique employer and return their session cookie, user object, and tenantId.
  */
 export async function createTestEmployer(
   suffix?: string
@@ -106,7 +106,7 @@ export async function createTestEmployer(
   }
 
   return {
-    token: res.body.accessToken,
+    cookie: res.headers['set-cookie'] as unknown as string[],
     user: res.body.user,
     tenantId: res.body.user.tenantId,
   };
@@ -131,14 +131,14 @@ export interface TestEmployee {
  * Create a test employee under the given employer's tenant.
  */
 export async function createTestEmployee(
-  employerToken: string,
+  employerCookie: string[],
   suffix?: string
 ): Promise<TestEmployee> {
   const tag = suffix ?? Date.now().toString();
 
   const res = await request
     .post('/api/v1/employees')
-    .set('Authorization', `Bearer ${employerToken}`)
+    .set('Cookie', employerCookie)
     .send({
       email: `employee-${tag}@test-champs.com`,
       fullName: 'Test Employee',
@@ -160,9 +160,9 @@ export async function createTestEmployee(
 }
 
 /**
- * Log in with employee credentials and return their token.
+ * Log in with employee credentials and return their session cookie.
  */
-export async function loginAsEmployee(email: string): Promise<string> {
+export async function loginAsEmployee(email: string): Promise<string[]> {
   const res = await request.post('/api/v1/auth/login').send({
     email,
     password: 'Welcome123!', // default password set by employees route
@@ -174,7 +174,7 @@ export async function loginAsEmployee(email: string): Promise<string> {
     );
   }
 
-  return res.body.accessToken as string;
+  return res.headers['set-cookie'] as unknown as string[];
 }
 
 // Pool is closed by --forceExit; don't call pool.end() here because

@@ -11,17 +11,17 @@ import {
 describe('W-2 Routes', () => {
   let employer: TestEmployer;
   let empRecord: TestEmployee;
-  let empToken: string;
+  let empCookie: string[];
   let empRecord2: TestEmployee;
-  let empToken2: string;
+  let empCookie2: string[];
 
   beforeAll(async () => {
     const ts = Date.now();
     employer   = await createTestEmployer(`w2-${ts}`);
-    empRecord  = await createTestEmployee(employer.token,  `w2-emp-${ts}`);
-    empRecord2 = await createTestEmployee(employer.token,  `w2-emp2-${ts}`);
-    empToken   = await loginAsEmployee(empRecord.email);
-    empToken2  = await loginAsEmployee(empRecord2.email);
+    empRecord  = await createTestEmployee(employer.cookie,  `w2-emp-${ts}`);
+    empRecord2 = await createTestEmployee(employer.cookie,  `w2-emp2-${ts}`);
+    empCookie   = await loginAsEmployee(empRecord.email);
+    empCookie2  = await loginAsEmployee(empRecord2.email);
 
     // Create and approve two payroll runs in 2025
     for (const period of [
@@ -30,17 +30,17 @@ describe('W-2 Routes', () => {
     ]) {
       const run = await request
         .post('/api/v1/payroll')
-        .set('Authorization', `Bearer ${employer.token}`)
+        .set('Cookie', employer.cookie)
         .send(period);
       await request
         .patch(`/api/v1/payroll/${run.body.id}/approve`)
-        .set('Authorization', `Bearer ${employer.token}`);
+        .set('Cookie', employer.cookie);
     }
 
     // One draft run (should NOT be included in W-2)
     await request
       .post('/api/v1/payroll')
-      .set('Authorization', `Bearer ${employer.token}`)
+      .set('Cookie', employer.cookie)
       .send({ periodStart: '2025-03-01', periodEnd: '2025-03-31' });
   }, 60_000);
 
@@ -51,7 +51,7 @@ describe('W-2 Routes', () => {
   it('employee gets their own W-2 → 200 with correct boxes', async () => {
     const res = await request
       .get(`/api/v1/employees/${empRecord.id}/w2?year=2025`)
-      .set('Authorization', `Bearer ${empToken}`);
+      .set('Cookie', empCookie);
 
     expect(res.status).toBe(200);
     expect(res.body.taxYear).toBe(2025);
@@ -65,7 +65,7 @@ describe('W-2 Routes', () => {
   it('W-2 box2 + box4 + box6 ≈ total deductions across runs', async () => {
     const res = await request
       .get(`/api/v1/employees/${empRecord.id}/w2?year=2025`)
-      .set('Authorization', `Bearer ${empToken}`);
+      .set('Cookie', empCookie);
 
     expect(res.status).toBe(200);
     const totalWithheld =
@@ -81,28 +81,28 @@ describe('W-2 Routes', () => {
   it('employer can get any employee W-2', async () => {
     const res = await request
       .get(`/api/v1/employees/${empRecord.id}/w2?year=2025`)
-      .set('Authorization', `Bearer ${employer.token}`);
+      .set('Cookie', employer.cookie);
     expect(res.status).toBe(200);
   });
 
   it('employee cannot read another employee W-2 → 403', async () => {
     const res = await request
       .get(`/api/v1/employees/${empRecord.id}/w2?year=2025`)
-      .set('Authorization', `Bearer ${empToken2}`);
+      .set('Cookie', empCookie2);
     expect(res.status).toBe(403);
   });
 
   it('missing year param → 400', async () => {
     const res = await request
       .get(`/api/v1/employees/${empRecord.id}/w2`)
-      .set('Authorization', `Bearer ${empToken}`);
+      .set('Cookie', empCookie);
     expect(res.status).toBe(400);
   });
 
   it('year with no completed payroll → 404', async () => {
     const res = await request
       .get(`/api/v1/employees/${empRecord.id}/w2?year=2020`)
-      .set('Authorization', `Bearer ${empToken}`);
+      .set('Cookie', empCookie);
     expect(res.status).toBe(404);
   });
 });

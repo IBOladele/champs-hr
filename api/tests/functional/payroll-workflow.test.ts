@@ -19,23 +19,23 @@ describe('Payroll Workflow (functional)', () => {
   beforeAll(async () => {
     employer = await createTestEmployer(`functional-payroll-${Date.now()}`);
 
-    emp1 = await createTestEmployee(employer.token, `pw-e1-${Date.now()}`);
+    emp1 = await createTestEmployee(employer.cookie, `pw-e1-${Date.now()}`);
     // PATCH gross_salary to desired value
     await request
       .patch(`/api/v1/employees/${emp1.id}`)
-      .set('Authorization', `Bearer ${employer.token}`)
+      .set('Cookie', employer.cookie)
       .send({ grossSalary: salaries[0] });
 
-    emp2 = await createTestEmployee(employer.token, `pw-e2-${Date.now()}`);
+    emp2 = await createTestEmployee(employer.cookie, `pw-e2-${Date.now()}`);
     await request
       .patch(`/api/v1/employees/${emp2.id}`)
-      .set('Authorization', `Bearer ${employer.token}`)
+      .set('Cookie', employer.cookie)
       .send({ grossSalary: salaries[1] });
 
-    emp3 = await createTestEmployee(employer.token, `pw-e3-${Date.now()}`);
+    emp3 = await createTestEmployee(employer.cookie, `pw-e3-${Date.now()}`);
     await request
       .patch(`/api/v1/employees/${emp3.id}`)
-      .set('Authorization', `Bearer ${employer.token}`)
+      .set('Cookie', employer.cookie)
       .send({ grossSalary: salaries[2] });
   });
 
@@ -49,7 +49,7 @@ describe('Payroll Workflow (functional)', () => {
   it('POST /payroll creates a run and auto-generates items for all 3 employees', async () => {
     const res = await request
       .post('/api/v1/payroll')
-      .set('Authorization', `Bearer ${employer.token}`)
+      .set('Cookie', employer.cookie)
       .send({ periodStart: '2025-01-01', periodEnd: '2025-01-31' });
 
     expect(res.status).toBe(201);
@@ -62,7 +62,7 @@ describe('Payroll Workflow (functional)', () => {
   it('GET /payroll/:id returns the run with items for all 3 employees', async () => {
     const res = await request
       .get(`/api/v1/payroll/${payrollRunId}`)
-      .set('Authorization', `Bearer ${employer.token}`);
+      .set('Cookie', employer.cookie);
 
     expect(res.status).toBe(200);
     expect(res.body.id).toBe(payrollRunId);
@@ -73,7 +73,7 @@ describe('Payroll Workflow (functional)', () => {
   it('each payroll item has correct gross_pay, US deductions breakdown, and net_pay', async () => {
     const res = await request
       .get(`/api/v1/payroll/${payrollRunId}`)
-      .set('Authorization', `Bearer ${employer.token}`);
+      .set('Cookie', employer.cookie);
 
     const items: Array<{
       gross_pay: string | number;
@@ -109,7 +109,7 @@ describe('Payroll Workflow (functional)', () => {
   it('run-level totals equal sum of item values', async () => {
     const res = await request
       .get(`/api/v1/payroll/${payrollRunId}`)
-      .set('Authorization', `Bearer ${employer.token}`);
+      .set('Cookie', employer.cookie);
 
     const items: Array<{
       gross_pay: string | number;
@@ -135,7 +135,7 @@ describe('Payroll Workflow (functional)', () => {
   it('PATCH /payroll/:id/approve sets status to completed', async () => {
     const res = await request
       .patch(`/api/v1/payroll/${payrollRunId}/approve`)
-      .set('Authorization', `Bearer ${employer.token}`);
+      .set('Cookie', employer.cookie);
 
     expect(res.status).toBe(200);
     expect(res.body.status).toBe('completed');
@@ -144,7 +144,7 @@ describe('Payroll Workflow (functional)', () => {
   it('GET /payroll/:id after approval shows status=completed', async () => {
     const res = await request
       .get(`/api/v1/payroll/${payrollRunId}`)
-      .set('Authorization', `Bearer ${employer.token}`);
+      .set('Cookie', employer.cookie);
 
     expect(res.status).toBe(200);
     expect(res.body.status).toBe('completed');
@@ -157,11 +157,11 @@ describe('Payroll Workflow (functional)', () => {
       email: emp1.email,
       password: 'Welcome123!',
     });
-    const empToken = loginRes.body.accessToken as string;
+    const empCookie = loginRes.headers['set-cookie'] as unknown as string[];
 
     const res = await request
       .get('/api/v1/payroll')
-      .set('Authorization', `Bearer ${empToken}`);
+      .set('Cookie', empCookie);
 
     expect(res.status).toBe(403);
   });
@@ -169,7 +169,7 @@ describe('Payroll Workflow (functional)', () => {
   it('approving the same run again is idempotent or returns non-500 error', async () => {
     const res = await request
       .patch(`/api/v1/payroll/${payrollRunId}/approve`)
-      .set('Authorization', `Bearer ${employer.token}`);
+      .set('Cookie', employer.cookie);
 
     // Should be idempotent (200 with completed status) or a handled client error (4xx)
     expect(res.status).not.toBe(500);
@@ -181,7 +181,7 @@ describe('Payroll Workflow (functional)', () => {
   it('POST /payroll with periodStart > periodEnd is rejected with 400 (date-order validation)', async () => {
     const res = await request
       .post('/api/v1/payroll')
-      .set('Authorization', `Bearer ${employer.token}`)
+      .set('Cookie', employer.cookie)
       .send({ periodStart: '2025-02-28', periodEnd: '2025-02-01' });
 
     // The API validates date format via regex but currently does NOT enforce period ordering.

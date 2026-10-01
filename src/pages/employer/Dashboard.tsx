@@ -5,6 +5,7 @@ import {
   FolderOpen, ChevronRight, Calendar, Mail
 } from 'lucide-react'
 
+import { usePageTitle } from '../../hooks/usePageTitle'
 // ── To-do card ────────────────────────────────────────────────────────
 
 interface TodoCardProps {
@@ -189,6 +190,8 @@ function ViewAllButton({ label }: { label: string }) {
 // ── Main Dashboard ────────────────────────────────────────────────────
 
 export default function EmployerDashboard() {
+  usePageTitle('Dashboard')
+
   return (
     <div className="max-w-full px-8 py-6 space-y-6">
 

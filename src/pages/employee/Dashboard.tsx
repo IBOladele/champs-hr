@@ -1,4 +1,5 @@
 import { Clock, FileText, CalendarDays, Gift, Settings, ChevronRight, Download, MapPin } from 'lucide-react'
+import { usePageTitle } from '../../hooks/usePageTitle'
 
 function StatusPill({ status }: { status: string }) {
   const cls =
@@ -49,6 +50,8 @@ const attendance = [
 ]
 
 export default function EmployeeDashboard() {
+  usePageTitle('My Dashboard')
+
   return (
     <div className="px-8 py-6">
 

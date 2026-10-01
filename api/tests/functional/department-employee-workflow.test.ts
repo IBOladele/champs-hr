@@ -23,21 +23,21 @@ describe('Department → Employee Workflow (functional)', () => {
     // Create 3 departments
     const engRes = await request
       .post('/api/v1/departments')
-      .set('Authorization', `Bearer ${employer.token}`)
+      .set('Cookie', employer.cookie)
       .send({ name: 'Engineering' });
     expect(engRes.status).toBe(201);
     engDeptId = engRes.body.id;
 
     const designRes = await request
       .post('/api/v1/departments')
-      .set('Authorization', `Bearer ${employer.token}`)
+      .set('Cookie', employer.cookie)
       .send({ name: 'Design' });
     expect(designRes.status).toBe(201);
     designDeptId = designRes.body.id;
 
     const marketingRes = await request
       .post('/api/v1/departments')
-      .set('Authorization', `Bearer ${employer.token}`)
+      .set('Cookie', employer.cookie)
       .send({ name: 'Marketing' });
     expect(marketingRes.status).toBe(201);
     marketingDeptId = marketingRes.body.id;
@@ -52,7 +52,7 @@ describe('Department → Employee Workflow (functional)', () => {
 
     const empEng = await request
       .post('/api/v1/employees')
-      .set('Authorization', `Bearer ${employer.token}`)
+      .set('Cookie', employer.cookie)
       .send({
         email: `eng-${tag}@test-champs.com`,
         fullName: 'Alice Engineer',
@@ -67,7 +67,7 @@ describe('Department → Employee Workflow (functional)', () => {
 
     const empDesign = await request
       .post('/api/v1/employees')
-      .set('Authorization', `Bearer ${employer.token}`)
+      .set('Cookie', employer.cookie)
       .send({
         email: `design-${tag}@test-champs.com`,
         fullName: 'Bob Designer',
@@ -82,7 +82,7 @@ describe('Department → Employee Workflow (functional)', () => {
 
     const empMarketing = await request
       .post('/api/v1/employees')
-      .set('Authorization', `Bearer ${employer.token}`)
+      .set('Cookie', employer.cookie)
       .send({
         email: `mkt-${tag}@test-champs.com`,
         fullName: 'Carol Marketer',
@@ -98,7 +98,7 @@ describe('Department → Employee Workflow (functional)', () => {
   it('GET /employees → each employee shows correct departmentName', async () => {
     const res = await request
       .get('/api/v1/employees')
-      .set('Authorization', `Bearer ${employer.token}`);
+      .set('Cookie', employer.cookie);
 
     expect(res.status).toBe(200);
     const employees = res.body as Array<{
@@ -121,14 +121,14 @@ describe('Department → Employee Workflow (functional)', () => {
   it("employer updates an employee's department → departmentName changes in GET /employees/:id", async () => {
     const patchRes = await request
       .patch(`/api/v1/employees/${empEngId}`)
-      .set('Authorization', `Bearer ${employer.token}`)
+      .set('Cookie', employer.cookie)
       .send({ departmentId: designDeptId });
 
     expect(patchRes.status).toBe(200);
 
     const getRes = await request
       .get(`/api/v1/employees/${empEngId}`)
-      .set('Authorization', `Bearer ${employer.token}`);
+      .set('Cookie', employer.cookie);
 
     expect(getRes.status).toBe(200);
     expect(getRes.body.departmentId).toBe(designDeptId);
@@ -141,14 +141,14 @@ describe('Department → Employee Workflow (functional)', () => {
     const tag = Date.now();
     const emptyDeptRes = await request
       .post('/api/v1/departments')
-      .set('Authorization', `Bearer ${employer.token}`)
+      .set('Cookie', employer.cookie)
       .send({ name: `EmptyDept-${tag}` });
     expect(emptyDeptRes.status).toBe(201);
     const emptyDeptId = emptyDeptRes.body.id;
 
     const deleteRes = await request
       .delete(`/api/v1/departments/${emptyDeptId}`)
-      .set('Authorization', `Bearer ${employer.token}`);
+      .set('Cookie', employer.cookie);
 
     expect(deleteRes.status).toBe(204);
   });
@@ -158,17 +158,17 @@ describe('Department → Employee Workflow (functional)', () => {
     // Create and immediately delete
     const deptRes = await request
       .post('/api/v1/departments')
-      .set('Authorization', `Bearer ${employer.token}`)
+      .set('Cookie', employer.cookie)
       .send({ name: `TempDept-${tag}` });
     const tempId = deptRes.body.id;
 
     await request
       .delete(`/api/v1/departments/${tempId}`)
-      .set('Authorization', `Bearer ${employer.token}`);
+      .set('Cookie', employer.cookie);
 
     const listRes = await request
       .get('/api/v1/departments')
-      .set('Authorization', `Bearer ${employer.token}`);
+      .set('Cookie', employer.cookie);
 
     expect(listRes.status).toBe(200);
     const ids = (listRes.body as Array<{ id: string }>).map((d) => d.id);
@@ -181,7 +181,7 @@ describe('Department → Employee Workflow (functional)', () => {
 
     const res = await request
       .post('/api/v1/employees')
-      .set('Authorization', `Bearer ${employer.token}`)
+      .set('Cookie', employer.cookie)
       .send({
         email: `invalid-dept-${tag}@test-champs.com`,
         fullName: 'Invalid Dept Employee',
@@ -213,7 +213,7 @@ describe('Department → Employee Workflow (functional)', () => {
 
     const res = await request
       .post('/api/v1/employees')
-      .set('Authorization', `Bearer ${employer.token}`)
+      .set('Cookie', employer.cookie)
       .send({
         email: `no-dept-${tag}@test-champs.com`,
         fullName: 'No Dept Employee',

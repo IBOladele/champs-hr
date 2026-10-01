@@ -11,13 +11,13 @@ import {
 describe('Benefits Routes', () => {
   let employer: TestEmployer;
   let employeeRecord: TestEmployee;
-  let employeeToken: string;
+  let employeeCookie: string[];
 
   beforeAll(async () => {
     const ts = Date.now();
     employer = await createTestEmployer(`ben-${ts}`);
-    employeeRecord = await createTestEmployee(employer.token, `ben-emp-${ts}`);
-    employeeToken = await loginAsEmployee(employeeRecord.email);
+    employeeRecord = await createTestEmployee(employer.cookie, `ben-emp-${ts}`);
+    employeeCookie = await loginAsEmployee(employeeRecord.email);
   });
 
   afterAll(async () => {
@@ -31,7 +31,7 @@ describe('Benefits Routes', () => {
     it('employer creates benefit → 201 with full benefit record', async () => {
       const res = await request
         .post('/api/v1/benefits')
-        .set('Authorization', `Bearer ${employer.token}`)
+        .set('Cookie', employer.cookie)
         .send({
           name: 'Private Health Insurance',
           description: 'Comprehensive health cover',
@@ -56,7 +56,7 @@ describe('Benefits Routes', () => {
     it('benefit without description → 201 (description optional)', async () => {
       const res = await request
         .post('/api/v1/benefits')
-        .set('Authorization', `Bearer ${employer.token}`)
+        .set('Cookie', employer.cookie)
         .send({
           name: 'Life Assurance',
           benefitType: 'life',
@@ -72,7 +72,7 @@ describe('Benefits Routes', () => {
     it('currency defaults to GBP when not provided', async () => {
       const res = await request
         .post('/api/v1/benefits')
-        .set('Authorization', `Bearer ${employer.token}`)
+        .set('Cookie', employer.cookie)
         .send({
           name: 'Gym Membership',
           benefitType: 'wellness',
@@ -86,7 +86,7 @@ describe('Benefits Routes', () => {
     it('employee cannot create benefit → 403', async () => {
       const res = await request
         .post('/api/v1/benefits')
-        .set('Authorization', `Bearer ${employeeToken}`)
+        .set('Cookie', employeeCookie)
         .send({
           name: 'Employee Attempt',
           benefitType: 'misc',
@@ -100,7 +100,7 @@ describe('Benefits Routes', () => {
     it('missing required fields → 400', async () => {
       const res = await request
         .post('/api/v1/benefits')
-        .set('Authorization', `Bearer ${employer.token}`)
+        .set('Cookie', employer.cookie)
         .send({
           name: 'Incomplete Benefit',
           // missing benefitType, value
@@ -128,7 +128,7 @@ describe('Benefits Routes', () => {
     beforeAll(async () => {
       await request
         .post('/api/v1/benefits')
-        .set('Authorization', `Bearer ${employer.token}`)
+        .set('Cookie', employer.cookie)
         .send({
           name: 'Dental Plan',
           benefitType: 'dental',
@@ -140,7 +140,7 @@ describe('Benefits Routes', () => {
     it('employer can list benefits → 200 with array', async () => {
       const res = await request
         .get('/api/v1/benefits')
-        .set('Authorization', `Bearer ${employer.token}`);
+        .set('Cookie', employer.cookie);
 
       expect(res.status).toBe(200);
       expect(Array.isArray(res.body)).toBe(true);
@@ -150,7 +150,7 @@ describe('Benefits Routes', () => {
     it('employee can list benefits → 200', async () => {
       const res = await request
         .get('/api/v1/benefits')
-        .set('Authorization', `Bearer ${employeeToken}`);
+        .set('Cookie', employeeCookie);
 
       expect(res.status).toBe(200);
       expect(Array.isArray(res.body)).toBe(true);
@@ -159,7 +159,7 @@ describe('Benefits Routes', () => {
     it('benefits are sorted by name ASC', async () => {
       const res = await request
         .get('/api/v1/benefits')
-        .set('Authorization', `Bearer ${employer.token}`);
+        .set('Cookie', employer.cookie);
 
       const names = (res.body as Array<{ name: string }>).map((b) => b.name);
       const sorted = [...names].sort();
@@ -169,7 +169,7 @@ describe('Benefits Routes', () => {
     it('each benefit has expected fields', async () => {
       const res = await request
         .get('/api/v1/benefits')
-        .set('Authorization', `Bearer ${employer.token}`);
+        .set('Cookie', employer.cookie);
 
       const benefit = res.body[0];
       expect(benefit).toHaveProperty('id');
@@ -197,7 +197,7 @@ describe('Benefits Routes', () => {
     beforeAll(async () => {
       const res = await request
         .post('/api/v1/benefits')
-        .set('Authorization', `Bearer ${employer.token}`)
+        .set('Cookie', employer.cookie)
         .send({
           name: 'Pension Scheme',
           benefitType: 'pension',
@@ -210,7 +210,7 @@ describe('Benefits Routes', () => {
     it('employer enrols employee in benefit → 201 with enrolment record', async () => {
       const res = await request
         .post(`/api/v1/benefits/${benefitId}/enrol`)
-        .set('Authorization', `Bearer ${employer.token}`)
+        .set('Cookie', employer.cookie)
         .send({ employeeId: employeeRecord.id });
 
       expect(res.status).toBe(201);
@@ -223,7 +223,7 @@ describe('Benefits Routes', () => {
     it('re-enrolment (idempotent upsert) → 201 with active status', async () => {
       const res = await request
         .post(`/api/v1/benefits/${benefitId}/enrol`)
-        .set('Authorization', `Bearer ${employer.token}`)
+        .set('Cookie', employer.cookie)
         .send({ employeeId: employeeRecord.id });
 
       expect(res.status).toBe(201);
@@ -233,7 +233,7 @@ describe('Benefits Routes', () => {
     it('enrol with nonexistent employee → 404', async () => {
       const res = await request
         .post(`/api/v1/benefits/${benefitId}/enrol`)
-        .set('Authorization', `Bearer ${employer.token}`)
+        .set('Cookie', employer.cookie)
         .send({ employeeId: '00000000-0000-0000-0000-000000000000' });
 
       expect(res.status).toBe(404);
@@ -243,7 +243,7 @@ describe('Benefits Routes', () => {
     it('enrol with nonexistent benefit → 404', async () => {
       const res = await request
         .post('/api/v1/benefits/00000000-0000-0000-0000-000000000000/enrol')
-        .set('Authorization', `Bearer ${employer.token}`)
+        .set('Cookie', employer.cookie)
         .send({ employeeId: employeeRecord.id });
 
       expect(res.status).toBe(404);
@@ -253,7 +253,7 @@ describe('Benefits Routes', () => {
     it('employee cannot enrol → 403', async () => {
       const res = await request
         .post(`/api/v1/benefits/${benefitId}/enrol`)
-        .set('Authorization', `Bearer ${employeeToken}`)
+        .set('Cookie', employeeCookie)
         .send({ employeeId: employeeRecord.id });
 
       expect(res.status).toBe(403);
@@ -263,7 +263,7 @@ describe('Benefits Routes', () => {
     it('missing employeeId → 400', async () => {
       const res = await request
         .post(`/api/v1/benefits/${benefitId}/enrol`)
-        .set('Authorization', `Bearer ${employer.token}`)
+        .set('Cookie', employer.cookie)
         .send({});
 
       expect(res.status).toBe(400);
@@ -273,7 +273,7 @@ describe('Benefits Routes', () => {
     it('non-UUID employeeId → 400', async () => {
       const res = await request
         .post(`/api/v1/benefits/${benefitId}/enrol`)
-        .set('Authorization', `Bearer ${employer.token}`)
+        .set('Cookie', employer.cookie)
         .send({ employeeId: 'not-a-uuid' });
 
       expect(res.status).toBe(400);

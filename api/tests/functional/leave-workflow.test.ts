@@ -12,18 +12,18 @@ describe('Leave Workflow (functional)', () => {
   let employer: TestEmployer;
   let empA: TestEmployee;
   let empB: TestEmployee;
-  let empAToken: string;
-  let empBToken: string;
+  let empACookie: string[];
+  let empBCookie: string[];
 
   beforeAll(async () => {
     const suffix = `lw-${Date.now()}`;
     employer = await createTestEmployer(`functional-leave-${suffix}`);
 
-    empA = await createTestEmployee(employer.token, `lw-a-${suffix}`);
-    empB = await createTestEmployee(employer.token, `lw-b-${suffix}`);
+    empA = await createTestEmployee(employer.cookie, `lw-a-${suffix}`);
+    empB = await createTestEmployee(employer.cookie, `lw-b-${suffix}`);
 
-    empAToken = await loginAsEmployee(empA.email);
-    empBToken = await loginAsEmployee(empB.email);
+    empACookie = await loginAsEmployee(empA.email);
+    empBCookie = await loginAsEmployee(empB.email);
   });
 
   afterAll(async () => {
@@ -36,7 +36,7 @@ describe('Leave Workflow (functional)', () => {
   it('employee submits leave request → status is pending', async () => {
     const res = await request
       .post('/api/v1/leave')
-      .set('Authorization', `Bearer ${empAToken}`)
+      .set('Cookie', empACookie)
       .send({
         leaveType: 'annual',
         startDate: '2025-03-10',
@@ -53,7 +53,7 @@ describe('Leave Workflow (functional)', () => {
   it('employer sees the pending leave request in GET /leave list', async () => {
     const res = await request
       .get('/api/v1/leave')
-      .set('Authorization', `Bearer ${employer.token}`);
+      .set('Cookie', employer.cookie);
 
     expect(res.status).toBe(200);
     const ids = (res.body as Array<{ id: string }>).map((r) => r.id);
@@ -63,7 +63,7 @@ describe('Leave Workflow (functional)', () => {
   it("a second employee CANNOT see the first employee's leave request", async () => {
     const res = await request
       .get('/api/v1/leave')
-      .set('Authorization', `Bearer ${empBToken}`);
+      .set('Cookie', empBCookie);
 
     expect(res.status).toBe(200);
     const ids = (res.body as Array<{ id: string }>).map((r) => r.id);
@@ -73,7 +73,7 @@ describe('Leave Workflow (functional)', () => {
   it('employer approves the leave → status becomes approved, reviewed_at and reviewed_by are set', async () => {
     const res = await request
       .patch(`/api/v1/leave/${leaveIdA}/approve`)
-      .set('Authorization', `Bearer ${employer.token}`);
+      .set('Cookie', employer.cookie);
 
     expect(res.status).toBe(200);
     expect(res.body.status).toBe('approved');
@@ -84,7 +84,7 @@ describe('Leave Workflow (functional)', () => {
   it('employer approves the same leave again → idempotent or client error, not 500', async () => {
     const res = await request
       .patch(`/api/v1/leave/${leaveIdA}/approve`)
-      .set('Authorization', `Bearer ${employer.token}`);
+      .set('Cookie', employer.cookie);
 
     expect(res.status).not.toBe(500);
     // Either idempotent 200 with approved status, or 400/409
@@ -97,7 +97,7 @@ describe('Leave Workflow (functional)', () => {
     // Employee B submits a leave request first
     const submitRes = await request
       .post('/api/v1/leave')
-      .set('Authorization', `Bearer ${empBToken}`)
+      .set('Cookie', empBCookie)
       .send({
         leaveType: 'sick',
         startDate: '2025-04-01',
@@ -110,7 +110,7 @@ describe('Leave Workflow (functional)', () => {
 
     const res = await request
       .patch(`/api/v1/leave/${leaveIdB}/reject`)
-      .set('Authorization', `Bearer ${employer.token}`);
+      .set('Cookie', employer.cookie);
 
     expect(res.status).toBe(200);
     expect(res.body.status).toBe('rejected');
@@ -121,7 +121,7 @@ describe('Leave Workflow (functional)', () => {
     // Employee A submits another leave
     const submitRes = await request
       .post('/api/v1/leave')
-      .set('Authorization', `Bearer ${empAToken}`)
+      .set('Cookie', empACookie)
       .send({
         leaveType: 'other',
         startDate: '2025-05-01',
@@ -133,7 +133,7 @@ describe('Leave Workflow (functional)', () => {
 
     const res = await request
       .patch(`/api/v1/leave/${newLeaveId}/approve`)
-      .set('Authorization', `Bearer ${empAToken}`);
+      .set('Cookie', empACookie);
 
     expect(res.status).toBe(403);
   });
@@ -142,7 +142,7 @@ describe('Leave Workflow (functional)', () => {
     // Employee A tries to reject Employee B's leave
     const res = await request
       .patch(`/api/v1/leave/${leaveIdB}/reject`)
-      .set('Authorization', `Bearer ${empAToken}`);
+      .set('Cookie', empACookie);
 
     expect(res.status).toBe(403);
   });
@@ -151,7 +151,7 @@ describe('Leave Workflow (functional)', () => {
     const fakeId = '00000000-0000-0000-0000-000000000000';
     const res = await request
       .patch(`/api/v1/leave/${fakeId}/approve`)
-      .set('Authorization', `Bearer ${employer.token}`);
+      .set('Cookie', employer.cookie);
 
     expect(res.status).toBe(404);
   });
@@ -166,7 +166,7 @@ describe('Leave Workflow (functional)', () => {
     for (const payload of leaveTypes) {
       const res = await request
         .post('/api/v1/leave')
-        .set('Authorization', `Bearer ${empAToken}`)
+        .set('Cookie', empACookie)
         .send(payload);
 
       expect(res.status).toBe(201);

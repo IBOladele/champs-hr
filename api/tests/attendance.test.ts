@@ -11,13 +11,13 @@ import {
 describe('Attendance Routes', () => {
   let employer: TestEmployer;
   let employeeRecord: TestEmployee;
-  let employeeToken: string;
+  let employeeCookie: string[];
 
   beforeAll(async () => {
     const ts = Date.now();
     employer = await createTestEmployer(`att-${ts}`);
-    employeeRecord = await createTestEmployee(employer.token, `att-emp-${ts}`);
-    employeeToken = await loginAsEmployee(employeeRecord.email);
+    employeeRecord = await createTestEmployee(employer.cookie, `att-emp-${ts}`);
+    employeeCookie = await loginAsEmployee(employeeRecord.email);
   });
 
   afterAll(async () => {
@@ -31,7 +31,7 @@ describe('Attendance Routes', () => {
     it('employee clocks in → 200, record has clock_in set and status=present', async () => {
       const res = await request
         .post('/api/v1/attendance/clock-in')
-        .set('Authorization', `Bearer ${employeeToken}`);
+        .set('Cookie', employeeCookie);
 
       expect(res.status).toBe(200);
       expect(res.body).toHaveProperty('id');
@@ -45,10 +45,10 @@ describe('Attendance Routes', () => {
       // Clock in twice — should still be 200 (ON CONFLICT DO UPDATE)
       const res1 = await request
         .post('/api/v1/attendance/clock-in')
-        .set('Authorization', `Bearer ${employeeToken}`);
+        .set('Cookie', employeeCookie);
       const res2 = await request
         .post('/api/v1/attendance/clock-in')
-        .set('Authorization', `Bearer ${employeeToken}`);
+        .set('Cookie', employeeCookie);
 
       // Both should succeed — second is an upsert
       expect(res1.status).toBe(200);
@@ -72,11 +72,11 @@ describe('Attendance Routes', () => {
       // Ensure clocked in first
       await request
         .post('/api/v1/attendance/clock-in')
-        .set('Authorization', `Bearer ${employeeToken}`);
+        .set('Cookie', employeeCookie);
 
       const res = await request
         .post('/api/v1/attendance/clock-out')
-        .set('Authorization', `Bearer ${employeeToken}`);
+        .set('Cookie', employeeCookie);
 
       expect(res.status).toBe(200);
       expect(res.body).toHaveProperty('clock_out');
@@ -94,30 +94,30 @@ describe('Attendance Routes', () => {
   // GET /api/v1/attendance
   // -----------------------------------------------------------------------
   describe('GET /api/v1/attendance', () => {
-    let secondEmpToken: string;
+    let secondEmpCookie: string[];
     let secondEmployeeRecord: TestEmployee;
 
     beforeAll(async () => {
       // Create a second employee so we can test scoping
       secondEmployeeRecord = await createTestEmployee(
-        employer.token,
+        employer.cookie,
         `att-emp2-${Date.now()}`
       );
-      secondEmpToken = await loginAsEmployee(secondEmployeeRecord.email);
+      secondEmpCookie = await loginAsEmployee(secondEmployeeRecord.email);
 
       // Both employees clock in
       await request
         .post('/api/v1/attendance/clock-in')
-        .set('Authorization', `Bearer ${employeeToken}`);
+        .set('Cookie', employeeCookie);
       await request
         .post('/api/v1/attendance/clock-in')
-        .set('Authorization', `Bearer ${secondEmpToken}`);
+        .set('Cookie', secondEmpCookie);
     });
 
     it('employee sees only own attendance records', async () => {
       const res = await request
         .get('/api/v1/attendance')
-        .set('Authorization', `Bearer ${employeeToken}`);
+        .set('Cookie', employeeCookie);
 
       expect(res.status).toBe(200);
       expect(Array.isArray(res.body)).toBe(true);
@@ -133,7 +133,7 @@ describe('Attendance Routes', () => {
     it('employer sees all attendance records in tenant', async () => {
       const res = await request
         .get('/api/v1/attendance')
-        .set('Authorization', `Bearer ${employer.token}`);
+        .set('Cookie', employer.cookie);
 
       expect(res.status).toBe(200);
       expect(Array.isArray(res.body)).toBe(true);
@@ -150,7 +150,7 @@ describe('Attendance Routes', () => {
     it('each attendance record has expected fields', async () => {
       const res = await request
         .get('/api/v1/attendance')
-        .set('Authorization', `Bearer ${employer.token}`);
+        .set('Cookie', employer.cookie);
 
       const record = res.body[0];
       expect(record).toHaveProperty('id');

@@ -13,7 +13,7 @@ describe('Benefits Workflow (functional)', () => {
   let employer: TestEmployer;
   let empA: TestEmployee;
   let empB: TestEmployee;
-  let empAToken: string;
+  let empACookie: string[];
 
   let healthId: string;
   let pensionId: string;
@@ -23,29 +23,29 @@ describe('Benefits Workflow (functional)', () => {
     const suffix = `bw-${Date.now()}`;
     employer = await createTestEmployer(`functional-benefits-${suffix}`);
 
-    empA = await createTestEmployee(employer.token, `bw-a-${suffix}`);
-    empB = await createTestEmployee(employer.token, `bw-b-${suffix}`);
+    empA = await createTestEmployee(employer.cookie, `bw-a-${suffix}`);
+    empB = await createTestEmployee(employer.cookie, `bw-b-${suffix}`);
 
-    empAToken = await loginAsEmployee(empA.email);
+    empACookie = await loginAsEmployee(empA.email);
 
     // Create 3 benefit plans
     const healthRes = await request
       .post('/api/v1/benefits')
-      .set('Authorization', `Bearer ${employer.token}`)
+      .set('Cookie', employer.cookie)
       .send({ name: 'Health Insurance', benefitType: 'health', value: 500, currency: 'GBP' });
     expect(healthRes.status).toBe(201);
     healthId = healthRes.body.id;
 
     const pensionRes = await request
       .post('/api/v1/benefits')
-      .set('Authorization', `Bearer ${employer.token}`)
+      .set('Cookie', employer.cookie)
       .send({ name: 'Pension Plan', benefitType: 'pension', value: 300, currency: 'GBP' });
     expect(pensionRes.status).toBe(201);
     pensionId = pensionRes.body.id;
 
     const transportRes = await request
       .post('/api/v1/benefits')
-      .set('Authorization', `Bearer ${employer.token}`)
+      .set('Cookie', employer.cookie)
       .send({ name: 'Transport Allowance', benefitType: 'transport', value: 150, currency: 'GBP' });
     expect(transportRes.status).toBe(201);
     transportId = transportRes.body.id;
@@ -58,13 +58,13 @@ describe('Benefits Workflow (functional)', () => {
   it('employer enrols employee A in health + pension', async () => {
     const healthEnrol = await request
       .post(`/api/v1/benefits/${healthId}/enrol`)
-      .set('Authorization', `Bearer ${employer.token}`)
+      .set('Cookie', employer.cookie)
       .send({ employeeId: empA.id });
     expect(healthEnrol.status).toBe(201);
 
     const pensionEnrol = await request
       .post(`/api/v1/benefits/${pensionId}/enrol`)
-      .set('Authorization', `Bearer ${employer.token}`)
+      .set('Cookie', employer.cookie)
       .send({ employeeId: empA.id });
     expect(pensionEnrol.status).toBe(201);
   });
@@ -73,7 +73,7 @@ describe('Benefits Workflow (functional)', () => {
     for (const benefitId of [healthId, pensionId, transportId]) {
       const res = await request
         .post(`/api/v1/benefits/${benefitId}/enrol`)
-        .set('Authorization', `Bearer ${employer.token}`)
+        .set('Cookie', employer.cookie)
         .send({ employeeId: empB.id });
       expect(res.status).toBe(201);
     }
@@ -82,7 +82,7 @@ describe('Benefits Workflow (functional)', () => {
   it('employee A logs in → GET /benefits shows all 3 plans', async () => {
     const res = await request
       .get('/api/v1/benefits')
-      .set('Authorization', `Bearer ${empAToken}`);
+      .set('Cookie', empACookie);
 
     expect(res.status).toBe(200);
     const ids = (res.body as Array<{ id: string }>).map((b) => b.id);
@@ -112,7 +112,7 @@ describe('Benefits Workflow (functional)', () => {
   it('employer enrols employee A in health again → idempotent (no duplicate, 200 or 201)', async () => {
     const res = await request
       .post(`/api/v1/benefits/${healthId}/enrol`)
-      .set('Authorization', `Bearer ${employer.token}`)
+      .set('Cookie', employer.cookie)
       .send({ employeeId: empA.id });
 
     // Route uses ON CONFLICT DO UPDATE so always 201; no duplicate row
@@ -130,7 +130,7 @@ describe('Benefits Workflow (functional)', () => {
     const fakeEmpId = '00000000-0000-0000-0000-000000000001';
     const res = await request
       .post(`/api/v1/benefits/${healthId}/enrol`)
-      .set('Authorization', `Bearer ${employer.token}`)
+      .set('Cookie', employer.cookie)
       .send({ employeeId: fakeEmpId });
 
     expect(res.status).toBe(404);
@@ -140,7 +140,7 @@ describe('Benefits Workflow (functional)', () => {
     const fakeBenefitId = '00000000-0000-0000-0000-000000000002';
     const res = await request
       .post(`/api/v1/benefits/${fakeBenefitId}/enrol`)
-      .set('Authorization', `Bearer ${employer.token}`)
+      .set('Cookie', employer.cookie)
       .send({ employeeId: empA.id });
 
     expect(res.status).toBe(404);
@@ -149,7 +149,7 @@ describe('Benefits Workflow (functional)', () => {
   it('employee A cannot create a benefit plan → 403', async () => {
     const res = await request
       .post('/api/v1/benefits')
-      .set('Authorization', `Bearer ${empAToken}`)
+      .set('Cookie', empACookie)
       .send({ name: 'Sneaky Benefit', benefitType: 'other', value: 999, currency: 'GBP' });
 
     expect(res.status).toBe(403);

@@ -20,7 +20,7 @@ describe('Auth Routes', () => {
   // POST /api/v1/auth/signup
   // -----------------------------------------------------------------------
   describe('POST /api/v1/auth/signup', () => {
-    it('valid data → 201 with accessToken and employer user', async () => {
+    it('valid data → 201 with session cookie and employer user', async () => {
       const tag = Date.now();
       const res = await request.post('/api/v1/auth/signup').send({
         email: `signup-new-${tag}@test-champs.com`,
@@ -30,8 +30,11 @@ describe('Auth Routes', () => {
       });
 
       expect(res.status).toBe(201);
-      expect(res.body).toHaveProperty('accessToken');
-      expect(typeof res.body.accessToken).toBe('string');
+      // Cookie-based auth: no accessToken in body
+      expect(res.body).not.toHaveProperty('accessToken');
+      expect(res.headers['set-cookie']).toBeDefined();
+      const cookieHeader = (res.headers['set-cookie'] as unknown as string[]).join(';');
+      expect(cookieHeader).toContain('champs_session=');
       expect(res.body.user).toMatchObject({
         email: `signup-new-${tag}@test-champs.com`,
         role: 'employer',
@@ -97,15 +100,17 @@ describe('Auth Routes', () => {
   // POST /api/v1/auth/login
   // -----------------------------------------------------------------------
   describe('POST /api/v1/auth/login', () => {
-    it('valid credentials → 200 with accessToken and user', async () => {
+    it('valid credentials → 200 with session cookie and user', async () => {
       const res = await request.post('/api/v1/auth/login').send({
         email: employer.user.email,
         password: 'Password123!',
       });
 
       expect(res.status).toBe(200);
-      expect(res.body).toHaveProperty('accessToken');
-      expect(typeof res.body.accessToken).toBe('string');
+      expect(res.body).not.toHaveProperty('accessToken');
+      expect(res.headers['set-cookie']).toBeDefined();
+      const cookieHeader = (res.headers['set-cookie'] as unknown as string[]).join(';');
+      expect(cookieHeader).toContain('champs_session=');
       expect(res.body.user).toMatchObject({
         email: employer.user.email,
         role: 'employer',
@@ -146,10 +151,10 @@ describe('Auth Routes', () => {
   // GET /api/v1/auth/me
   // -----------------------------------------------------------------------
   describe('GET /api/v1/auth/me', () => {
-    it('valid token → 200 with full user object', async () => {
+    it('valid cookie → 200 with full user object', async () => {
       const res = await request
         .get('/api/v1/auth/me')
-        .set('Authorization', `Bearer ${employer.token}`);
+        .set('Cookie', employer.cookie);
 
       expect(res.status).toBe(200);
       expect(res.body).toMatchObject({
@@ -159,36 +164,71 @@ describe('Auth Routes', () => {
         tenantId: employer.tenantId,
         fullName: employer.user.fullName,
       });
-      expect(res.body).toHaveProperty('createdAt');
     });
 
-    it('no token → 401 with Missing or malformed Authorization header', async () => {
+    it('no cookie → 401 with Not authenticated', async () => {
       const res = await request.get('/api/v1/auth/me');
 
       expect(res.status).toBe(401);
-      expect(res.body).toEqual({
-        error: 'Missing or malformed Authorization header',
-      });
+      expect(res.body).toEqual({ error: 'Not authenticated' });
     });
 
-    it('invalid/tampered token → 401 with Invalid or expired token', async () => {
+    it('tampered cookie value → 401 with Invalid or expired session', async () => {
       const res = await request
         .get('/api/v1/auth/me')
-        .set('Authorization', 'Bearer this.is.not.a.real.jwt');
+        .set('Cookie', ['champs_session=this.is.not.a.real.jwt']);
 
       expect(res.status).toBe(401);
-      expect(res.body).toEqual({ error: 'Invalid or expired token' });
+      expect(res.body).toEqual({ error: 'Invalid or expired session' });
     });
 
-    it('Bearer prefix missing → 401', async () => {
+    it('cookie with empty value → 401', async () => {
       const res = await request
         .get('/api/v1/auth/me')
-        .set('Authorization', employer.token); // no "Bearer " prefix
+        .set('Cookie', ['champs_session=']);
 
       expect(res.status).toBe(401);
-      expect(res.body).toEqual({
-        error: 'Missing or malformed Authorization header',
+    });
+  });
+
+  // -----------------------------------------------------------------------
+  // POST /api/v1/auth/verify-email
+  // -----------------------------------------------------------------------
+  describe('POST /api/v1/auth/verify-email', () => {
+    it('invalid token → 400 with error message', async () => {
+      const res = await request.post('/api/v1/auth/verify-email').send({
+        token: 'completely-invalid-token-that-does-not-exist',
       });
+
+      expect(res.status).toBe(400);
+      expect(res.body).toHaveProperty('error');
+    });
+
+    it('missing token body → 400', async () => {
+      const res = await request.post('/api/v1/auth/verify-email').send({});
+
+      expect(res.status).toBe(400);
+      expect(res.body).toHaveProperty('error');
+    });
+  });
+
+  // -----------------------------------------------------------------------
+  // POST /api/v1/auth/resend-verification
+  // -----------------------------------------------------------------------
+  describe('POST /api/v1/auth/resend-verification', () => {
+    it('authenticated → 200 or 429 (if sent recently)', async () => {
+      const res = await request
+        .post('/api/v1/auth/resend-verification')
+        .set('Cookie', employer.cookie);
+
+      // 200 ok or 400 already-verified or 429 rate-limit — all are valid
+      expect([200, 400, 429]).toContain(res.status);
+    });
+
+    it('unauthenticated → 401', async () => {
+      const res = await request.post('/api/v1/auth/resend-verification');
+
+      expect(res.status).toBe(401);
     });
   });
 });

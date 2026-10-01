@@ -29,7 +29,7 @@ describe('Database Constraint Enforcement (relational)', () => {
 
     const first = await request
       .post('/api/v1/employees')
-      .set('Authorization', `Bearer ${employer.token}`)
+      .set('Cookie', employer.cookie)
       .send({
         email: `dup1-${tag}@test-champs.com`,
         fullName: 'Duplicate One',
@@ -42,7 +42,7 @@ describe('Database Constraint Enforcement (relational)', () => {
 
     const second = await request
       .post('/api/v1/employees')
-      .set('Authorization', `Bearer ${employer.token}`)
+      .set('Cookie', employer.cookie)
       .send({
         email: `dup2-${tag}@test-champs.com`,
         fullName: 'Duplicate Two',
@@ -62,7 +62,7 @@ describe('Database Constraint Enforcement (relational)', () => {
 
     const t1 = await request
       .post('/api/v1/employees')
-      .set('Authorization', `Bearer ${employer.token}`)
+      .set('Cookie', employer.cookie)
       .send({
         email: `ct1-${tag}@test-champs.com`,
         fullName: 'Cross Tenant One',
@@ -75,7 +75,7 @@ describe('Database Constraint Enforcement (relational)', () => {
 
     const t2 = await request
       .post('/api/v1/employees')
-      .set('Authorization', `Bearer ${employer2.token}`)
+      .set('Cookie', employer2.cookie)
       .send({
         email: `ct2-${tag}@test-champs.com`,
         fullName: 'Cross Tenant Two',
@@ -94,7 +94,7 @@ describe('Database Constraint Enforcement (relational)', () => {
 
     const res = await request
       .post('/api/v1/employees')
-      .set('Authorization', `Bearer ${employer.token}`)
+      .set('Cookie', employer.cookie)
       .send({
         email: `bad-dept-${tag}@test-champs.com`,
         fullName: 'Bad Dept Employee',
@@ -126,7 +126,7 @@ describe('Database Constraint Enforcement (relational)', () => {
     // Create a department under tenant 2
     const deptRes = await request
       .post('/api/v1/departments')
-      .set('Authorization', `Bearer ${employer2.token}`)
+      .set('Cookie', employer2.cookie)
       .send({ name: `T2 Dept ${tag}` });
     expect(deptRes.status).toBe(201);
     const t2DeptId = deptRes.body.id;
@@ -134,7 +134,7 @@ describe('Database Constraint Enforcement (relational)', () => {
     // Tenant 1 employer tries to assign employee to tenant 2's dept
     const res = await request
       .post('/api/v1/employees')
-      .set('Authorization', `Bearer ${employer.token}`)
+      .set('Cookie', employer.cookie)
       .send({
         email: `cross-dept-${tag}@test-champs.com`,
         fullName: 'Cross Dept Employee',
@@ -152,7 +152,7 @@ describe('Database Constraint Enforcement (relational)', () => {
       // If it succeeded, fetch it back and verify the department is null (FK mismatch → SET NULL or ignored)
       const getRes = await request
         .get(`/api/v1/employees/${res.body.id}`)
-        .set('Authorization', `Bearer ${employer.token}`);
+        .set('Cookie', employer.cookie);
       // The department should either be null or the response should show it wasn't found in T1
       expect(
         getRes.body.departmentId === null || getRes.body.departmentId !== t2DeptId
@@ -166,11 +166,11 @@ describe('Database Constraint Enforcement (relational)', () => {
   it('payroll run status cannot be moved back from completed to draft via approve', async () => {
     // Create an employee to run payroll
     const tag = `payroll-state-${Date.now()}`;
-    await createTestEmployee(employer.token, tag);
+    await createTestEmployee(employer.cookie, tag);
 
     const createRes = await request
       .post('/api/v1/payroll')
-      .set('Authorization', `Bearer ${employer.token}`)
+      .set('Cookie', employer.cookie)
       .send({ periodStart: '2025-06-01', periodEnd: '2025-06-30' });
     expect(createRes.status).toBe(201);
     const runId = createRes.body.id;
@@ -178,38 +178,38 @@ describe('Database Constraint Enforcement (relational)', () => {
     // Approve → completed
     await request
       .patch(`/api/v1/payroll/${runId}/approve`)
-      .set('Authorization', `Bearer ${employer.token}`);
+      .set('Cookie', employer.cookie);
 
     // Verify completed
     const getRes = await request
       .get(`/api/v1/payroll/${runId}`)
-      .set('Authorization', `Bearer ${employer.token}`);
+      .set('Cookie', employer.cookie);
     expect(getRes.body.status).toBe('completed');
 
     // There is no PATCH /payroll/:id/draft endpoint → confirm it returns 404
     const draftRes = await request
       .patch(`/api/v1/payroll/${runId}/draft`)
-      .set('Authorization', `Bearer ${employer.token}`);
+      .set('Cookie', employer.cookie);
     expect(draftRes.status).toBe(404);
   });
 
   // --- 6. Attendance unique constraint: two clock-ins same day → exactly 1 row ---
   it('two clock-ins on same day for same employee yield exactly 1 attendance row', async () => {
     const tag = `att-uniq-${Date.now()}`;
-    const emp = await createTestEmployee(employer.token, tag);
+    const emp = await createTestEmployee(employer.cookie, tag);
 
     // Login as employee
     const loginRes = await request
       .post('/api/v1/auth/login')
       .send({ email: emp.email, password: 'Welcome123!' });
-    const empToken = loginRes.body.accessToken as string;
+    const empCookieLocal2 = loginRes.headers["set-cookie"] as unknown as string[];
 
     await request
       .post('/api/v1/attendance/clock-in')
-      .set('Authorization', `Bearer ${empToken}`);
+      .set('Cookie', empCookieLocal2);
     await request
       .post('/api/v1/attendance/clock-in')
-      .set('Authorization', `Bearer ${empToken}`);
+      .set('Cookie', empCookieLocal2);
 
     const today = new Date().toISOString().slice(0, 10);
     const countRes = await pool.query(
@@ -226,21 +226,21 @@ describe('Database Constraint Enforcement (relational)', () => {
 
     const benefitRes = await request
       .post('/api/v1/benefits')
-      .set('Authorization', `Bearer ${employer.token}`)
+      .set('Cookie', employer.cookie)
       .send({ name: `Unique Benefit ${tag}`, benefitType: 'health', value: 100, currency: 'GBP' });
     expect(benefitRes.status).toBe(201);
     const benefitId = benefitRes.body.id;
 
-    const emp = await createTestEmployee(employer.token, tag);
+    const emp = await createTestEmployee(employer.cookie, tag);
 
     // Enrol twice
     await request
       .post(`/api/v1/benefits/${benefitId}/enrol`)
-      .set('Authorization', `Bearer ${employer.token}`)
+      .set('Cookie', employer.cookie)
       .send({ employeeId: emp.id });
     await request
       .post(`/api/v1/benefits/${benefitId}/enrol`)
-      .set('Authorization', `Bearer ${employer.token}`)
+      .set('Cookie', employer.cookie)
       .send({ employeeId: emp.id });
 
     const countRes = await pool.query(

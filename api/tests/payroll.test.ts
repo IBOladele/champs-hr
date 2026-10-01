@@ -11,13 +11,13 @@ import {
 describe('Payroll Routes', () => {
   let employer: TestEmployer;
   let employeeRecord: TestEmployee;
-  let employeeToken: string;
+  let employeeCookie: string[];
 
   beforeAll(async () => {
     const ts = Date.now();
     employer = await createTestEmployer(`payroll-${ts}`);
-    employeeRecord = await createTestEmployee(employer.token, `payroll-emp-${ts}`);
-    employeeToken = await loginAsEmployee(employeeRecord.email);
+    employeeRecord = await createTestEmployee(employer.cookie, `payroll-emp-${ts}`);
+    employeeCookie = await loginAsEmployee(employeeRecord.email);
   });
 
   afterAll(async () => {
@@ -31,7 +31,7 @@ describe('Payroll Routes', () => {
     it('employer creates payroll run → 201 with run record', async () => {
       const res = await request
         .post('/api/v1/payroll')
-        .set('Authorization', `Bearer ${employer.token}`)
+        .set('Cookie', employer.cookie)
         .send({
           periodStart: '2025-07-01',
           periodEnd: '2025-07-31',
@@ -56,7 +56,7 @@ describe('Payroll Routes', () => {
     it('payroll run total_net = total_gross - total_deductions', async () => {
       const res = await request
         .post('/api/v1/payroll')
-        .set('Authorization', `Bearer ${employer.token}`)
+        .set('Cookie', employer.cookie)
         .send({
           periodStart: '2025-08-01',
           periodEnd: '2025-08-31',
@@ -72,7 +72,7 @@ describe('Payroll Routes', () => {
     it('employee tries to create payroll → 403', async () => {
       const res = await request
         .post('/api/v1/payroll')
-        .set('Authorization', `Bearer ${employeeToken}`)
+        .set('Cookie', employeeCookie)
         .send({
           periodStart: '2025-07-01',
           periodEnd: '2025-07-31',
@@ -85,7 +85,7 @@ describe('Payroll Routes', () => {
     it('missing periodStart → 400', async () => {
       const res = await request
         .post('/api/v1/payroll')
-        .set('Authorization', `Bearer ${employer.token}`)
+        .set('Cookie', employer.cookie)
         .send({ periodEnd: '2025-07-31' });
 
       expect(res.status).toBe(400);
@@ -110,19 +110,19 @@ describe('Payroll Routes', () => {
       // Ensure at least two runs exist so we can verify ordering
       await request
         .post('/api/v1/payroll')
-        .set('Authorization', `Bearer ${employer.token}`)
+        .set('Cookie', employer.cookie)
         .send({ periodStart: '2025-05-01', periodEnd: '2025-05-31' });
 
       await request
         .post('/api/v1/payroll')
-        .set('Authorization', `Bearer ${employer.token}`)
+        .set('Cookie', employer.cookie)
         .send({ periodStart: '2025-06-01', periodEnd: '2025-06-30' });
     });
 
     it('employer gets list sorted by created_at desc → 200', async () => {
       const res = await request
         .get('/api/v1/payroll')
-        .set('Authorization', `Bearer ${employer.token}`);
+        .set('Cookie', employer.cookie);
 
       expect(res.status).toBe(200);
       expect(Array.isArray(res.body)).toBe(true);
@@ -140,7 +140,7 @@ describe('Payroll Routes', () => {
     it('each run in list has expected fields', async () => {
       const res = await request
         .get('/api/v1/payroll')
-        .set('Authorization', `Bearer ${employer.token}`);
+        .set('Cookie', employer.cookie);
 
       expect(res.status).toBe(200);
       const run = res.body[0];
@@ -157,7 +157,7 @@ describe('Payroll Routes', () => {
     it('employee cannot list payroll runs → 403', async () => {
       const res = await request
         .get('/api/v1/payroll')
-        .set('Authorization', `Bearer ${employeeToken}`);
+        .set('Cookie', employeeCookie);
 
       expect(res.status).toBe(403);
     });
@@ -172,7 +172,7 @@ describe('Payroll Routes', () => {
     beforeAll(async () => {
       const res = await request
         .post('/api/v1/payroll')
-        .set('Authorization', `Bearer ${employer.token}`)
+        .set('Cookie', employer.cookie)
         .send({ periodStart: '2025-09-01', periodEnd: '2025-09-30' });
       runId = res.body.id as string;
     });
@@ -180,7 +180,7 @@ describe('Payroll Routes', () => {
     it('employer gets payroll run with items → 200', async () => {
       const res = await request
         .get(`/api/v1/payroll/${runId}`)
-        .set('Authorization', `Bearer ${employer.token}`);
+        .set('Cookie', employer.cookie);
 
       expect(res.status).toBe(200);
       expect(res.body.id).toBe(runId);
@@ -198,7 +198,7 @@ describe('Payroll Routes', () => {
     it('each payroll item has expected US deduction fields', async () => {
       const res = await request
         .get(`/api/v1/payroll/${runId}`)
-        .set('Authorization', `Bearer ${employer.token}`);
+        .set('Cookie', employer.cookie);
 
       const item = res.body.items[0];
       const deductions = item.deductions as {
@@ -231,7 +231,7 @@ describe('Payroll Routes', () => {
     it('nonexistent run id → 404', async () => {
       const res = await request
         .get('/api/v1/payroll/00000000-0000-0000-0000-000000000000')
-        .set('Authorization', `Bearer ${employer.token}`);
+        .set('Cookie', employer.cookie);
 
       expect(res.status).toBe(404);
       expect(res.body).toEqual({ error: 'Payroll run not found' });
@@ -247,7 +247,7 @@ describe('Payroll Routes', () => {
     beforeAll(async () => {
       const res = await request
         .post('/api/v1/payroll')
-        .set('Authorization', `Bearer ${employer.token}`)
+        .set('Cookie', employer.cookie)
         .send({ periodStart: '2025-10-01', periodEnd: '2025-10-31' });
       runId = res.body.id as string;
     });
@@ -255,7 +255,7 @@ describe('Payroll Routes', () => {
     it('employer approves payroll run → status = completed', async () => {
       const res = await request
         .patch(`/api/v1/payroll/${runId}/approve`)
-        .set('Authorization', `Bearer ${employer.token}`);
+        .set('Cookie', employer.cookie);
 
       expect(res.status).toBe(200);
       expect(res.body.status).toBe('completed');
@@ -264,7 +264,7 @@ describe('Payroll Routes', () => {
     it('employee tries to approve payroll → 403', async () => {
       const res = await request
         .patch(`/api/v1/payroll/${runId}/approve`)
-        .set('Authorization', `Bearer ${employeeToken}`);
+        .set('Cookie', employeeCookie);
 
       expect(res.status).toBe(403);
     });
@@ -272,7 +272,7 @@ describe('Payroll Routes', () => {
     it('approve nonexistent run → 404', async () => {
       const res = await request
         .patch('/api/v1/payroll/00000000-0000-0000-0000-000000000000/approve')
-        .set('Authorization', `Bearer ${employer.token}`);
+        .set('Cookie', employer.cookie);
 
       expect(res.status).toBe(404);
       expect(res.body).toEqual({ error: 'Payroll run not found' });

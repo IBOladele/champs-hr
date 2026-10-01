@@ -11,13 +11,13 @@ import {
 describe('Departments Routes', () => {
   let employer: TestEmployer;
   let employeeRecord: TestEmployee;
-  let employeeToken: string;
+  let employeeCookie: string[];
 
   beforeAll(async () => {
     const ts = Date.now();
     employer = await createTestEmployer(`dept-${ts}`);
-    employeeRecord = await createTestEmployee(employer.token, `dept-emp-${ts}`);
-    employeeToken = await loginAsEmployee(employeeRecord.email);
+    employeeRecord = await createTestEmployee(employer.cookie, `dept-emp-${ts}`);
+    employeeCookie = await loginAsEmployee(employeeRecord.email);
   });
 
   afterAll(async () => {
@@ -31,7 +31,7 @@ describe('Departments Routes', () => {
     it('employer creates department → 201 with id, name, created_at', async () => {
       const res = await request
         .post('/api/v1/departments')
-        .set('Authorization', `Bearer ${employer.token}`)
+        .set('Cookie', employer.cookie)
         .send({ name: 'Engineering' });
 
       expect(res.status).toBe(201);
@@ -43,7 +43,7 @@ describe('Departments Routes', () => {
     it('employee cannot create department → 403', async () => {
       const res = await request
         .post('/api/v1/departments')
-        .set('Authorization', `Bearer ${employeeToken}`)
+        .set('Cookie', employeeCookie)
         .send({ name: 'Forbidden Dept' });
 
       expect(res.status).toBe(403);
@@ -53,7 +53,7 @@ describe('Departments Routes', () => {
     it('missing name → 400', async () => {
       const res = await request
         .post('/api/v1/departments')
-        .set('Authorization', `Bearer ${employer.token}`)
+        .set('Cookie', employer.cookie)
         .send({});
 
       expect(res.status).toBe(400);
@@ -77,14 +77,14 @@ describe('Departments Routes', () => {
       // Create a department to list
       await request
         .post('/api/v1/departments')
-        .set('Authorization', `Bearer ${employer.token}`)
+        .set('Cookie', employer.cookie)
         .send({ name: 'Marketing' });
     });
 
     it('employer can read departments → 200 with array', async () => {
       const res = await request
         .get('/api/v1/departments')
-        .set('Authorization', `Bearer ${employer.token}`);
+        .set('Cookie', employer.cookie);
 
       expect(res.status).toBe(200);
       expect(Array.isArray(res.body)).toBe(true);
@@ -96,7 +96,7 @@ describe('Departments Routes', () => {
     it('employee can read departments → 200', async () => {
       const res = await request
         .get('/api/v1/departments')
-        .set('Authorization', `Bearer ${employeeToken}`);
+        .set('Cookie', employeeCookie);
 
       expect(res.status).toBe(200);
       expect(Array.isArray(res.body)).toBe(true);
@@ -105,16 +105,16 @@ describe('Departments Routes', () => {
     it('departments are sorted by name ASC', async () => {
       await request
         .post('/api/v1/departments')
-        .set('Authorization', `Bearer ${employer.token}`)
+        .set('Cookie', employer.cookie)
         .send({ name: 'Aardvark Dept' });
       await request
         .post('/api/v1/departments')
-        .set('Authorization', `Bearer ${employer.token}`)
+        .set('Cookie', employer.cookie)
         .send({ name: 'Zebra Dept' });
 
       const res = await request
         .get('/api/v1/departments')
-        .set('Authorization', `Bearer ${employer.token}`);
+        .set('Cookie', employer.cookie);
 
       expect(res.status).toBe(200);
       const names = (res.body as Array<{ name: string }>).map((d) => d.name);
@@ -138,7 +138,7 @@ describe('Departments Routes', () => {
     beforeAll(async () => {
       const res = await request
         .post('/api/v1/departments')
-        .set('Authorization', `Bearer ${employer.token}`)
+        .set('Cookie', employer.cookie)
         .send({ name: 'Original Name' });
       deptId = res.body.id as string;
     });
@@ -146,7 +146,7 @@ describe('Departments Routes', () => {
     it('employer updates department → 200 with new name', async () => {
       const res = await request
         .patch(`/api/v1/departments/${deptId}`)
-        .set('Authorization', `Bearer ${employer.token}`)
+        .set('Cookie', employer.cookie)
         .send({ name: 'Updated Name' });
 
       expect(res.status).toBe(200);
@@ -157,7 +157,7 @@ describe('Departments Routes', () => {
     it('employee cannot update department → 403', async () => {
       const res = await request
         .patch(`/api/v1/departments/${deptId}`)
-        .set('Authorization', `Bearer ${employeeToken}`)
+        .set('Cookie', employeeCookie)
         .send({ name: 'Employee Try' });
 
       expect(res.status).toBe(403);
@@ -166,7 +166,7 @@ describe('Departments Routes', () => {
     it('update nonexistent department → 404', async () => {
       const res = await request
         .patch('/api/v1/departments/00000000-0000-0000-0000-000000000000')
-        .set('Authorization', `Bearer ${employer.token}`)
+        .set('Cookie', employer.cookie)
         .send({ name: 'Ghost' });
 
       expect(res.status).toBe(404);
@@ -176,7 +176,7 @@ describe('Departments Routes', () => {
     it('missing name in body → 400', async () => {
       const res = await request
         .patch(`/api/v1/departments/${deptId}`)
-        .set('Authorization', `Bearer ${employer.token}`)
+        .set('Cookie', employer.cookie)
         .send({});
 
       expect(res.status).toBe(400);
@@ -192,7 +192,7 @@ describe('Departments Routes', () => {
     beforeAll(async () => {
       const res = await request
         .post('/api/v1/departments')
-        .set('Authorization', `Bearer ${employer.token}`)
+        .set('Cookie', employer.cookie)
         .send({ name: 'To Be Deleted' });
       deptIdToDelete = res.body.id as string;
     });
@@ -200,7 +200,7 @@ describe('Departments Routes', () => {
     it('employer deletes department → 204 no content', async () => {
       const res = await request
         .delete(`/api/v1/departments/${deptIdToDelete}`)
-        .set('Authorization', `Bearer ${employer.token}`);
+        .set('Cookie', employer.cookie);
 
       expect(res.status).toBe(204);
       expect(res.text).toBe('');
@@ -209,7 +209,7 @@ describe('Departments Routes', () => {
     it('deleted department no longer appears in list', async () => {
       const res = await request
         .get('/api/v1/departments')
-        .set('Authorization', `Bearer ${employer.token}`);
+        .set('Cookie', employer.cookie);
 
       const ids = (res.body as Array<{ id: string }>).map((d) => d.id);
       expect(ids).not.toContain(deptIdToDelete);
@@ -218,12 +218,12 @@ describe('Departments Routes', () => {
     it('employee cannot delete department → 403', async () => {
       const newDept = await request
         .post('/api/v1/departments')
-        .set('Authorization', `Bearer ${employer.token}`)
+        .set('Cookie', employer.cookie)
         .send({ name: 'Protected Dept' });
 
       const res = await request
         .delete(`/api/v1/departments/${newDept.body.id}`)
-        .set('Authorization', `Bearer ${employeeToken}`);
+        .set('Cookie', employeeCookie);
 
       expect(res.status).toBe(403);
     });
@@ -231,7 +231,7 @@ describe('Departments Routes', () => {
     it('delete nonexistent department → 404', async () => {
       const res = await request
         .delete('/api/v1/departments/00000000-0000-0000-0000-000000000000')
-        .set('Authorization', `Bearer ${employer.token}`);
+        .set('Cookie', employer.cookie);
 
       expect(res.status).toBe(404);
       expect(res.body).toEqual({ error: 'Department not found' });

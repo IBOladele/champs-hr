@@ -5,6 +5,7 @@ import {
   Pencil, ChevronDown, Plus, Settings,
 } from 'lucide-react'
 
+import { usePageTitle } from '../../hooks/usePageTitle'
 type SidebarKey = 'organisation' | 'compliance' | 'compensation' | 'bank' | 'hours' | 'leave'
 type MainTab = 'organization' | 'profile'
 
@@ -156,6 +157,8 @@ function PlaceholderContent({ title }: { title: string }) {
 }
 
 export default function Config() {
+  usePageTitle('Settings')
+
   const navigate = useNavigate()
   const [mainTab, setMainTab] = useState<MainTab>('organization')
   const [activeSection, setActiveSection] = useState<SidebarKey>('organisation')

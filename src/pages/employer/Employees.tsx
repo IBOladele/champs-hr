@@ -5,6 +5,7 @@ import {
   ChevronLeft, ChevronRight, CirclePlus, ChevronsUpDown, Eye
 } from 'lucide-react'
 
+import { usePageTitle } from '../../hooks/usePageTitle'
 type Tab = 'active' | 'invited' | 'pending' | 'terminated'
 
 interface Employee {
@@ -96,6 +97,8 @@ const tabs: { key: Tab; label: string }[] = [
 ]
 
 export default function Employees() {
+  usePageTitle('Employees')
+
   const [activeTab, setActiveTab] = useState<Tab>('active')
   const [search, setSearch] = useState('')
   const navigate = useNavigate()

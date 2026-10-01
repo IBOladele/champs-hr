@@ -2,8 +2,11 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { auth } from '../../lib/api'
 import { useAuth } from '../../context/AuthContext'
+import { usePageTitle } from '../../hooks/usePageTitle'
 
 export default function VerifyEmail() {
+  usePageTitle('Verify email')
+
   const [params] = useSearchParams()
   const navigate = useNavigate()
   const { refreshUser } = useAuth()

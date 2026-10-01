@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Check, ChevronDown, Mail, RefreshCw, Loader2 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { auth, onboarding } from '../../lib/api'
+import { usePageTitle } from '../../hooks/usePageTitle'
 
 // ── Shared field components ───────────────────────────────────────────────────
 
@@ -450,6 +451,8 @@ const STEPS = [
 // ── Main Onboarding component ─────────────────────────────────────────────────
 
 export default function Onboarding() {
+  usePageTitle('Set up your workspace')
+
   const navigate = useNavigate()
 
   const [currentStep, setCurrentStep] = useState(0)

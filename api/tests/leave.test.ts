@@ -11,13 +11,13 @@ import {
 describe('Leave Routes', () => {
   let employer: TestEmployer;
   let employeeRecord: TestEmployee;
-  let employeeToken: string;
+  let employeeCookie: string[];
 
   beforeAll(async () => {
     const ts = Date.now();
     employer = await createTestEmployer(`leave-${ts}`);
-    employeeRecord = await createTestEmployee(employer.token, `leave-emp-${ts}`);
-    employeeToken = await loginAsEmployee(employeeRecord.email);
+    employeeRecord = await createTestEmployee(employer.cookie, `leave-emp-${ts}`);
+    employeeCookie = await loginAsEmployee(employeeRecord.email);
   });
 
   afterAll(async () => {
@@ -31,7 +31,7 @@ describe('Leave Routes', () => {
     it('employee creates leave request → 201 with correct fields', async () => {
       const res = await request
         .post('/api/v1/leave')
-        .set('Authorization', `Bearer ${employeeToken}`)
+        .set('Cookie', employeeCookie)
         .send({
           leaveType: 'annual',
           startDate: '2025-09-01',
@@ -53,7 +53,7 @@ describe('Leave Routes', () => {
     it('leave request without reason → 201 (reason is optional)', async () => {
       const res = await request
         .post('/api/v1/leave')
-        .set('Authorization', `Bearer ${employeeToken}`)
+        .set('Cookie', employeeCookie)
         .send({
           leaveType: 'sick',
           startDate: '2025-10-01',
@@ -69,7 +69,7 @@ describe('Leave Routes', () => {
     it('missing required fields → 400', async () => {
       const res = await request
         .post('/api/v1/leave')
-        .set('Authorization', `Bearer ${employeeToken}`)
+        .set('Cookie', employeeCookie)
         .send({
           leaveType: 'annual',
           // missing startDate, endDate, daysRequested
@@ -99,7 +99,7 @@ describe('Leave Routes', () => {
       // Ensure at least one leave request exists
       await request
         .post('/api/v1/leave')
-        .set('Authorization', `Bearer ${employeeToken}`)
+        .set('Cookie', employeeCookie)
         .send({
           leaveType: 'annual',
           startDate: '2025-11-01',
@@ -112,7 +112,7 @@ describe('Leave Routes', () => {
     it('employer can see all leave requests in the tenant', async () => {
       const res = await request
         .get('/api/v1/leave')
-        .set('Authorization', `Bearer ${employer.token}`);
+        .set('Cookie', employer.cookie);
 
       expect(res.status).toBe(200);
       expect(Array.isArray(res.body)).toBe(true);
@@ -125,15 +125,15 @@ describe('Leave Routes', () => {
     it('employee can only see their own leave requests', async () => {
       // Create a second employee in same tenant
       const secondEmp = await createTestEmployee(
-        employer.token,
+        employer.cookie,
         `leave-emp2-${Date.now()}`
       );
-      const secondToken = await loginAsEmployee(secondEmp.email);
+      const secondCookie = await loginAsEmployee(secondEmp.email);
 
       // Second employee creates a leave request
       await request
         .post('/api/v1/leave')
-        .set('Authorization', `Bearer ${secondToken}`)
+        .set('Cookie', secondCookie)
         .send({
           leaveType: 'sick',
           startDate: '2025-12-01',
@@ -144,7 +144,7 @@ describe('Leave Routes', () => {
       // First employee fetches leave — should only see their own
       const res = await request
         .get('/api/v1/leave')
-        .set('Authorization', `Bearer ${employeeToken}`);
+        .set('Cookie', employeeCookie);
 
       expect(res.status).toBe(200);
       const leaveItems = res.body as Array<{ employee_id: string }>;
@@ -166,7 +166,7 @@ describe('Leave Routes', () => {
     beforeAll(async () => {
       const res = await request
         .post('/api/v1/leave')
-        .set('Authorization', `Bearer ${employeeToken}`)
+        .set('Cookie', employeeCookie)
         .send({
           leaveType: 'annual',
           startDate: '2026-01-10',
@@ -180,7 +180,7 @@ describe('Leave Routes', () => {
     it('employer approves leave → status becomes approved', async () => {
       const res = await request
         .patch(`/api/v1/leave/${leaveId}/approve`)
-        .set('Authorization', `Bearer ${employer.token}`);
+        .set('Cookie', employer.cookie);
 
       expect(res.status).toBe(200);
       expect(res.body.status).toBe('approved');
@@ -191,7 +191,7 @@ describe('Leave Routes', () => {
       // Create a fresh pending leave to attempt approval
       const newLeave = await request
         .post('/api/v1/leave')
-        .set('Authorization', `Bearer ${employeeToken}`)
+        .set('Cookie', employeeCookie)
         .send({
           leaveType: 'sick',
           startDate: '2026-02-01',
@@ -202,7 +202,7 @@ describe('Leave Routes', () => {
 
       const res = await request
         .patch(`/api/v1/leave/${newLeaveId}/approve`)
-        .set('Authorization', `Bearer ${employeeToken}`);
+        .set('Cookie', employeeCookie);
 
       expect(res.status).toBe(403);
       expect(res.body).toEqual({ error: 'Employer access required' });
@@ -211,7 +211,7 @@ describe('Leave Routes', () => {
     it('employer rejects leave → status becomes rejected', async () => {
       const rejectTarget = await request
         .post('/api/v1/leave')
-        .set('Authorization', `Bearer ${employeeToken}`)
+        .set('Cookie', employeeCookie)
         .send({
           leaveType: 'annual',
           startDate: '2026-03-01',
@@ -222,7 +222,7 @@ describe('Leave Routes', () => {
 
       const res = await request
         .patch(`/api/v1/leave/${rejectId}/reject`)
-        .set('Authorization', `Bearer ${employer.token}`);
+        .set('Cookie', employer.cookie);
 
       expect(res.status).toBe(200);
       expect(res.body.status).toBe('rejected');
@@ -232,7 +232,7 @@ describe('Leave Routes', () => {
     it('approve nonexistent leave → 404', async () => {
       const res = await request
         .patch('/api/v1/leave/00000000-0000-0000-0000-000000000000/approve')
-        .set('Authorization', `Bearer ${employer.token}`);
+        .set('Cookie', employer.cookie);
 
       expect(res.status).toBe(404);
       expect(res.body).toEqual({ error: 'Leave request not found' });
@@ -241,7 +241,7 @@ describe('Leave Routes', () => {
     it('employee tries to reject own leave → 403', async () => {
       const newLeave = await request
         .post('/api/v1/leave')
-        .set('Authorization', `Bearer ${employeeToken}`)
+        .set('Cookie', employeeCookie)
         .send({
           leaveType: 'sick',
           startDate: '2026-04-01',
@@ -251,7 +251,7 @@ describe('Leave Routes', () => {
 
       const res = await request
         .patch(`/api/v1/leave/${newLeave.body.id}/reject`)
-        .set('Authorization', `Bearer ${employeeToken}`);
+        .set('Cookie', employeeCookie);
 
       expect(res.status).toBe(403);
     });

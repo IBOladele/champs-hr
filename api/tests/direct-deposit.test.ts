@@ -11,17 +11,17 @@ import {
 describe('Direct Deposit Routes', () => {
   let employer: TestEmployer;
   let empRecord: TestEmployee;
-  let empToken: string;
+  let empCookie: string[];
   let empRecord2: TestEmployee;
-  let empToken2: string;
+  let empCookie2: string[];
 
   beforeAll(async () => {
     const ts = Date.now();
     employer   = await createTestEmployer(`dd-${ts}`);
-    empRecord  = await createTestEmployee(employer.token, `dd-emp-${ts}`);
-    empRecord2 = await createTestEmployee(employer.token, `dd-emp2-${ts}`);
-    empToken   = await loginAsEmployee(empRecord.email);
-    empToken2  = await loginAsEmployee(empRecord2.email);
+    empRecord  = await createTestEmployee(employer.cookie, `dd-emp-${ts}`);
+    empRecord2 = await createTestEmployee(employer.cookie, `dd-emp2-${ts}`);
+    empCookie   = await loginAsEmployee(empRecord.email);
+    empCookie2  = await loginAsEmployee(empRecord2.email);
   }, 30_000);
 
   afterAll(async () => {
@@ -31,7 +31,7 @@ describe('Direct Deposit Routes', () => {
   it('GET returns empty array before any bank info saved', async () => {
     const res = await request
       .get(`/api/v1/employees/${empRecord.id}/direct-deposit`)
-      .set('Authorization', `Bearer ${empToken}`);
+      .set('Cookie', empCookie);
     expect(res.status).toBe(200);
     expect(res.body).toEqual([]);
   });
@@ -39,7 +39,7 @@ describe('Direct Deposit Routes', () => {
   it('employee saves direct deposit → 200 with masked account', async () => {
     const res = await request
       .put(`/api/v1/employees/${empRecord.id}/direct-deposit`)
-      .set('Authorization', `Bearer ${empToken}`)
+      .set('Cookie', empCookie)
       .send({
         bankName:      'Chase Bank',
         routingNumber: '021000021',
@@ -60,7 +60,7 @@ describe('Direct Deposit Routes', () => {
   it('GET returns masked account and routing', async () => {
     const res = await request
       .get(`/api/v1/employees/${empRecord.id}/direct-deposit`)
-      .set('Authorization', `Bearer ${empToken}`);
+      .set('Cookie', empCookie);
 
     expect(res.status).toBe(200);
     expect(res.body.length).toBe(1);
@@ -73,7 +73,7 @@ describe('Direct Deposit Routes', () => {
   it('routing number must be exactly 9 digits → 400 otherwise', async () => {
     const res = await request
       .put(`/api/v1/employees/${empRecord.id}/direct-deposit`)
-      .set('Authorization', `Bearer ${empToken}`)
+      .set('Cookie', empCookie)
       .send({
         bankName: 'Bad Bank', routingNumber: '1234', accountNumber: '999999',
         accountType: 'checking',
@@ -84,7 +84,7 @@ describe('Direct Deposit Routes', () => {
   it('employer can read their employee direct deposit', async () => {
     const res = await request
       .get(`/api/v1/employees/${empRecord.id}/direct-deposit`)
-      .set('Authorization', `Bearer ${employer.token}`);
+      .set('Cookie', employer.cookie);
     expect(res.status).toBe(200);
     expect(res.body.length).toBeGreaterThan(0);
   });
@@ -92,14 +92,14 @@ describe('Direct Deposit Routes', () => {
   it('employee cannot read another employee direct deposit → 403', async () => {
     const res = await request
       .get(`/api/v1/employees/${empRecord.id}/direct-deposit`)
-      .set('Authorization', `Bearer ${empToken2}`);
+      .set('Cookie', empCookie2);
     expect(res.status).toBe(403);
   });
 
   it('savings account type accepted', async () => {
     const res = await request
       .put(`/api/v1/employees/${empRecord2.id}/direct-deposit`)
-      .set('Authorization', `Bearer ${empToken2}`)
+      .set('Cookie', empCookie2)
       .send({
         bankName: 'Bank of America', routingNumber: '026009593',
         accountNumber: '987654321', accountType: 'savings',

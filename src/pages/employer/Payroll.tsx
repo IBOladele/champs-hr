@@ -5,6 +5,7 @@ import {
   ChevronLeft, ChevronRight, PoundSterling, Users, Clock, Calendar, Play
 } from 'lucide-react'
 
+import { usePageTitle } from '../../hooks/usePageTitle'
 type PayTab = 'cycle' | 'employees' | 'components'
 type CycleStatus = 'Completed' | 'Pending' | 'Processing'
 
@@ -129,6 +130,8 @@ function StatusPill({ status }: { status: CycleStatus }) {
 }
 
 export default function Payroll() {
+  usePageTitle('Payroll')
+
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<PayTab>('cycle')
 

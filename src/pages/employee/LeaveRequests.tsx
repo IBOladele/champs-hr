@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { CalendarDays, Plus, ChevronDown, ChevronLeft, ChevronRight, Eye } from 'lucide-react'
+import { usePageTitle } from '../../hooks/usePageTitle'
 
 type LeaveStatus = 'Pending' | 'Approved' | 'Denied'
 
@@ -36,6 +37,8 @@ function StatusPill({ status }: { status: LeaveStatus }) {
 }
 
 export default function LeaveRequests() {
+  usePageTitle('Leave Requests')
+
   const navigate = useNavigate()
 
   return (

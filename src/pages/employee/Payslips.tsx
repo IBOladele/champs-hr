@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { FileText, Download, Search, ChevronDown, Eye } from 'lucide-react'
+import { usePageTitle } from '../../hooks/usePageTitle'
 
 type PayslipStatus = 'Loaded' | 'Pending' | 'Refund'
 
@@ -38,6 +39,8 @@ function StatusPill({ status }: { status: PayslipStatus }) {
 }
 
 export default function Payslips() {
+  usePageTitle('My Payslips')
+
   const navigate = useNavigate()
 
   return (

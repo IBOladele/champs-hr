@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Users, DollarSign, Gift, Calendar, Umbrella, Lock } from 'lucide-react'
+import { usePageTitle } from '../../hooks/usePageTitle'
 
 type SubTab = 'All reports' | 'My reports'
 
@@ -52,6 +53,8 @@ const myReportCards = [
 ]
 
 export default function Reports() {
+  usePageTitle('Reports')
+
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<SubTab>('All reports')
 

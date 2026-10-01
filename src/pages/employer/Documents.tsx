@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Search, FileText, History, Clock, ChevronDown, MoreHorizontal } from 'lucide-react'
+import { usePageTitle } from '../../hooks/usePageTitle'
 
 type SubTab = 'Documents uploaded' | 'Assigned documents' | 'Archived documents'
 type DocStatus = 'Live' | 'Due' | 'Exp' | ''
@@ -97,6 +98,8 @@ function StatusPill({ status }: { status: DocStatus }) {
 }
 
 export default function Documents() {
+  usePageTitle('Documents')
+
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<SubTab>('Documents uploaded')
   const [search, setSearch] = useState('')

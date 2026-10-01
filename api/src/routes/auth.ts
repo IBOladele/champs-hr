@@ -165,9 +165,9 @@ router.get('/me', requireAuth, async (req: Request, res: Response, next: NextFun
     const result = await pool.query<{
       id: string; email: string; role: string; tenant_id: string;
       full_name: string; phone: string | null; avatar_url: string | null;
-      email_verified: boolean;
+      email_verified: boolean; created_at: string;
     }>(
-      `SELECT id, email, role, tenant_id, full_name, phone, avatar_url, email_verified
+      `SELECT id, email, role, tenant_id, full_name, phone, avatar_url, email_verified, created_at
        FROM users WHERE id = $1 AND tenant_id = $2`,
       [req.user!.userId, req.user!.tenantId],
     );
@@ -184,6 +184,7 @@ router.get('/me', requireAuth, async (req: Request, res: Response, next: NextFun
       phone:         user.phone,
       avatarUrl:     user.avatar_url,
       emailVerified: user.email_verified,
+      createdAt:     user.created_at,
     });
   } catch (err) {
     next(err);

@@ -38,8 +38,11 @@ function StatusPill({ status }: { status: BenefitStatus }) {
 }
 
 import { useState } from 'react'
+import { usePageTitle } from '../../hooks/usePageTitle'
 
 export default function Benefits() {
+  usePageTitle('My Benefits')
+
   const navigate = useNavigate()
   const [activeSection, setActiveSection] = useState<SideSection>('plans')
 
