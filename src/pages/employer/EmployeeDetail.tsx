@@ -99,21 +99,18 @@ const employeeData: Record<string, {
 }
 
 type DetailTab =
-  | 'overview' | 'personal' | 'employment' | 'payroll'
-  | 'compensation' | 'benefits' | 'attendance' | 'leave'
+  | 'personal' | 'employment' | 'payroll'
+  | 'compensation' | 'attendance'
   | 'document' | 'logs'
 
 const tabs: { key: DetailTab; label: string }[] = [
-  { key: 'overview',      label: 'Overview'      },
-  { key: 'personal',      label: 'Personal info'  },
-  { key: 'employment',    label: 'Employment'     },
-  { key: 'payroll',       label: 'Payroll'        },
-  { key: 'compensation',  label: 'Compensation'   },
-  { key: 'benefits',      label: 'Benefits'       },
-  { key: 'attendance',    label: 'Attendance'     },
-  { key: 'leave',         label: 'Leave'          },
-  { key: 'document',      label: 'Document'       },
-  { key: 'logs',          label: 'Logs'           },
+  { key: 'personal',      label: 'Personal info'       },
+  { key: 'employment',    label: 'Employment'          },
+  { key: 'payroll',       label: 'Payroll'             },
+  { key: 'compensation',  label: 'Compensation details'},
+  { key: 'attendance',    label: 'Attendance'          },
+  { key: 'document',      label: 'Documents'           },
+  { key: 'logs',          label: 'Logs'                },
 ]
 
 // ── Sub-components ────────────────────────────────────────────────────────
@@ -149,40 +146,6 @@ function EditBtn({ label = 'Edit information' }: { label?: string }) {
 }
 
 // ── Tab content panels ────────────────────────────────────────────────────
-
-function OverviewTab({ emp }: { emp: typeof employeeData['1'] }) {
-  return (
-    <div className="space-y-5">
-      <SectionCard title="Personal information" action={<EditBtn />}>
-        <div className="grid grid-cols-3 gap-x-8 gap-y-5">
-          <InfoField label="Email address"      value={emp.email} />
-          <InfoField label="Phone number"       value={emp.phone} />
-          <InfoField label="Nationality"        value={emp.nationality} />
-          <InfoField label="Date of birth"      value={emp.dateOfBirth} />
-          <InfoField label="Gender"             value={emp.gender} />
-          <InfoField label="Address"            value={emp.address} />
-        </div>
-      </SectionCard>
-      <SectionCard title="Employment details" action={<EditBtn />}>
-        <div className="grid grid-cols-3 gap-x-8 gap-y-5">
-          <InfoField label="Department"         value={emp.department} />
-          <InfoField label="Job title"          value={emp.role} />
-          <InfoField label="Employment status"  value={emp.employmentStatus} />
-          <InfoField label="Pay type"           value={emp.payType} />
-          <InfoField label="Level"              value={emp.level} />
-          <InfoField label="Manager"            value={emp.managerName} />
-        </div>
-      </SectionCard>
-      <SectionCard title="Emergency contact" action={<EditBtn />}>
-        <div className="grid grid-cols-3 gap-x-8 gap-y-5">
-          <InfoField label="Contact name"       value={emp.emergencyContact} />
-          <InfoField label="Phone number"       value={emp.emergencyPhone} />
-          <InfoField label="Relationship"       value="Spouse" />
-        </div>
-      </SectionCard>
-    </div>
-  )
-}
 
 function PersonalTab({ emp }: { emp: typeof employeeData['1'] }) {
   return (
@@ -344,42 +307,6 @@ function CompensationTab({ emp }: { emp: typeof employeeData['1'] }) {
   )
 }
 
-function BenefitsTab() {
-  const plans = [
-    { name: 'Health plan',      provider: 'Aviva',    coverage: 'Employee + Family', renewal: 'Jan 2026',  status: 'Active' },
-    { name: 'Pension plan',     provider: 'Nest',     coverage: 'Employee',          renewal: 'Apr 2026',  status: 'Active' },
-    { name: 'Paid time off',    provider: 'Internal', coverage: '25 days/year',      renewal: 'Jan 2026',  status: 'Active' },
-  ]
-  return (
-    <div className="space-y-5">
-      <SectionCard title="Enrolled benefit plans">
-        <div className="space-y-3">
-          {plans.map((plan, i) => (
-            <div key={i} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-              <div>
-                <p className="text-sm font-medium text-gray-800">{plan.name}</p>
-                <p className="text-xs text-gray-400 mt-0.5">{plan.provider} · {plan.coverage}</p>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="text-right">
-                  <p className="text-xs text-gray-400">Renewal</p>
-                  <p className="text-sm font-medium text-gray-700">{plan.renewal}</p>
-                </div>
-                <span className="text-xs bg-green-50 text-green-600 border border-green-200 rounded-full px-2.5 py-0.5">
-                  {plan.status}
-                </span>
-                <button className="text-xs text-gray-600 border border-gray-200 rounded-lg px-3 py-1.5 hover:bg-gray-100">
-                  View details
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </SectionCard>
-    </div>
-  )
-}
-
 function AttendanceTab() {
   const records = [
     { date: 'Mon, Jun 9 2025',  clockIn: '09:02 AM', clockOut: '06:01 PM', total: '8h 59m', status: 'Present' },
@@ -432,66 +359,6 @@ function AttendanceTab() {
                   <span className={`text-xs border rounded-full px-2.5 py-0.5 ${statusStyle[r.status]}`}>
                     {r.status}
                   </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </SectionCard>
-    </div>
-  )
-}
-
-function LeaveTab() {
-  const requests = [
-    { type: 'Annual leave',   from: 'Jun 23, 2025', to: 'Jun 27, 2025', days: 5, status: 'Approved' },
-    { type: 'Sick leave',     from: 'May 12, 2025', to: 'May 13, 2025', days: 2, status: 'Approved' },
-    { type: 'Paternal leave', from: 'Jul 1, 2025',  to: 'Jul 31, 2025', days: 23, status: 'Pending' },
-  ]
-  const statusStyle: Record<string, string> = {
-    Approved: 'bg-green-50 text-green-600 border-green-200',
-    Pending:  'bg-amber-50 text-amber-600 border-amber-200',
-    Rejected: 'bg-red-50 text-red-600 border-red-200',
-  }
-  return (
-    <div className="space-y-5">
-      <div className="grid grid-cols-3 gap-4">
-        {[
-          { label: 'Annual leave balance',  value: '20 days' },
-          { label: 'Days taken',            value: '7 days'  },
-          { label: 'Days remaining',        value: '13 days' },
-        ].map((s, i) => (
-          <div key={i} className="bg-white rounded-xl border border-gray-100 p-5">
-            <p className="text-xs text-gray-400 mb-1">{s.label}</p>
-            <p className="text-xl font-bold text-gray-900">{s.value}</p>
-          </div>
-        ))}
-      </div>
-      <SectionCard title="Leave requests">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-gray-100">
-              {['Type', 'From', 'To', 'Days', 'Status', 'Actions'].map(h => (
-                <th key={h} className="pb-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wide">{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {requests.map((r, i) => (
-              <tr key={i} className="border-b border-gray-100 last:border-0">
-                <td className="py-3 text-sm font-medium text-gray-800">{r.type}</td>
-                <td className="py-3 text-sm text-gray-600">{r.from}</td>
-                <td className="py-3 text-sm text-gray-600">{r.to}</td>
-                <td className="py-3 text-sm text-gray-600">{r.days}</td>
-                <td className="py-3">
-                  <span className={`text-xs border rounded-full px-2.5 py-0.5 ${statusStyle[r.status]}`}>
-                    {r.status}
-                  </span>
-                </td>
-                <td className="py-3">
-                  <button className="text-xs text-gray-600 border border-gray-200 rounded-lg px-3 py-1.5 hover:bg-gray-50">
-                    View
-                  </button>
                 </td>
               </tr>
             ))}
@@ -597,7 +464,7 @@ function LogsTab() {
 export default function EmployeeDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const [activeTab, setActiveTab] = useState<DetailTab>('overview')
+  const [activeTab, setActiveTab] = useState<DetailTab>('personal')
 
   const emp = employeeData[id ?? '1'] ?? employeeData['1']
 
@@ -609,14 +476,11 @@ export default function EmployeeDetail() {
 
   function renderTab() {
     switch (activeTab) {
-      case 'overview':     return <OverviewTab emp={emp} />
       case 'personal':     return <PersonalTab emp={emp} />
       case 'employment':   return <EmploymentTab emp={emp} />
       case 'payroll':      return <PayrollTab emp={emp} />
       case 'compensation': return <CompensationTab emp={emp} />
-      case 'benefits':     return <BenefitsTab />
       case 'attendance':   return <AttendanceTab />
-      case 'leave':        return <LeaveTab />
       case 'document':     return <DocumentTab />
       case 'logs':         return <LogsTab />
     }

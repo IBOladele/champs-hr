@@ -1,16 +1,13 @@
 import { useState } from 'react'
 import {
-  User, CreditCard, Bell, ShieldCheck, FolderOpen, Pencil, ChevronDown
+  User, CreditCard, Pencil, ChevronDown
 } from 'lucide-react'
 
-type SidebarKey = 'account' | 'payment' | 'notifications' | 'security' | 'documents'
+type SidebarKey = 'account' | 'payment'
 
 const sidebarItems: { key: SidebarKey; label: string; icon: React.ReactNode }[] = [
-  { key: 'account',       label: 'Personal information', icon: <User size={16} />        },
-  { key: 'payment',       label: 'Payment information',  icon: <CreditCard size={16} />  },
-  { key: 'notifications', label: 'Notifications',        icon: <Bell size={16} />        },
-  { key: 'security',      label: 'Security',             icon: <ShieldCheck size={16} /> },
-  { key: 'documents',     label: 'Documents',            icon: <FolderOpen size={16} />  },
+  { key: 'account', label: 'Personal information', icon: <User size={16} />       },
+  { key: 'payment', label: 'Payment information',  icon: <CreditCard size={16} /> },
 ]
 
 function InputField({

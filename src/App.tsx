@@ -1,7 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
-
-// Landing
-import LandingPage from './pages/LandingPage'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 
 // Auth
 import RoleSelect from './pages/auth/RoleSelect'
@@ -50,10 +47,8 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Landing */}
-        <Route path="/" element={<LandingPage />} />
-
         {/* Auth flow */}
+        <Route path="/" element={<Navigate to="/get-started" replace />} />
         <Route path="/get-started" element={<RoleSelect />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/otp" element={<OtpVerify />} />
