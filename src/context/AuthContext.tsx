@@ -1,4 +1,5 @@
-import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react'
+import { createContext, useContext, useEffect, useState, useCallback } from 'react'
+import type { ReactNode } from 'react'
 import { auth, ApiError, type AuthUser } from '../lib/api'
 
 interface AuthContextValue {
