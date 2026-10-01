@@ -7,6 +7,7 @@ import RoleSelect from './pages/auth/RoleSelect'
 import Signup from './pages/auth/Signup'
 import Login from './pages/auth/Login'
 import Onboarding from './pages/auth/Onboarding'
+import VerifyEmail from './pages/auth/VerifyEmail'
 
 // Employer
 import EmployerLayout from './layouts/EmployerLayout'
@@ -54,6 +55,7 @@ export default function App() {
           <Route path="/get-started" element={<RoleSelect />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
 
           {/* Onboarding — requires auth (employer only) */}
           <Route

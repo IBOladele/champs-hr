@@ -21,8 +21,11 @@ CREATE TABLE IF NOT EXISTS users (
   role          TEXT NOT NULL CHECK (role IN ('employer', 'employee')),
   full_name     TEXT NOT NULL,
   phone         TEXT,
-  avatar_url    TEXT,
-  created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  avatar_url                   TEXT,
+  email_verified               BOOLEAN NOT NULL DEFAULT FALSE,
+  email_verification_token     TEXT,
+  email_verification_sent_at   TIMESTAMPTZ,
+  created_at                   TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX IF NOT EXISTS idx_users_tenant_id ON users (tenant_id);
@@ -239,3 +242,8 @@ CREATE TABLE IF NOT EXISTS employee_direct_deposit (
 );
 CREATE INDEX IF NOT EXISTS idx_direct_deposit_tenant_id ON employee_direct_deposit(tenant_id);
 CREATE INDEX IF NOT EXISTS idx_direct_deposit_employee_id ON employee_direct_deposit(employee_id);
+
+-- Idempotent additions for existing databases
+ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified             BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verification_token   TEXT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verification_sent_at TIMESTAMPTZ;

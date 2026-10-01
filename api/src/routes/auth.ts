@@ -1,9 +1,11 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import { z } from 'zod';
 import pool from '../db';
 import { requireAuth, SESSION_COOKIE, cookieOptions } from '../middleware/auth';
+import { sendVerificationEmail } from '../lib/email';
 
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET as string;
@@ -53,28 +55,37 @@ router.post('/signup', async (req: Request, res: Response, next: NextFunction) =
       );
       const tenantId = tenantResult.rows[0].id;
 
+      const verificationToken = crypto.randomBytes(32).toString('hex');
+
       const userResult = await client.query<{
         id: string; email: string; role: string; tenant_id: string; full_name: string;
       }>(
-        `INSERT INTO users (tenant_id, email, password_hash, role, full_name)
-         VALUES ($1, $2, $3, 'employer', $4)
+        `INSERT INTO users (tenant_id, email, password_hash, role, full_name,
+                            email_verification_token, email_verification_sent_at)
+         VALUES ($1, $2, $3, 'employer', $4, $5, NOW())
          RETURNING id, email, role, tenant_id, full_name`,
-        [tenantId, body.email, passwordHash, body.fullName],
+        [tenantId, body.email, passwordHash, body.fullName, verificationToken],
       );
       const user = userResult.rows[0];
 
       await client.query('COMMIT');
+
+      // Fire-and-forget — don't block signup if email fails
+      sendVerificationEmail(body.email, verificationToken).catch((err) =>
+        console.error('[email] Failed to send verification email:', err),
+      );
 
       const token = signToken({ userId: user.id, tenantId: user.tenant_id, role: 'employer' });
       res.cookie(SESSION_COOKIE, token, cookieOptions);
 
       res.status(201).json({
         user: {
-          id:       user.id,
-          email:    user.email,
-          role:     user.role,
-          tenantId: user.tenant_id,
-          fullName: user.full_name,
+          id:            user.id,
+          email:         user.email,
+          role:          user.role,
+          tenantId:      user.tenant_id,
+          fullName:      user.full_name,
+          emailVerified: false,
         },
       });
     } catch (err) {
@@ -106,8 +117,9 @@ router.post('/login', async (req: Request, res: Response, next: NextFunction) =>
     const result = await pool.query<{
       id: string; email: string; role: 'employer' | 'employee';
       tenant_id: string; full_name: string; password_hash: string;
+      email_verified: boolean;
     }>(
-      `SELECT id, email, role, tenant_id, full_name, password_hash
+      `SELECT id, email, role, tenant_id, full_name, password_hash, email_verified
        FROM users WHERE email = $1`,
       [body.email],
     );
@@ -127,11 +139,12 @@ router.post('/login', async (req: Request, res: Response, next: NextFunction) =>
 
     res.json({
       user: {
-        id:       user.id,
-        email:    user.email,
-        role:     user.role,
-        tenantId: user.tenant_id,
-        fullName: user.full_name,
+        id:            user.id,
+        email:         user.email,
+        role:          user.role,
+        tenantId:      user.tenant_id,
+        fullName:      user.full_name,
+        emailVerified: user.email_verified,
       },
     });
   } catch (err) {
@@ -152,8 +165,9 @@ router.get('/me', requireAuth, async (req: Request, res: Response, next: NextFun
     const result = await pool.query<{
       id: string; email: string; role: string; tenant_id: string;
       full_name: string; phone: string | null; avatar_url: string | null;
+      email_verified: boolean;
     }>(
-      `SELECT id, email, role, tenant_id, full_name, phone, avatar_url
+      `SELECT id, email, role, tenant_id, full_name, phone, avatar_url, email_verified
        FROM users WHERE id = $1 AND tenant_id = $2`,
       [req.user!.userId, req.user!.tenantId],
     );
@@ -162,14 +176,85 @@ router.get('/me', requireAuth, async (req: Request, res: Response, next: NextFun
     if (!user) { res.status(404).json({ error: 'User not found' }); return; }
 
     res.json({
-      id:        user.id,
-      email:     user.email,
-      role:      user.role,
-      tenantId:  user.tenant_id,
-      fullName:  user.full_name,
-      phone:     user.phone,
-      avatarUrl: user.avatar_url,
+      id:            user.id,
+      email:         user.email,
+      role:          user.role,
+      tenantId:      user.tenant_id,
+      fullName:      user.full_name,
+      phone:         user.phone,
+      avatarUrl:     user.avatar_url,
+      emailVerified: user.email_verified,
     });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// POST /auth/verify-email
+router.post('/verify-email', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { token } = z.object({ token: z.string().min(1) }).parse(req.body);
+
+    const result = await pool.query<{ id: string }>(
+      `UPDATE users
+       SET email_verified = TRUE, email_verification_token = NULL
+       WHERE email_verification_token = $1
+         AND email_verification_sent_at > NOW() - INTERVAL '24 hours'
+         AND email_verified = FALSE
+       RETURNING id`,
+      [token],
+    );
+
+    if (result.rowCount === 0) {
+      res.status(400).json({ error: 'Invalid or expired verification link' });
+      return;
+    }
+
+    res.json({ ok: true });
+  } catch (err) {
+    if (err instanceof z.ZodError) { res.status(400).json({ error: err.errors }); return; }
+    next(err);
+  }
+});
+
+// POST /auth/resend-verification
+router.post('/resend-verification', requireAuth, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { userId, tenantId } = req.user!;
+
+    const result = await pool.query<{
+      email: string; email_verified: boolean; email_verification_sent_at: Date | null;
+    }>(
+      `SELECT email, email_verified, email_verification_sent_at
+       FROM users WHERE id = $1 AND tenant_id = $2`,
+      [userId, tenantId],
+    );
+
+    const user = result.rows[0];
+    if (!user) { res.status(404).json({ error: 'User not found' }); return; }
+    if (user.email_verified) { res.status(400).json({ error: 'Email already verified' }); return; }
+
+    // Rate-limit: one resend per minute
+    if (user.email_verification_sent_at) {
+      const sentAt = new Date(user.email_verification_sent_at).getTime();
+      if (Date.now() - sentAt < 60_000) {
+        res.status(429).json({ error: 'Please wait a moment before requesting another email' });
+        return;
+      }
+    }
+
+    const token = crypto.randomBytes(32).toString('hex');
+    await pool.query(
+      `UPDATE users SET email_verification_token = $1, email_verification_sent_at = NOW()
+       WHERE id = $2`,
+      [token, userId],
+    );
+
+    sendVerificationEmail(user.email, token).catch((err) =>
+      console.error('[email] Failed to resend verification email:', err),
+    );
+
+    res.json({ ok: true });
   } catch (err) {
     next(err);
   }
@@ -197,7 +282,7 @@ router.patch('/me', requireAuth, async (req: Request, res: Response, next: NextF
     const result = await pool.query(
       `UPDATE users SET ${fields.join(', ')}
        WHERE id = $1 AND tenant_id = $2
-       RETURNING id, email, role, tenant_id, full_name, phone, avatar_url`,
+       RETURNING id, email, role, tenant_id, full_name, phone, avatar_url, email_verified`,
       values,
     );
 
@@ -206,6 +291,7 @@ router.patch('/me', requireAuth, async (req: Request, res: Response, next: NextF
       id: u.id, email: u.email, role: u.role,
       tenantId: u.tenant_id, fullName: u.full_name,
       phone: u.phone, avatarUrl: u.avatar_url,
+      emailVerified: u.email_verified,
     });
   } catch (err) {
     if (err instanceof z.ZodError) { res.status(400).json({ error: err.errors }); return; }

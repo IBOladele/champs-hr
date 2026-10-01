@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Check, ChevronDown } from 'lucide-react'
+import { Check, ChevronDown, Mail, RefreshCw } from 'lucide-react'
+import { useAuth } from '../../context/AuthContext'
+import { auth } from '../../lib/api'
 
 const steps = [
   { label: 'Company profile info',          sub: 'Tell us about your company'          },
@@ -130,6 +132,47 @@ function StepContent({ step }: { step: number }) {
   )
 }
 
+function EmailVerificationBanner() {
+  const { user } = useAuth()
+  const [sending, setSending] = useState(false)
+  const [sent, setSent] = useState(false)
+  const [error, setError] = useState('')
+
+  if (!user || user.emailVerified) return null
+
+  async function handleResend() {
+    setSending(true)
+    setError('')
+    try {
+      await auth.resendVerification()
+      setSent(true)
+      setTimeout(() => setSent(false), 30_000)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to resend')
+    } finally {
+      setSending(false)
+    }
+  }
+
+  return (
+    <div className="bg-amber-50 border-b border-amber-200 px-12 py-3 flex items-center gap-3">
+      <Mail size={16} className="text-amber-600 flex-shrink-0" />
+      <p className="text-sm text-amber-800 flex-1">
+        Please verify your email address. We sent a link to <strong>{user.email}</strong>.
+      </p>
+      {error && <p className="text-xs text-red-600">{error}</p>}
+      <button
+        onClick={handleResend}
+        disabled={sending || sent}
+        className="flex items-center gap-1.5 text-xs font-medium text-amber-700 hover:text-amber-900 disabled:opacity-50 whitespace-nowrap"
+      >
+        <RefreshCw size={12} className={sending ? 'animate-spin' : ''} />
+        {sent ? 'Email sent!' : sending ? 'Sending…' : 'Resend email'}
+      </button>
+    </div>
+  )
+}
+
 export default function Onboarding() {
   const [currentStep, setCurrentStep] = useState(0)
   const navigate = useNavigate()
@@ -203,6 +246,7 @@ export default function Onboarding() {
 
       {/* Right — form content */}
       <div className="flex-1 flex flex-col overflow-y-auto">
+        <EmailVerificationBanner />
         <div className="flex-1 px-12 py-10 max-w-2xl">
           {/* Step header */}
           <div className="mb-8">

@@ -74,6 +74,7 @@ export interface AuthUser {
   fullName: string
   phone?: string | null
   avatarUrl?: string | null
+  emailVerified: boolean
 }
 
 export interface Employee {
@@ -201,6 +202,12 @@ export const auth = {
 
   updateMe: (data: { fullName?: string; phone?: string | null }): Promise<AuthUser> =>
     request<AuthUser>('/auth/me', { method: 'PATCH', body: JSON.stringify(data) }),
+
+  verifyEmail: (token: string): Promise<{ ok: boolean }> =>
+    request<{ ok: boolean }>('/auth/verify-email', { method: 'POST', body: JSON.stringify({ token }) }),
+
+  resendVerification: (): Promise<{ ok: boolean }> =>
+    request<{ ok: boolean }>('/auth/resend-verification', { method: 'POST' }),
 
   getStoredUser: loadUser,
 }
