@@ -195,24 +195,37 @@ describe('Payroll Routes', () => {
       expect(item).toHaveProperty('deductions');
     });
 
-    it('each payroll item has expected deduction fields', async () => {
+    it('each payroll item has expected US deduction fields', async () => {
       const res = await request
         .get(`/api/v1/payroll/${runId}`)
         .set('Authorization', `Bearer ${employer.token}`);
 
       const item = res.body.items[0];
       const deductions = item.deductions as {
-        tax: number;
-        nationalInsurance: number;
+        federalTax: number;
+        socialSecurity: number;
+        medicare: number;
         total: number;
       };
-      expect(deductions).toHaveProperty('tax');
-      expect(deductions).toHaveProperty('nationalInsurance');
+      expect(deductions).toHaveProperty('federalTax');
+      expect(deductions).toHaveProperty('socialSecurity');
+      expect(deductions).toHaveProperty('medicare');
       expect(deductions).toHaveProperty('total');
-      // gross * 0.2 = tax, gross * 0.05 = NI
+
       const gross = parseFloat(item.gross_pay);
-      expect(Math.abs(deductions.tax - gross * 0.2)).toBeLessThan(0.02);
-      expect(Math.abs(deductions.nationalInsurance - gross * 0.05)).toBeLessThan(0.02);
+
+      // Federal tax is bracket-based (IRS Pub 15-T) — just verify it's non-negative
+      // and less than 37% (top marginal rate)
+      expect(deductions.federalTax).toBeGreaterThanOrEqual(0);
+      expect(deductions.federalTax).toBeLessThanOrEqual(gross * 0.37);
+
+      // FICA rates are flat: 6.2% SS, 1.45% Medicare
+      expect(Math.abs(deductions.socialSecurity - gross * 0.062 )).toBeLessThan(0.02);
+      expect(Math.abs(deductions.medicare       - gross * 0.0145)).toBeLessThan(0.02);
+
+      // Total must equal the sum of the three components
+      const expectedTotal = deductions.federalTax + deductions.socialSecurity + deductions.medicare;
+      expect(Math.abs(deductions.total - expectedTotal)).toBeLessThan(0.02);
     });
 
     it('nonexistent run id → 404', async () => {

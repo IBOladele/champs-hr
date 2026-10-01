@@ -2,6 +2,14 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import pool from '../db';
 import { requireEmployer } from '../middleware/auth';
+import {
+  computeFederalWithholding,
+  computeFica,
+  DEFAULT_W4,
+  PAY_PERIODS,
+  type W4Elections,
+  type PayFrequency,
+} from '../lib/withholding';
 
 const router = Router();
 
@@ -48,13 +56,26 @@ router.post(
       try {
         await client.query('BEGIN');
 
-        // Fetch all active employees for this tenant
+        // Fetch all active employees + their W-4 elections for this tenant
         const employees = await client.query<{
           id: string;
           gross_salary: string;
+          pay_frequency: string;
+          filing_status: string | null;
+          multiple_jobs: boolean | null;
+          dependents_amount: string | null;
+          other_income: string | null;
+          extra_deductions: string | null;
+          extra_withholding: string | null;
+          exempt: boolean | null;
         }>(
-          `SELECT id, gross_salary FROM employees
-           WHERE tenant_id = $1 AND employment_status = 'active'`,
+          `SELECT
+             e.id, e.gross_salary, e.pay_frequency,
+             w.filing_status, w.multiple_jobs, w.dependents_amount,
+             w.other_income, w.extra_deductions, w.extra_withholding, w.exempt
+           FROM employees e
+           LEFT JOIN employee_w4 w ON w.employee_id = e.id
+           WHERE e.tenant_id = $1 AND e.employment_status = 'active'`,
           [tenantId]
         );
 
@@ -64,27 +85,43 @@ router.post(
           return;
         }
 
-        // Calculate totals with a simple 20% tax + 5% NI deduction model
         let totalGross = 0;
         let totalNet = 0;
         let totalDeductions = 0;
 
         const items = employees.rows.map((emp) => {
-          const gross = parseFloat(emp.gross_salary);
-          const tax = parseFloat((gross * 0.2).toFixed(2));
-          const ni = parseFloat((gross * 0.05).toFixed(2));
-          const deductionsTotal = tax + ni;
-          const net = parseFloat((gross - deductionsTotal).toFixed(2));
+          const annualGross = parseFloat(emp.gross_salary);
+          const frequency   = (emp.pay_frequency as PayFrequency) in PAY_PERIODS
+            ? emp.pay_frequency as PayFrequency
+            : 'monthly';
+          const periods     = PAY_PERIODS[frequency];
+          const periodGross = parseFloat((annualGross / periods).toFixed(2));
 
-          totalGross += gross;
+          // Build W-4 elections — fall back to DEFAULT_W4 if none on file
+          const w4: W4Elections = emp.filing_status ? {
+            filingStatus:     emp.filing_status as W4Elections['filingStatus'],
+            multipleJobs:     emp.multiple_jobs ?? false,
+            dependentsAmount: parseFloat(emp.dependents_amount ?? '0'),
+            otherIncome:      parseFloat(emp.other_income ?? '0'),
+            extraDeductions:  parseFloat(emp.extra_deductions ?? '0'),
+            extraWithholding: parseFloat(emp.extra_withholding ?? '0'),
+            exempt:           emp.exempt ?? false,
+          } : DEFAULT_W4;
+
+          const federalTax     = computeFederalWithholding(periodGross, frequency, w4);
+          const { socialSecurity, medicare } = computeFica(periodGross, frequency);
+          const deductionsTotal = parseFloat((federalTax + socialSecurity + medicare).toFixed(2));
+          const net             = parseFloat((periodGross - deductionsTotal).toFixed(2));
+
+          totalGross      += periodGross;
           totalDeductions += deductionsTotal;
-          totalNet += net;
+          totalNet        += net;
 
           return {
             employeeId: emp.id,
-            grossPay: gross,
-            deductions: { tax, nationalInsurance: ni, total: deductionsTotal },
-            netPay: net,
+            grossPay:   periodGross,
+            deductions: { federalTax, socialSecurity, medicare, total: deductionsTotal },
+            netPay:     net,
           };
         });
 

@@ -171,4 +171,49 @@ router.patch(
   }
 );
 
+// PATCH /:id/cancel — employee cancels their own pending request (employer can cancel any)
+router.patch(
+  '/:id/cancel',
+  requireAuth,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { tenantId, role, userId } = req.user!;
+      const { id } = req.params;
+
+      // Check the request belongs to this tenant and is still pending
+      const existing = await pool.query<{
+        id: string; status: string; employee_id: string;
+      }>(
+        `SELECT lr.id, lr.status, e.user_id
+         FROM leave_requests lr
+         JOIN employees e ON e.id = lr.employee_id
+         WHERE lr.id = $1 AND lr.tenant_id = $2`,
+        [id, tenantId],
+      );
+
+      const row = existing.rows[0];
+      if (!row) { res.status(404).json({ error: 'Leave request not found' }); return; }
+      if (row.status !== 'pending') {
+        res.status(409).json({ error: `Cannot cancel a request with status '${row.status}'` }); return;
+      }
+
+      // Employees can only cancel their own requests
+      if (role === 'employee' && (row as unknown as { user_id: string }).user_id !== userId) {
+        res.status(403).json({ error: 'Access denied' }); return;
+      }
+
+      const result = await pool.query(
+        `UPDATE leave_requests SET status = 'cancelled'
+         WHERE id = $1 AND tenant_id = $2
+         RETURNING *`,
+        [id, tenantId],
+      );
+
+      res.json(result.rows[0]);
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
 export default router;

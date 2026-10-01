@@ -56,6 +56,18 @@ router.post(
       const body = createEmployeeSchema.parse(req.body);
       const { tenantId } = req.user!;
 
+      // Validate departmentId belongs to this tenant (if provided)
+      if (body.departmentId) {
+        const deptCheck = await pool.query(
+          `SELECT id FROM departments WHERE id = $1 AND tenant_id = $2`,
+          [body.departmentId, tenantId]
+        );
+        if (!deptCheck.rows[0]) {
+          res.status(400).json({ error: 'Department not found in your tenant' });
+          return;
+        }
+      }
+
       const passwordHash = await bcrypt.hash('Welcome123!', 10);
 
       const client = await pool.connect();
@@ -116,6 +128,11 @@ router.post(
     } catch (err) {
       if (err instanceof z.ZodError) {
         res.status(400).json({ error: err.errors });
+        return;
+      }
+      // Duplicate email or employee_number — unique constraint violation
+      if ((err as { code?: string }).code === '23505') {
+        res.status(409).json({ error: 'Duplicate value: employee number or email already exists in this tenant' });
         return;
       }
       next(err);
@@ -195,6 +212,18 @@ router.patch(
         return;
       }
       const userId = existing.rows[0].user_id;
+
+      // Validate departmentId belongs to this tenant (if being changed)
+      if (body.departmentId !== undefined && body.departmentId !== null) {
+        const deptCheck = await pool.query(
+          `SELECT id FROM departments WHERE id = $1 AND tenant_id = $2`,
+          [body.departmentId, tenantId]
+        );
+        if (!deptCheck.rows[0]) {
+          res.status(400).json({ error: 'Department not found in your tenant' });
+          return;
+        }
+      }
 
       const client = await pool.connect();
       try {

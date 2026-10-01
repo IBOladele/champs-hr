@@ -118,7 +118,7 @@ CREATE TABLE IF NOT EXISTS benefits (
   description  TEXT,
   benefit_type TEXT NOT NULL,
   value        NUMERIC(12, 2) NOT NULL,
-  currency     TEXT NOT NULL DEFAULT 'GBP',
+  currency     TEXT NOT NULL DEFAULT 'USD',
   is_active    BOOLEAN NOT NULL DEFAULT TRUE,
   created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -156,3 +156,86 @@ CREATE TABLE IF NOT EXISTS attendance_records (
 CREATE INDEX IF NOT EXISTS idx_attendance_records_tenant_id ON attendance_records (tenant_id);
 CREATE INDEX IF NOT EXISTS idx_attendance_records_employee_id ON attendance_records (employee_id);
 CREATE INDEX IF NOT EXISTS idx_attendance_records_date ON attendance_records (date);
+
+-- W-4 (Federal Withholding Certificate)
+CREATE TABLE IF NOT EXISTS employee_w4 (
+  id                 UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  tenant_id          UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+  employee_id        UUID NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
+  filing_status      TEXT NOT NULL DEFAULT 'single'
+                       CHECK (filing_status IN ('single','married_jointly','head_of_household')),
+  multiple_jobs      BOOLEAN NOT NULL DEFAULT FALSE,
+  dependents_amount  NUMERIC(10,2) NOT NULL DEFAULT 0,
+  other_income       NUMERIC(10,2) NOT NULL DEFAULT 0,
+  extra_deductions   NUMERIC(10,2) NOT NULL DEFAULT 0,
+  extra_withholding  NUMERIC(10,2) NOT NULL DEFAULT 0,
+  exempt             BOOLEAN NOT NULL DEFAULT FALSE,
+  signed_at          TIMESTAMPTZ,
+  created_at         TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at         TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (employee_id)
+);
+CREATE INDEX IF NOT EXISTS idx_employee_w4_tenant_id ON employee_w4(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_employee_w4_employee_id ON employee_w4(employee_id);
+
+-- State Withholding
+CREATE TABLE IF NOT EXISTS employee_state_withholding (
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  tenant_id       UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+  employee_id     UUID NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
+  state           CHAR(2) NOT NULL,
+  filing_status   TEXT NOT NULL DEFAULT 'single',
+  allowances      INTEGER NOT NULL DEFAULT 0,
+  extra_withholding NUMERIC(10,2) NOT NULL DEFAULT 0,
+  exempt          BOOLEAN NOT NULL DEFAULT FALSE,
+  signed_at       TIMESTAMPTZ,
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (employee_id, state)
+);
+CREATE INDEX IF NOT EXISTS idx_state_withholding_tenant_id ON employee_state_withholding(tenant_id);
+
+-- I-9 (Employment Eligibility Verification)
+CREATE TABLE IF NOT EXISTS employee_i9 (
+  id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  tenant_id           UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+  employee_id         UUID NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
+  status              TEXT NOT NULL DEFAULT 'pending'
+                        CHECK (status IN ('pending','completed','reverification_required')),
+  citizenship_status  TEXT CHECK (citizenship_status IN
+                        ('us_citizen','noncitizen_national','lawful_permanent_resident','alien_authorized')),
+  alien_reg_number    TEXT,
+  i94_number          TEXT,
+  foreign_passport_country TEXT,
+  authorized_through  DATE,
+  section1_completed_at TIMESTAMPTZ,
+  doc_list_used       TEXT CHECK (doc_list_used IN ('list_a','list_b_c')),
+  doc_title           TEXT,
+  doc_issuing_authority TEXT,
+  doc_number          TEXT,
+  doc_expiry          DATE,
+  section2_completed_at TIMESTAMPTZ,
+  section2_completed_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  reverification_due  DATE,
+  created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (employee_id)
+);
+CREATE INDEX IF NOT EXISTS idx_employee_i9_tenant_id ON employee_i9(tenant_id);
+
+-- Direct Deposit Authorization
+CREATE TABLE IF NOT EXISTS employee_direct_deposit (
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  tenant_id       UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+  employee_id     UUID NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
+  bank_name       TEXT NOT NULL,
+  routing_number  CHAR(9) NOT NULL,
+  account_number  TEXT NOT NULL,
+  account_type    TEXT NOT NULL DEFAULT 'checking' CHECK (account_type IN ('checking','savings')),
+  is_primary      BOOLEAN NOT NULL DEFAULT TRUE,
+  is_active       BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_direct_deposit_tenant_id ON employee_direct_deposit(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_direct_deposit_employee_id ON employee_direct_deposit(employee_id);

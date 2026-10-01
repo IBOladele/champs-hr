@@ -210,4 +210,52 @@ router.get(
   }
 );
 
+// PATCH /auth/me — update own profile (full_name, phone)
+const updateMeSchema = z.object({
+  fullName: z.string().min(1).optional(),
+  phone:    z.string().optional().nullable(),
+});
+
+router.patch(
+  '/me',
+  requireAuth,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const body = updateMeSchema.parse(req.body);
+      const { userId, tenantId } = req.user!;
+
+      const fields: string[] = [];
+      const values: unknown[] = [userId, tenantId];
+
+      if (body.fullName !== undefined) { values.push(body.fullName); fields.push(`full_name = $${values.length}`); }
+      if (body.phone    !== undefined) { values.push(body.phone);    fields.push(`phone = $${values.length}`); }
+
+      if (fields.length === 0) {
+        res.status(400).json({ error: 'No fields to update' }); return;
+      }
+
+      const result = await pool.query(
+        `UPDATE users SET ${fields.join(', ')}
+         WHERE id = $1 AND tenant_id = $2
+         RETURNING id, email, role, tenant_id, full_name, phone, avatar_url`,
+        values,
+      );
+
+      const u = result.rows[0];
+      res.json({
+        id:       u.id,
+        email:    u.email,
+        role:     u.role,
+        tenantId: u.tenant_id,
+        fullName: u.full_name,
+        phone:    u.phone,
+        avatarUrl: u.avatar_url,
+      });
+    } catch (err) {
+      if (err instanceof z.ZodError) { res.status(400).json({ error: err.errors }); return; }
+      next(err);
+    }
+  },
+);
+
 export default router;
