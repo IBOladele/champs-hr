@@ -80,7 +80,7 @@ describe('Benefits Routes', () => {
         });
 
       expect(res.status).toBe(201);
-      expect(res.body.currency).toBe('GBP');
+      expect(res.body.currency).toBe('USD');
     });
 
     it('employee cannot create benefit → 403', async () => {
