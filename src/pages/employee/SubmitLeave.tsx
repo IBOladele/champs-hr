@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, Upload } from 'lucide-react'
+import { leave as leaveApi } from '../../lib/api'
 
 const leaveTypes = [
   'Annual leave',
@@ -27,10 +28,28 @@ export default function SubmitLeave() {
   const [cover, setCover] = useState('')
 
   const numDays = startDate && endDate ? daysBetween(startDate, endDate) : null
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    navigate('/employee/leave')
+    if (!leaveType || !startDate || !endDate || !numDays) return
+    setSubmitting(true)
+    setError(null)
+    try {
+      await leaveApi.create({
+        leaveType,
+        startDate,
+        endDate,
+        daysRequested: numDays,
+        reason: reason || undefined,
+      })
+      navigate('/employee/leave')
+    } catch {
+      setError('Failed to submit request. Please try again.')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -154,6 +173,7 @@ export default function SubmitLeave() {
           </div>
 
           {/* Actions */}
+          {error && <p className="text-sm text-red-600">{error}</p>}
           <div className="flex items-center justify-end gap-3 pt-2">
             <button
               type="button"
@@ -164,9 +184,10 @@ export default function SubmitLeave() {
             </button>
             <button
               type="submit"
-              className="px-5 py-2 text-sm font-medium text-white bg-[#22c55e] rounded-lg hover:bg-green-600 transition-colors"
+              disabled={submitting}
+              className="px-5 py-2 text-sm font-medium text-white bg-[#22c55e] rounded-lg hover:bg-green-600 transition-colors disabled:opacity-60"
             >
-              Submit request
+              {submitting ? 'Submitting…' : 'Submit request'}
             </button>
           </div>
         </form>

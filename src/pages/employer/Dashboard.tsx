@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Check, User } from 'lucide-react'
 
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { useAuth } from '../../context/AuthContext'
+import { onboarding as onboardingApi, employerDashboard, type EmployerDashboard } from '../../lib/api'
 
 // ── Step disc marker ──────────────────────────────────────────────────
 
@@ -224,15 +225,36 @@ const RECOMMENDED: RecommendedItem[] = [
 
 // ── Main Dashboard ────────────────────────────────────────────────────
 
+function buildSteps(currentStep: number, completed: boolean): Step[] {
+  return SETUP_STEPS.map(s => ({
+    ...s,
+    status: completed || s.id < currentStep ? 'done'
+          : s.id === currentStep ? 'current'
+          : 'upcoming',
+  }))
+}
+
 export default function EmployerDashboard() {
   usePageTitle('Dashboard')
   const { user } = useAuth()
   const firstName = user?.fullName?.split(' ')[0] ?? 'there'
 
-  // For now always show State A (no firstPayrollRunAt yet)
-  const firstPayrollRunAt: string | null = null
+  const [onboardingStep, setOnboardingStep] = useState(1)
+  const [onboardingCompleted, setOnboardingCompleted] = useState(false)
+  const [dashData, setDashData] = useState<EmployerDashboard | null>(null)
 
-  const steps = SETUP_STEPS
+  useEffect(() => {
+    onboardingApi.get()
+      .then(s => { setOnboardingStep(s.step); setOnboardingCompleted(s.completed) })
+      .catch(() => {})
+    employerDashboard.get()
+      .then(setDashData)
+      .catch(() => {})
+  }, [])
+
+  const firstPayrollRunAt: string | null = dashData?.recentPayrolls?.[0]?.periodStart ?? null
+
+  const steps = buildSteps(onboardingStep, onboardingCompleted)
   const doneCount = steps.filter(s => s.status === 'done').length
   const totalSteps = steps.length
   const remainingCount = totalSteps - doneCount
@@ -245,11 +267,23 @@ export default function EmployerDashboard() {
     setExpandedStep(prev => (prev === id ? null : id))
   }
 
-  if (firstPayrollRunAt) {
-    // State B placeholder — not reached yet
+  if (firstPayrollRunAt || onboardingCompleted) {
     return (
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Good morning, {firstName}</h1>
+      <div className="flex flex-col gap-6">
+        <h1 className="text-2xl font-bold text-gray-900">Welcome back, {firstName}</h1>
+        <div className="grid grid-cols-4 gap-4">
+          {[
+            { label: 'Employees', value: String(dashData?.employeeCount ?? '—') },
+            { label: 'Pending leave', value: String(dashData?.pendingLeaveCount ?? '—') },
+            { label: 'Today present', value: String(dashData?.todayPresent ?? '—') },
+            { label: 'Payroll runs', value: String(dashData?.recentPayrolls?.length ?? '—') },
+          ].map(card => (
+            <div key={card.label} className="bg-white rounded-xl border border-gray-200 p-5">
+              <p className="text-sm text-gray-500 mb-1">{card.label}</p>
+              <p className="text-2xl font-bold text-gray-900">{card.value}</p>
+            </div>
+          ))}
+        </div>
       </div>
     )
   }

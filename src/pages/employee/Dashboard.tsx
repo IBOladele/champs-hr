@@ -1,7 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Clock, FileText, CalendarDays, Gift, Settings, ChevronRight, MapPin } from 'lucide-react'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { useAuth } from '../../context/AuthContext'
+import { useNavigate } from 'react-router-dom'
+import { employeeDashboard, attendance as attendanceApi, type EmployeeDashboardData } from '../../lib/api'
 
 function StatusPill({ status }: { status: string }) {
   const cls =
@@ -20,22 +22,56 @@ function StatusPill({ status }: { status: string }) {
 }
 
 const quickActions = [
-  { label: 'Manage payslips',       icon: FileText },
-  { label: 'Manage attendance',     icon: Clock },
-  { label: 'Manage benefits',       icon: Gift },
-  { label: 'Manage leave requests', icon: CalendarDays },
-  { label: 'Configure settings',    icon: Settings },
+  { label: 'Manage payslips',       icon: FileText,     path: '/employee/payslips' },
+  { label: 'Manage attendance',     icon: Clock,        path: '/employee/attendance' },
+  { label: 'Manage benefits',       icon: Gift,         path: '/employee/benefits' },
+  { label: 'Manage leave requests', icon: CalendarDays, path: '/employee/leave' },
+  { label: 'Configure settings',    icon: Settings,     path: '/employee/settings' },
 ]
 
 export default function EmployeeDashboard() {
   usePageTitle('My Dashboard')
   const { user } = useAuth()
+  const navigate = useNavigate()
   const firstName = user?.fullName?.split(' ')[0] ?? 'there'
 
-  const [benefits] = useState<{ name: string; sub: string; status: string; action: string }[]>([])
-  const [payslips] = useState<{ name: string; info: string }[]>([])
-  const [leaveRequests] = useState<{ name: string; sub: string; status: string; action: string }[]>([])
-  const [attendance] = useState<{ time: string; sub: string; status: string }[]>([])
+  const [data, setData] = useState<EmployeeDashboardData | null>(null)
+  const [clockingIn, setClockingIn] = useState(false)
+
+  useEffect(() => {
+    employeeDashboard.get()
+      .then(setData)
+      .catch(() => {})
+  }, [])
+
+  async function handleClockIn() {
+    setClockingIn(true)
+    try {
+      await attendanceApi.clockIn()
+      const refreshed = await employeeDashboard.get()
+      setData(refreshed)
+    } finally {
+      setClockingIn(false)
+    }
+  }
+
+  const benefits = (data?.enrolledBenefits ?? []).map(b => ({
+    name: b.name,
+    sub: b.benefitType ?? 'Benefit',
+    status: b.isActive ? 'Active' : 'Inactive',
+    action: 'View',
+    id: b.id,
+  }))
+  const payslips = (data?.recentPayslips ?? []).slice(0, 3).map(p => ({
+    name: p.periodStart ? new Date(p.periodStart).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : 'Payslip',
+    info: `Net: $${p.netPay ? parseFloat(p.netPay).toLocaleString('en-US', { minimumFractionDigits: 2 }) : '—'}`,
+    id: p.id,
+  }))
+  const attendance = (data?.recentAttendance ?? []).slice(0, 3).map(r => ({
+    time: new Date(r.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+    sub: 'Office',
+    status: r.status === 'present' ? 'Early' : r.status === 'late' ? 'Overtime' : 'Absent',
+  }))
 
   return (
     <div className="">
@@ -43,9 +79,13 @@ export default function EmployeeDashboard() {
       {/* Welcome row */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Welcome {firstName}</h1>
-        <button className="flex items-center gap-2 bg-[#22c55e] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-600 transition-colors">
+        <button
+          onClick={handleClockIn}
+          disabled={clockingIn}
+          className="flex items-center gap-2 bg-[#22c55e] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-600 transition-colors disabled:opacity-60"
+        >
           <Clock size={14} />
-          Clock in time
+          {clockingIn ? 'Clocking in…' : 'Clock in'}
         </button>
       </div>
 
@@ -61,10 +101,10 @@ export default function EmployeeDashboard() {
         </div>
 
         {[
-          { label: 'Total worked',  value: '0 hrs',   icon: Clock,        iconCls: 'text-blue-500',  bg: 'bg-blue-50'  },
-          { label: 'Total paid',    value: '—',        icon: FileText,     iconCls: 'text-amber-500', bg: 'bg-amber-50' },
-          { label: 'Leave days',    value: '0',        icon: CalendarDays, iconCls: 'text-blue-500',  bg: 'bg-blue-50'  },
-          { label: 'Benefit plans', value: '0',        icon: Gift,         iconCls: 'text-green-500', bg: 'bg-green-50' },
+          { label: 'Attendance',    value: `${data?.recentAttendance?.length ?? 0} records`, icon: Clock,        iconCls: 'text-blue-500',  bg: 'bg-blue-50'  },
+          { label: 'Last pay',      value: payslips[0]?.info.replace('Net: ', '') ?? '—',    icon: FileText,     iconCls: 'text-amber-500', bg: 'bg-amber-50' },
+          { label: 'Annual leave',  value: `${data?.leaveBalances?.annual ?? 0} days`,       icon: CalendarDays, iconCls: 'text-blue-500',  bg: 'bg-blue-50'  },
+          { label: 'Benefit plans', value: String(benefits.length),                          icon: Gift,         iconCls: 'text-green-500', bg: 'bg-green-50' },
         ].map(({ label, value, icon: Icon, iconCls, bg }) => (
           <div key={label} className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex items-start justify-between">
             <div>
@@ -82,9 +122,10 @@ export default function EmployeeDashboard() {
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 mb-6">
         <h2 className="text-sm font-semibold text-gray-900 mb-4">Quick actions</h2>
         <div className="grid grid-cols-5 gap-3">
-          {quickActions.map(({ label, icon: Icon }) => (
+          {quickActions.map(({ label, icon: Icon, path }) => (
             <button
               key={label}
+              onClick={() => navigate(path)}
               className="flex flex-col gap-3 p-4 border border-gray-100 rounded-xl hover:bg-gray-50 transition-colors text-left"
             >
               <div className="w-9 h-9 bg-gray-100 rounded-lg flex items-center justify-center">
@@ -136,7 +177,7 @@ export default function EmployeeDashboard() {
                 ))}
               </div>
             )}
-            <button className="mt-4 text-sm text-gray-500 hover:text-gray-700 w-full text-center border-t border-gray-50 pt-3">
+            <button onClick={() => navigate('/employee/benefits')} className="mt-4 text-sm text-gray-500 hover:text-gray-700 w-full text-center border-t border-gray-50 pt-3">
               View all benefits
             </button>
           </div>
@@ -171,8 +212,8 @@ export default function EmployeeDashboard() {
                 ))}
               </div>
             )}
-            <button className="mt-4 text-sm text-gray-500 hover:text-gray-700 w-full text-center border-t border-gray-50 pt-3">
-              View all tasks
+            <button onClick={() => navigate('/employee/leave')} className="mt-4 text-sm text-gray-500 hover:text-gray-700 w-full text-center border-t border-gray-50 pt-3">
+              View all leave requests
             </button>
           </div>
 
@@ -207,7 +248,7 @@ export default function EmployeeDashboard() {
                 ))}
               </div>
             )}
-            <button className="mt-4 text-sm text-gray-500 hover:text-gray-700 w-full text-center border-t border-gray-50 pt-3">
+            <button onClick={() => navigate('/employee/payslips')} className="mt-4 text-sm text-gray-500 hover:text-gray-700 w-full text-center border-t border-gray-50 pt-3">
               View all payslips
             </button>
           </div>
@@ -244,7 +285,7 @@ export default function EmployeeDashboard() {
                 ))}
               </div>
             )}
-            <button className="mt-4 text-sm text-gray-500 hover:text-gray-700 w-full text-center border-t border-gray-50 pt-3">
+            <button onClick={() => navigate('/employee/attendance')} className="mt-4 text-sm text-gray-500 hover:text-gray-700 w-full text-center border-t border-gray-50 pt-3">
               View all attendance
             </button>
           </div>
