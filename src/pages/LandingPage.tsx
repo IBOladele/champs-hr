@@ -47,34 +47,10 @@ const features = [
 ]
 
 const stats = [
-  { value: '10,000+', label: 'Companies trust PayChamps' },
-  { value: '2M+', label: 'Employees managed' },
-  { value: '99.9%', label: 'Uptime guarantee' },
-  { value: '4 min', label: 'Average setup time' },
-]
-
-const testimonials = [
-  {
-    quote: "PayChamps cut our monthly payroll processing from 3 days to under an hour. It's the best HR investment we've made.",
-    author: 'Sarah Mitchell',
-    role: 'Head of People, Vantara Inc.',
-    initial: 'S',
-    color: 'bg-purple-200 text-purple-800',
-  },
-  {
-    quote: 'The employee self-service portal alone has saved our HR team countless hours every week. Our staff love it.',
-    author: 'James Okonkwo',
-    role: 'HR Director, Nexis Group',
-    initial: 'J',
-    color: 'bg-blue-200 text-blue-800',
-  },
-  {
-    quote: 'Onboarding used to take weeks. With PayChamps, new hires are fully set up in a day — documents, payroll, benefits and all.',
-    author: 'Amara Patel',
-    role: 'COO, Brightfield Labs',
-    initial: 'A',
-    color: 'bg-green-200 text-green-800',
-  },
+  { value: '< 5 min', label: 'Average payroll run time' },
+  { value: '100%', label: 'Automated tax calculations' },
+  { value: '99.9%', label: 'Platform uptime SLA' },
+  { value: 'Same day', label: 'Direct deposit processing' },
 ]
 
 export default function LandingPage() {
@@ -156,7 +132,7 @@ export default function LandingPage() {
                   <div key={label} className="bg-white/10 rounded-xl p-4">
                     <p className="text-xs text-gray-400 mb-1">{label}</p>
                     <p className="text-xl font-bold text-white">
-                      {['54,567', '24,585', '23,000', '30'][i]}
+                      {['48', '45', '44', '3'][i]}
                     </p>
                   </div>
                 ))}
@@ -255,7 +231,7 @@ export default function LandingPage() {
           <div className="relative h-80 hidden md:block">
             <div className="absolute top-0 right-0 w-72 bg-white rounded-2xl border border-gray-100 shadow-xl p-5">
               <p className="text-xs text-gray-400 mb-1">Monthly payroll</p>
-              <p className="text-2xl font-bold text-gray-900 mb-3">£453,300</p>
+              <p className="text-2xl font-bold text-gray-900 mb-3">£94,200</p>
               <div className="flex items-center gap-2">
                 <span className="text-xs px-2 py-0.5 rounded-full bg-green-50 text-green-600 border border-green-200">Approved ✓</span>
                 <span className="text-xs text-gray-400">40 employees paid</span>
@@ -285,29 +261,26 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── Testimonials ── */}
+      {/* ── Early access ── */}
       <section className="py-24 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-14">
-            <p className="text-sm font-semibold uppercase tracking-wider mb-3" style={{ color: '#22c55e' }}>Testimonials</p>
-            <h2 className="text-4xl font-bold text-gray-900">Loved by HR teams worldwide</h2>
-          </div>
-          <div className="grid md:grid-cols-3 gap-6">
-            {testimonials.map((t) => (
-              <div key={t.author} className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-                <p className="text-gray-600 text-sm leading-relaxed mb-6">"{t.quote}"</p>
-                <div className="flex items-center gap-3">
-                  <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold ${t.color}`}>
-                    {t.initial}
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-gray-900">{t.author}</p>
-                    <p className="text-xs text-gray-400">{t.role}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+        <div className="max-w-3xl mx-auto px-6 text-center">
+          <p className="text-sm font-semibold uppercase tracking-wider mb-3" style={{ color: '#22c55e' }}>
+            Early access
+          </p>
+          <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            Be among the first
+          </h2>
+          <p className="text-lg text-gray-500 max-w-xl mx-auto mb-8 leading-relaxed">
+            PayChamps is rolling out to early customers now. Get full access, hands-on onboarding from our team, and a seat at the table as we build.
+          </p>
+          <button
+            onClick={() => navigate('/get-started')}
+            className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold text-white rounded-xl shadow-lg transition-all hover:scale-105"
+            style={{ backgroundColor: '#22c55e' }}
+          >
+            Request early access
+            <ArrowRight size={16} />
+          </button>
         </div>
       </section>
 

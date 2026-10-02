@@ -1,29 +1,35 @@
 /**
  * k6 Load Test for Champs HR API
  *
- * Run with:
- *   k6 run --env API_URL=https://your-api.up.railway.app api/tests/stress/load-test.js
+ * Run against Railway production:
+ *   k6 run --env API_URL=https://champs-hr-production.up.railway.app api/tests/stress/load-test.js
+ *
+ * Run against local server:
+ *   k6 run api/tests/stress/load-test.js
  *
  * Requires k6 installed: https://k6.io/docs/getting-started/installation/
  */
 
 import http from 'k6/http';
-import { check, sleep } from 'k6';
-import { Rate } from 'k6/metrics';
+import { check, group, sleep } from 'k6';
+import { Rate, Trend } from 'k6/metrics';
 
-const errorRate = new Rate('errors');
+// Custom metrics
+const errorRate    = new Rate('errors');
+const responseTime = new Trend('response_time', true);
 
 export const options = {
   stages: [
-    { duration: '30s', target: 20 },   // ramp up to 20 users
-    { duration: '1m',  target: 50 },   // stay at 50 users for 1 minute
-    { duration: '30s', target: 100 },  // spike to 100 users
-    { duration: '30s', target: 0 },    // ramp down
+    { duration: '30s', target: 10  },  // warm up
+    { duration: '1m',  target: 50  },  // normal load
+    { duration: '30s', target: 150 },  // peak (payroll day spike)
+    { duration: '1m',  target: 150 },  // sustained peak
+    { duration: '30s', target: 0   },  // ramp down
   ],
   thresholds: {
-    http_req_duration: ['p(95)<500'],  // 95% of requests under 500ms
-    http_req_failed:   ['rate<0.01'],  // less than 1% errors
-    errors:            ['rate<0.05'],  // less than 5% check failures
+    http_req_duration: ['p(95)<300', 'p(99)<800'],  // p95 under 300ms
+    http_req_failed:   ['rate<0.005'],               // < 0.5% HTTP errors
+    errors:            ['rate<0.02'],                // < 2% check failures
   },
 };
 
@@ -31,135 +37,266 @@ const BASE_URL = __ENV.API_URL || 'http://localhost:3000';
 
 /**
  * setup() runs once before the load test begins.
- * Returns data shared with all VUs via the `data` parameter in default().
+ * Creates a single warm test employer account and seeds data.
+ * Returns the cookie jar and baseUrl shared across all VUs.
  */
 export function setup() {
-  const tag = `loadtest-${Date.now()}`;
+  const jar = http.cookieJar();
+  const tag  = `loadtest-${Date.now()}`;
+
+  // 1. Sign up a test employer — jar captures the champs_session cookie automatically
   const signupPayload = JSON.stringify({
-    email: `${tag}@loadtest.com`,
-    password: 'LoadTest123!',
-    fullName: 'Load Test Employer',
+    email:       `${tag}@loadtest.com`,
+    password:    'LoadTest123!',
+    fullName:    'Load Test Employer',
     companyName: `Load Test Corp ${tag}`,
   });
 
-  const signupRes = http.post(`${BASE_URL}/api/v1/auth/signup`, signupPayload, {
-    headers: { 'Content-Type': 'application/json' },
-  });
+  const signupRes = http.post(
+    `${BASE_URL}/api/v1/auth/signup`,
+    signupPayload,
+    { headers: { 'Content-Type': 'application/json' }, jar },
+  );
 
   const signupOk = check(signupRes, {
     'setup: signup status 201': (r) => r.status === 201,
-    'setup: has accessToken': (r) => {
-      try {
-        return !!JSON.parse(r.body).accessToken;
-      } catch {
-        return false;
-      }
-    },
   });
 
   if (!signupOk) {
     console.error(`Setup signup failed: ${signupRes.status} ${signupRes.body}`);
-    return { token: null };
+    return { jar: null, baseUrl: BASE_URL };
   }
 
-  const body = JSON.parse(signupRes.body);
-  const token = body.accessToken;
+  const authHeaders = { 'Content-Type': 'application/json' };
 
-  // Create one employee so payroll endpoints have something to return
-  const empPayload = JSON.stringify({
-    email: `loadtest-emp-${Date.now()}@loadtest.com`,
-    fullName: 'Load Test Employee',
-    jobTitle: 'Engineer',
-    employeeNumber: `EMP-LT-${Date.now()}`,
-    grossSalary: 40000,
-    startDate: '2024-01-01',
-    employmentType: 'full_time',
-    payFrequency: 'monthly',
+  // 2. Create 5 test employees
+  for (let i = 1; i <= 5; i++) {
+    const empPayload = JSON.stringify({
+      email:          `${tag}-emp-${i}@loadtest.com`,
+      fullName:       `Load Test Employee ${i}`,
+      jobTitle:       'Engineer',
+      employeeNumber: `EMP-LT-${tag}-${i}`,
+      grossSalary:    50000,
+      startDate:      '2024-01-01',
+      employmentType: 'full_time',
+      payFrequency:   'monthly',
+    });
+
+    const empRes = http.post(
+      `${BASE_URL}/api/v1/employees`,
+      empPayload,
+      { headers: authHeaders, jar },
+    );
+
+    check(empRes, {
+      [`setup: create employee ${i} status 201`]: (r) => r.status === 201,
+    });
+  }
+
+  // 3. Create a payroll run
+  const payrollPayload = JSON.stringify({
+    periodStart: '2024-01-01',
+    periodEnd:   '2024-01-31',
   });
 
-  http.post(`${BASE_URL}/api/v1/employees`, empPayload, {
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
+  const payrollRes = http.post(
+    `${BASE_URL}/api/v1/payroll`,
+    payrollPayload,
+    { headers: authHeaders, jar },
+  );
+
+  check(payrollRes, {
+    'setup: create payroll run status 201': (r) => r.status === 201,
   });
 
-  return { token };
+  // 4. Create 3 leave requests using first employee — log in as them first
+  const loginRes = http.post(
+    `${BASE_URL}/api/v1/auth/login`,
+    JSON.stringify({ email: `${tag}-emp-1@loadtest.com`, password: 'Welcome123!' }),
+    { headers: authHeaders },
+  );
+
+  if (loginRes.status === 200) {
+    const empJar = http.cookieJar();
+    // re-login with empJar so we capture their cookie
+    const loginRes2 = http.post(
+      `${BASE_URL}/api/v1/auth/login`,
+      JSON.stringify({ email: `${tag}-emp-1@loadtest.com`, password: 'Welcome123!' }),
+      { headers: authHeaders, jar: empJar },
+    );
+
+    if (loginRes2.status === 200) {
+      for (let i = 1; i <= 3; i++) {
+        const leavePayload = JSON.stringify({
+          leaveType:     'annual',
+          startDate:     `2024-0${i + 1}-01`,
+          endDate:       `2024-0${i + 1}-05`,
+          daysRequested: 5,
+          reason:        `Load test leave ${i}`,
+        });
+
+        http.post(
+          `${BASE_URL}/api/v1/leave`,
+          leavePayload,
+          { headers: authHeaders, jar: empJar },
+        );
+      }
+    }
+  }
+
+  return { jar, baseUrl: BASE_URL };
 }
 
 /**
- * default() is the main VU function, called repeatedly for each virtual user.
+ * default() is the main VU function — called repeatedly for each virtual user.
+ * Weighted random routing across all major endpoints.
  */
 export default function (data) {
-  const token = data.token;
-
-  if (!token) {
-    console.warn('No token available, skipping VU iteration');
+  if (!data.jar) {
+    console.warn('No session jar available, skipping VU iteration');
     sleep(1);
     return;
   }
 
-  const headers = {
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${token}`,
-  };
+  const { jar, baseUrl } = data;
+  const headers = { 'Content-Type': 'application/json' };
+  const roll    = Math.random();
 
-  // Randomly pick a scenario weighted by a random number
-  const roll = Math.random();
-
+  // 0–0.20 → 20% health (no auth)
   if (roll < 0.20) {
-    // 20% — GET /health (no auth required)
-    const res = http.get(`${BASE_URL}/health`);
-    const ok = check(res, {
-      'health: status 200': (r) => r.status === 200,
-      'health: ok=true': (r) => {
-        try {
-          return JSON.parse(r.body).ok === true;
-        } catch {
-          return false;
-        }
-      },
-    });
-    errorRate.add(!ok);
+    group('health', () => {
+      const start = Date.now();
+      const res   = http.get(`${baseUrl}/health`);
+      responseTime.add(Date.now() - start);
 
+      const ok = check(res, {
+        'health: status 200':  (r) => r.status === 200,
+        'health: body is JSON': (r) => {
+          try { JSON.parse(r.body); return true; } catch { return false; }
+        },
+        'health: response < 500ms': (r) => r.timings.duration < 500,
+      });
+      errorRate.add(!ok);
+    });
+
+  // 0.20–0.35 → 15% dashboard
+  } else if (roll < 0.35) {
+    group('dashboard', () => {
+      const start = Date.now();
+      const res   = http.get(`${baseUrl}/api/v1/dashboard`, { headers, jar });
+      responseTime.add(Date.now() - start);
+
+      const ok = check(res, {
+        'dashboard: status 200':  (r) => r.status === 200,
+        'dashboard: body is JSON': (r) => {
+          try { JSON.parse(r.body); return true; } catch { return false; }
+        },
+        'dashboard: response < 500ms': (r) => r.timings.duration < 500,
+      });
+      errorRate.add(!ok);
+    });
+
+  // 0.35–0.50 → 15% stats
   } else if (roll < 0.50) {
-    // 30% — GET /api/v1/employees
-    const res = http.get(`${BASE_URL}/api/v1/employees`, { headers });
-    const ok = check(res, {
-      'employees: status 200': (r) => r.status === 200,
-      'employees: is array': (r) => {
-        try {
-          return Array.isArray(JSON.parse(r.body));
-        } catch {
-          return false;
-        }
-      },
-    });
-    errorRate.add(!ok);
+    group('stats', () => {
+      const start = Date.now();
+      const res   = http.get(`${baseUrl}/api/v1/stats`, { headers, jar });
+      responseTime.add(Date.now() - start);
 
-  } else if (roll < 0.70) {
-    // 20% — GET /api/v1/leave
-    const res = http.get(`${BASE_URL}/api/v1/leave`, { headers });
-    const ok = check(res, {
-      'leave: status 200': (r) => r.status === 200,
+      const ok = check(res, {
+        'stats: status 200':  (r) => r.status === 200,
+        'stats: body is JSON': (r) => {
+          try { JSON.parse(r.body); return true; } catch { return false; }
+        },
+        'stats: response < 500ms': (r) => r.timings.duration < 500,
+      });
+      errorRate.add(!ok);
     });
-    errorRate.add(!ok);
 
+  // 0.50–0.65 → 15% employees
+  } else if (roll < 0.65) {
+    group('employees', () => {
+      const start = Date.now();
+      const res   = http.get(`${baseUrl}/api/v1/employees`, { headers, jar });
+      responseTime.add(Date.now() - start);
+
+      const ok = check(res, {
+        'employees: status 200':  (r) => r.status === 200,
+        'employees: body is array': (r) => {
+          try { return Array.isArray(JSON.parse(r.body)); } catch { return false; }
+        },
+        'employees: response < 500ms': (r) => r.timings.duration < 500,
+      });
+      errorRate.add(!ok);
+    });
+
+  // 0.65–0.75 → 10% payroll
+  } else if (roll < 0.75) {
+    group('payroll', () => {
+      const start = Date.now();
+      const res   = http.get(`${baseUrl}/api/v1/payroll`, { headers, jar });
+      responseTime.add(Date.now() - start);
+
+      const ok = check(res, {
+        'payroll: status 200':  (r) => r.status === 200,
+        'payroll: body is JSON': (r) => {
+          try { JSON.parse(r.body); return true; } catch { return false; }
+        },
+        'payroll: response < 500ms': (r) => r.timings.duration < 500,
+      });
+      errorRate.add(!ok);
+    });
+
+  // 0.75–0.85 → 10% leave
   } else if (roll < 0.85) {
-    // 15% — GET /api/v1/payroll
-    const res = http.get(`${BASE_URL}/api/v1/payroll`, { headers });
-    const ok = check(res, {
-      'payroll: status 200': (r) => r.status === 200,
-    });
-    errorRate.add(!ok);
+    group('leave', () => {
+      const start = Date.now();
+      const res   = http.get(`${baseUrl}/api/v1/leave`, { headers, jar });
+      responseTime.add(Date.now() - start);
 
-  } else {
-    // 15% — GET /api/v1/attendance
-    const res = http.get(`${BASE_URL}/api/v1/attendance`, { headers });
-    const ok = check(res, {
-      'attendance: status 200': (r) => r.status === 200,
+      const ok = check(res, {
+        'leave: status 200':  (r) => r.status === 200,
+        'leave: body is JSON': (r) => {
+          try { JSON.parse(r.body); return true; } catch { return false; }
+        },
+        'leave: response < 500ms': (r) => r.timings.duration < 500,
+      });
+      errorRate.add(!ok);
     });
-    errorRate.add(!ok);
+
+  // 0.85–0.95 → 10% attendance
+  } else if (roll < 0.95) {
+    group('attendance', () => {
+      const start = Date.now();
+      const res   = http.get(`${baseUrl}/api/v1/attendance`, { headers, jar });
+      responseTime.add(Date.now() - start);
+
+      const ok = check(res, {
+        'attendance: status 200':  (r) => r.status === 200,
+        'attendance: body is JSON': (r) => {
+          try { JSON.parse(r.body); return true; } catch { return false; }
+        },
+        'attendance: response < 500ms': (r) => r.timings.duration < 500,
+      });
+      errorRate.add(!ok);
+    });
+
+  // 0.95–1.00 → 5% benefits
+  } else {
+    group('benefits', () => {
+      const start = Date.now();
+      const res   = http.get(`${baseUrl}/api/v1/benefits`, { headers, jar });
+      responseTime.add(Date.now() - start);
+
+      const ok = check(res, {
+        'benefits: status 200':  (r) => r.status === 200,
+        'benefits: body is JSON': (r) => {
+          try { JSON.parse(r.body); return true; } catch { return false; }
+        },
+        'benefits: response < 500ms': (r) => r.timings.duration < 500,
+      });
+      errorRate.add(!ok);
+    });
   }
 
   sleep(1);
@@ -167,10 +304,8 @@ export default function (data) {
 
 /**
  * teardown() runs once after the load test ends.
- * We leave test data in the database — it will be cleaned up by
- * running the Jest test suite or manually.
+ * Test data is left in the DB — clean up manually or via Jest test suite.
  */
 export function teardown(data) {
-  // Nothing to tear down — test data is left in the database
-  console.log(`Load test complete. Test employer token was: ${data.token ? '[present]' : '[missing]'}`);
+  console.log(`Load test complete. Session jar: ${data.jar ? '[present]' : '[missing]'}`);
 }

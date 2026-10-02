@@ -13,6 +13,8 @@ import i9Router from './i9';
 import directDepositRouter from './directDeposit';
 import w2Router from './w2';
 import payslipsRouter from './payslips';
+import dashboardRouter from './dashboard';
+import employeeDashboardRouter from './employeeDashboard';
 
 const router = Router();
 
@@ -25,6 +27,8 @@ router.use('/payroll', payrollRouter);
 router.use('/attendance', attendanceRouter);
 router.use('/benefits', benefitsRouter);
 router.use('/stats', statsRouter);
+router.use('/dashboard', dashboardRouter);
+router.use('/employee/dashboard', employeeDashboardRouter);
 router.use('', w4Router);
 router.use('', i9Router);
 router.use('', directDepositRouter);
