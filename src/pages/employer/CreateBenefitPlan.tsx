@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { api } from '../../lib/api'
 
 type CoverageType = 'Employee only' | 'Employee + Spouse' | 'Employee + Family'
 
@@ -17,6 +18,8 @@ export default function CreateBenefitPlan() {
   const [enrolmentDeadline, setEnrolmentDeadline] = useState('')
   const [availability, setAvailability] = useState<string[]>(['All employees'])
   const [countries, setCountries] = useState('All countries')
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const inputCls = 'border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-[#22c55e] w-full'
 
@@ -27,6 +30,28 @@ export default function CreateBenefitPlan() {
     setAvailability(prev =>
       prev.includes(option) ? prev.filter(v => v !== option) : [...prev, option]
     )
+  }
+
+  async function handleCreate() {
+    if (!planName.trim()) { setError('Plan name is required'); return }
+    if (!planType) { setError('Plan type is required'); return }
+    setError(null)
+    setSaving(true)
+    try {
+      await api.benefits.create({
+        name: planName.trim(),
+        description: description.trim() || undefined,
+        benefitType: planType,
+        value: parseFloat(monthlyCost) || 0,
+        currency: 'USD',
+      })
+      navigate('/employer/benefits')
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : 'Failed to create benefit plan'
+      setError(msg)
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
@@ -237,11 +262,15 @@ export default function CreateBenefitPlan() {
         <button className="px-5 py-2.5 text-sm text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
           Save as draft
         </button>
+        {error && (
+          <p className="text-sm text-red-500">{error}</p>
+        )}
         <button
-          onClick={() => navigate('/employer/benefits')}
-          className="px-5 py-2.5 text-sm font-medium text-white bg-[#22c55e] rounded-lg hover:bg-green-600 transition-colors"
+          onClick={handleCreate}
+          disabled={saving}
+          className="px-5 py-2.5 text-sm font-medium text-white bg-[#22c55e] rounded-lg hover:bg-green-600 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          Create benefit plan
+          {saving ? 'Creating…' : 'Create benefit plan'}
         </button>
       </div>
     </div>

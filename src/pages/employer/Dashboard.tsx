@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Check, User } from 'lucide-react'
 
 import { usePageTitle } from '../../hooks/usePageTitle'
@@ -56,6 +56,8 @@ interface Step {
   status: StepStatus
   actionLabel?: string
   secondaryLabel?: string
+  path?: string
+  secondaryPath?: string
 }
 
 const SETUP_STEPS: Step[] = [
@@ -66,6 +68,7 @@ const SETUP_STEPS: Step[] = [
     description: 'Add your business name, address, and legal entity type.',
     estMinutes: 5,
     actionLabel: 'Continue setup',
+    path: '/employer/config',
   },
   {
     id: 2,
@@ -73,6 +76,8 @@ const SETUP_STEPS: Step[] = [
     status: 'upcoming',
     description: 'Connect the account PayChamps will pull funds from on payroll day.',
     estMinutes: 3,
+    actionLabel: 'Set up bank account',
+    path: '/employer/config',
   },
   {
     id: 3,
@@ -83,24 +88,32 @@ const SETUP_STEPS: Step[] = [
     estMinutes: 8,
     actionLabel: 'Continue setup',
     secondaryLabel: 'Register a state ID for me',
+    path: '/employer/config',
+    secondaryPath: '/employer/config',
   },
   {
     id: 4,
     title: 'Add employees',
     status: 'upcoming',
     description: 'Import a CSV or invite people to fill in their own details.',
+    actionLabel: 'Add employees',
+    path: '/employer/employees/add',
   },
   {
     id: 5,
     title: 'Pay schedule',
     status: 'upcoming',
     description: 'Weekly, biweekly, semi-monthly or monthly.',
+    actionLabel: 'Set pay schedule',
+    path: '/employer/payroll',
   },
   {
     id: 6,
     title: 'Run your first payroll',
     status: 'upcoming',
     description: 'Preview it before anything is paid.',
+    actionLabel: 'Run payroll',
+    path: '/employer/payroll',
   },
 ]
 
@@ -109,7 +122,8 @@ function ChecklistStep({ step, isExpanded, onToggle }: {
   isExpanded: boolean
   onToggle: () => void
 }) {
-  const { status, id, title, description, estMinutes, actionLabel, secondaryLabel } = step
+  const navigate = useNavigate()
+  const { status, id, title, description, estMinutes, actionLabel, secondaryLabel, path, secondaryPath } = step
 
   const rowBg = status === 'current' ? '#f0fdf4' : 'white'
 
@@ -145,6 +159,7 @@ function ChecklistStep({ step, isExpanded, onToggle }: {
                 <div className="flex items-center gap-3 mt-3 flex-wrap">
                   {actionLabel && (
                     <button
+                      onClick={() => path && navigate(path)}
                       className="px-4 py-1.5 rounded-lg text-[13px] font-medium text-white"
                       style={{ background: '#22c55e' }}
                     >
@@ -152,7 +167,10 @@ function ChecklistStep({ step, isExpanded, onToggle }: {
                     </button>
                   )}
                   {secondaryLabel && (
-                    <button className="px-4 py-1.5 rounded-lg text-[13px] font-medium text-gray-600 border border-gray-200 hover:bg-gray-50">
+                    <button
+                      onClick={() => (secondaryPath || path) && navigate(secondaryPath ?? path!)}
+                      className="px-4 py-1.5 rounded-lg text-[13px] font-medium text-gray-600 border border-gray-200 hover:bg-gray-50"
+                    >
                       {secondaryLabel}
                     </button>
                   )}

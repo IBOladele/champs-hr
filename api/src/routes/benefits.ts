@@ -32,7 +32,7 @@ const createBenefitSchema = z.object({
   description: z.string().optional(),
   benefitType: z.string().min(1),
   value: z.number().nonnegative(),
-  currency: z.string().length(3).default('GBP'),
+  currency: z.string().length(3).default('USD'),
 });
 
 router.post(
