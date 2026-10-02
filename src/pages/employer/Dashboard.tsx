@@ -1,236 +1,378 @@
-import React from 'react'
-import { useNavigate } from 'react-router-dom'
-import {
-  Users, CreditCard, FileText, Key,
-  Briefcase, BarChart2, Gift, ShieldCheck, Settings,
-  FolderOpen, ChevronRight, Calendar, AlertCircle
-} from 'lucide-react'
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
+import { Check, User } from 'lucide-react'
 
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { useAuth } from '../../context/AuthContext'
 
-// ── To-do card ────────────────────────────────────────────────────────
+// ── Step disc marker ──────────────────────────────────────────────────
 
-interface TodoCardProps {
-  icon: React.ElementType
-  iconBg: string
-  iconColor: string
+type StepStatus = 'done' | 'current' | 'upcoming'
+
+function StepDisc({ status, number }: { status: StepStatus; number: number }) {
+  if (status === 'done') {
+    return (
+      <div
+        className="shrink-0 flex items-center justify-center rounded-full"
+        style={{ width: 26, height: 26, background: '#1b2838' }}
+      >
+        <Check size={13} color="white" strokeWidth={2.5} />
+      </div>
+    )
+  }
+  if (status === 'current') {
+    return (
+      <div
+        className="shrink-0 flex items-center justify-center rounded-full text-[13px] font-semibold"
+        style={{
+          width: 26,
+          height: 26,
+          border: '2px solid #22c55e',
+          color: '#15803d',
+        }}
+      >
+        {number}
+      </div>
+    )
+  }
+  // upcoming
+  return (
+    <div
+      className="shrink-0 flex items-center justify-center rounded-full text-[13px] font-semibold text-gray-400"
+      style={{ width: 26, height: 26, border: '1.5px solid #d1d5db' }}
+    >
+      {number}
+    </div>
+  )
+}
+
+// ── Checklist step ────────────────────────────────────────────────────
+
+interface Step {
+  id: number
   title: string
-  description: string
-  action: string
+  description?: string
+  estMinutes?: number
+  status: StepStatus
+  actionLabel?: string
+  secondaryLabel?: string
 }
 
-function TodoCard({ icon: Icon, iconBg, iconColor, title, description, action }: TodoCardProps) {
+const SETUP_STEPS: Step[] = [
+  {
+    id: 1,
+    title: 'Company details',
+    status: 'current',
+    description: 'Add your business name, address, and legal entity type.',
+    estMinutes: 5,
+    actionLabel: 'Continue setup',
+  },
+  {
+    id: 2,
+    title: 'Business bank account',
+    status: 'upcoming',
+    description: 'Connect the account PayChamps will pull funds from on payroll day.',
+    estMinutes: 3,
+  },
+  {
+    id: 3,
+    title: 'Federal and state tax setup',
+    status: 'upcoming',
+    description:
+      'Add your EIN and state withholding and unemployment account numbers. Don\'t have a state ID yet? We\'ll register for you.',
+    estMinutes: 8,
+    actionLabel: 'Continue setup',
+    secondaryLabel: 'Register a state ID for me',
+  },
+  {
+    id: 4,
+    title: 'Add employees',
+    status: 'upcoming',
+    description: 'Import a CSV or invite people to fill in their own details.',
+  },
+  {
+    id: 5,
+    title: 'Pay schedule',
+    status: 'upcoming',
+    description: 'Weekly, biweekly, semi-monthly or monthly.',
+  },
+  {
+    id: 6,
+    title: 'Run your first payroll',
+    status: 'upcoming',
+    description: 'Preview it before anything is paid.',
+  },
+]
+
+function ChecklistStep({ step, isExpanded, onToggle }: {
+  step: Step
+  isExpanded: boolean
+  onToggle: () => void
+}) {
+  const { status, id, title, description, estMinutes, actionLabel, secondaryLabel } = step
+
+  const rowBg = status === 'current' ? '#f0fdf4' : 'white'
+
   return (
-    <div className="bg-white rounded-xl border border-gray-100 p-5 flex flex-col">
-      <div className={`w-10 h-10 rounded-full ${iconBg} flex items-center justify-center`}>
-        <Icon size={18} className={iconColor} />
-      </div>
-      <p className="text-gray-900 font-medium mt-3 text-sm leading-snug">{title}</p>
-      <p className="text-gray-500 text-sm mt-1 leading-relaxed">{description}</p>
-      <button className="text-emerald-500 text-sm mt-4 text-left hover:text-emerald-600 transition-colors">
-        {action}
-      </button>
-    </div>
-  )
-}
+    <div
+      className="px-6 py-4 border-b border-gray-100 last:border-b-0 cursor-pointer"
+      style={{ background: rowBg }}
+      onClick={status !== 'done' ? onToggle : undefined}
+    >
+      <div className="flex items-start gap-3">
+        <StepDisc status={status} number={id} />
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between gap-2">
+            <p
+              className={`text-[15px] font-medium ${
+                status === 'done' ? 'line-through text-gray-400' : 'text-gray-800'
+              }`}
+            >
+              {title}
+            </p>
+            {status === 'done' && (
+              <button className="text-[13px] text-emerald-600 hover:text-emerald-700 shrink-0">
+                Edit
+              </button>
+            )}
+          </div>
 
-// ── Quick action card ─────────────────────────────────────────────────
+          {/* Expanded content for current or if user toggled open */}
+          {(status === 'current' || isExpanded) && description && (
+            <div className="mt-2">
+              <p className="text-[13px] text-gray-500">{description}</p>
+              {(actionLabel || secondaryLabel) && (
+                <div className="flex items-center gap-3 mt-3 flex-wrap">
+                  {actionLabel && (
+                    <button
+                      className="px-4 py-1.5 rounded-lg text-[13px] font-medium text-white"
+                      style={{ background: '#22c55e' }}
+                    >
+                      {actionLabel}
+                    </button>
+                  )}
+                  {secondaryLabel && (
+                    <button className="px-4 py-1.5 rounded-lg text-[13px] font-medium text-gray-600 border border-gray-200 hover:bg-gray-50">
+                      {secondaryLabel}
+                    </button>
+                  )}
+                  {estMinutes && (
+                    <span className="text-[12px] text-gray-400">~{estMinutes} min</span>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
 
-interface QuickActionCardProps {
-  icon: React.ElementType
-  iconBg: string
-  iconColor: string
-  label: string
-}
-
-function QuickActionCard({ icon: Icon, iconBg, iconColor, label }: QuickActionCardProps) {
-  return (
-    <button className="bg-white rounded-xl border border-gray-100 p-4 flex flex-col w-full hover:shadow-sm transition-shadow">
-      <div className="flex items-start justify-between w-full">
-        <div className={`w-9 h-9 rounded-full ${iconBg} flex items-center justify-center`}>
-          <Icon size={16} className={iconColor} />
+          {/* Collapsed upcoming: show description dimmed */}
+          {status === 'upcoming' && !isExpanded && description && (
+            <p className="text-[13px] text-gray-400 mt-0.5">{description}</p>
+          )}
         </div>
-        <ChevronRight size={14} className="text-gray-400 mt-0.5" />
       </div>
-      <span className="text-gray-700 text-sm font-medium mt-3 text-left">{label}</span>
-    </button>
-  )
-}
-
-// ── View all button ───────────────────────────────────────────────────
-
-function ViewAllButton({ label }: { label: string }) {
-  return (
-    <button className="w-full mt-4 py-2 text-sm text-gray-600 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors font-medium">
-      {label}
-    </button>
-  )
-}
-
-// ── Empty section state ───────────────────────────────────────────────
-
-function EmptySection({ icon: Icon, message, sub }: { icon: React.ElementType; message: string; sub?: string }) {
-  return (
-    <div className="flex flex-col items-center justify-center py-10 text-center">
-      <Icon size={32} className="text-gray-300 mb-3" />
-      <p className="text-sm font-medium text-gray-500">{message}</p>
-      {sub && <p className="text-xs text-gray-400 mt-1">{sub}</p>}
     </div>
   )
 }
+
+// ── Recommended next ──────────────────────────────────────────────────
+
+interface RecommendedItem {
+  label: string
+  description: string
+  linkLabel: string
+  path: string
+}
+
+const RECOMMENDED: RecommendedItem[] = [
+  {
+    label: 'Add benefits',
+    description: 'Create health, dental and 401(k) plans for your business',
+    linkLabel: 'Add benefits',
+    path: '/employer/benefits',
+  },
+  {
+    label: 'Add documents to sign',
+    description: 'Handbooks, offer letters and policies for employees to e-sign',
+    linkLabel: 'Add documents',
+    path: '/employer/documents',
+  },
+  {
+    label: 'Set up user access',
+    description: 'Departments, user groups and admins',
+    linkLabel: 'Set up access',
+    path: '/employer/user-access',
+  },
+]
 
 // ── Main Dashboard ────────────────────────────────────────────────────
-
-const ONBOARDING_STEPS = [
-  'Company profile',
-  'Compliance',
-  'Pay schedule',
-  'Pay elements',
-  'Work locations',
-  'Invite employees',
-]
 
 export default function EmployerDashboard() {
   usePageTitle('Dashboard')
   const { user } = useAuth()
-  const navigate = useNavigate()
   const firstName = user?.fullName?.split(' ')[0] ?? 'there'
-  const onboardingDone = user?.onboardingCompleted === true
+
+  // For now always show State A (no firstPayrollRunAt yet)
+  const firstPayrollRunAt: string | null = null
+
+  const steps = SETUP_STEPS
+  const doneCount = steps.filter(s => s.status === 'done').length
+  const totalSteps = steps.length
+  const remainingCount = totalSteps - doneCount
+  const progressPct = (doneCount / totalSteps) * 100
+
+  // Which step is expanded (besides the current step which is always expanded)
+  const [expandedStep, setExpandedStep] = useState<number | null>(null)
+
+  function toggleStep(id: number) {
+    setExpandedStep(prev => (prev === id ? null : id))
+  }
+
+  if (firstPayrollRunAt) {
+    // State B placeholder — not reached yet
+    return (
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900">Good morning, {firstName}</h1>
+      </div>
+    )
+  }
 
   return (
-    <div className="space-y-6">
+    // Two-column grid: main + right sidebar
+    <div
+      className="grid gap-7"
+      style={{ gridTemplateColumns: 'minmax(0,1fr) 340px', alignItems: 'start' }}
+    >
+      {/* ── Left column ─────────────────────────────────────────── */}
+      <div className="flex flex-col gap-6">
 
-      {/* Greeting */}
-      <h1 className="text-2xl font-bold text-gray-900">Hello {firstName}</h1>
+        {/* Heading */}
+        <div>
+          <h1
+            className="text-[28px] font-semibold text-gray-900"
+            style={{ letterSpacing: '-0.02em' }}
+          >
+            Welcome, {firstName}
+          </h1>
+          <p className="text-[15px] text-gray-500 mt-1">
+            {remainingCount} step{remainingCount !== 1 ? 's' : ''} left before you can run your first payroll.
+            Most teams finish in about 20 minutes.
+          </p>
+        </div>
 
-      {/* Onboarding banner */}
-      {!onboardingDone && (
-        <section className="bg-amber-50 border border-amber-200 rounded-xl p-5">
-          <div className="flex items-start gap-3 mb-4">
-            <AlertCircle size={20} className="text-amber-500 mt-0.5 shrink-0" />
-            <div>
-              <p className="text-sm font-semibold text-amber-900">Complete your account setup</p>
-              <p className="text-xs text-amber-700 mt-0.5">Finish onboarding to unlock payroll and invite your team.</p>
+        {/* Checklist card */}
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          {/* Card header */}
+          <div className="px-6 py-4 border-b border-gray-100">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-[14px] font-semibold text-gray-900">Set up payroll</p>
+              <p className="text-[13px] text-gray-400">{doneCount} of {totalSteps} complete</p>
             </div>
-            <button
-              onClick={() => navigate('/onboarding')}
-              className="ml-auto shrink-0 px-4 py-1.5 text-sm font-medium text-white rounded-lg"
-              style={{ backgroundColor: '#22c55e' }}
-            >
-              Continue setup →
-            </button>
+            {/* Progress bar */}
+            <div className="h-[6px] rounded-full" style={{ background: '#f3f2ee' }}>
+              <div
+                className="h-full rounded-full transition-all duration-300"
+                style={{ width: `${progressPct}%`, background: '#22c55e' }}
+              />
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            {ONBOARDING_STEPS.map((step, i) => (
-              <div key={step} className="flex items-center gap-2">
-                <div className="flex items-center gap-1.5">
-                  <div className="w-5 h-5 rounded-full border-2 border-amber-300 bg-white flex items-center justify-center">
-                    <span className="text-[10px] font-semibold text-amber-500">{i + 1}</span>
-                  </div>
-                  <span className="text-xs text-amber-800 whitespace-nowrap">{step}</span>
+
+          {/* Steps */}
+          <div>
+            {steps.map(step => (
+              <ChecklistStep
+                key={step.id}
+                step={step}
+                isExpanded={expandedStep === step.id}
+                onToggle={() => toggleStep(step.id)}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Recommended next card */}
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+            <p className="text-[14px] font-semibold text-gray-900">Recommended next</p>
+            <p className="text-[13px] text-gray-400">Optional · do anytime</p>
+          </div>
+          <div>
+            {RECOMMENDED.map((item, i) => (
+              <div
+                key={item.label}
+                className={`px-6 py-4 flex items-start gap-3 ${
+                  i < RECOMMENDED.length - 1 ? 'border-b border-gray-100' : ''
+                }`}
+              >
+                {/* Dashed square marker */}
+                <div
+                  className="shrink-0 rounded-[6px]"
+                  style={{
+                    width: 26,
+                    height: 26,
+                    border: '1.5px dashed #d1d5db',
+                    marginTop: 1,
+                  }}
+                />
+                <div>
+                  <p className="text-[13px] text-gray-500">{item.description}</p>
+                  <Link
+                    to={item.path}
+                    className="text-[13px] font-medium text-emerald-600 hover:text-emerald-700 mt-0.5 inline-block"
+                  >
+                    {item.linkLabel}
+                  </Link>
                 </div>
-                {i < ONBOARDING_STEPS.length - 1 && (
-                  <div className="w-6 h-px bg-amber-200" />
-                )}
               </div>
             ))}
           </div>
-        </section>
-      )}
-
-      {/* Section 1: To-do items */}
-      <section className="bg-white rounded-xl border border-gray-100 p-6">
-        <h2 className="text-base font-semibold text-gray-900 mb-4">To-do items</h2>
-        <div className="grid grid-cols-4 gap-4">
-          <TodoCard
-            icon={Users}
-            iconBg="bg-emerald-100"
-            iconColor="text-emerald-600"
-            title="Add your employees"
-            description="Add a list of all your employees to help you"
-            action="+ Add your employees"
-          />
-          <TodoCard
-            icon={CreditCard}
-            iconBg="bg-amber-100"
-            iconColor="text-amber-600"
-            title="Add benefits"
-            description="Create benefit plans for your business"
-            action="+ Add benefits"
-          />
-          <TodoCard
-            icon={FileText}
-            iconBg="bg-blue-100"
-            iconColor="text-blue-600"
-            title="Add documents to sign"
-            description="Add documents for your employees to make"
-            action="+ Add documents"
-          />
-          <TodoCard
-            icon={Key}
-            iconBg="bg-cyan-100"
-            iconColor="text-cyan-600"
-            title="Setup user access"
-            description="Add departments, user groups and admin"
-            action="+ Setup user access"
-          />
         </div>
-      </section>
+      </div>
 
-      {/* Section 2: Quick actions */}
-      <section className="bg-white rounded-xl border border-gray-100 p-6">
-        <h2 className="text-base font-semibold text-gray-900 mb-4">Quick actions</h2>
-        <div className="grid grid-cols-4 gap-4">
-          <QuickActionCard icon={Briefcase}  iconBg="bg-yellow-100"  iconColor="text-yellow-600"  label="Manage payroll"      />
-          <QuickActionCard icon={Users}      iconBg="bg-green-100"   iconColor="text-green-600"   label="Invite employees"    />
-          <QuickActionCard icon={BarChart2}  iconBg="bg-gray-100"    iconColor="text-gray-500"    label="View analytics"      />
-          <QuickActionCard icon={FileText}   iconBg="bg-blue-100"    iconColor="text-blue-600"    label="Generate reports"    />
-          <QuickActionCard icon={FileText}   iconBg="bg-indigo-100"  iconColor="text-indigo-600"  label="Create documents"    />
-          <QuickActionCard icon={Gift}       iconBg="bg-amber-100"   iconColor="text-amber-600"   label="Manage benefits"     />
-          <QuickActionCard icon={ShieldCheck} iconBg="bg-teal-100"   iconColor="text-teal-600"    label="Manage Admin"        />
-          <QuickActionCard icon={Settings}   iconBg="bg-slate-100"   iconColor="text-slate-600"   label="Configure Business"  />
-        </div>
-      </section>
+      {/* ── Right column ────────────────────────────────────────── */}
+      <div className="flex flex-col gap-5">
 
-      {/* Row A: Your tasks + Team overview */}
-      <div className="grid grid-cols-2 gap-6">
-
-        {/* Your tasks */}
-        <div className="bg-white rounded-xl border border-gray-100 p-6">
-          <h2 className="text-base font-semibold text-gray-900 mb-2">Your tasks</h2>
-          <EmptySection icon={Briefcase} message="No team tasks" sub="Tasks assigned to you will appear here" />
-          <ViewAllButton label="View all tasks" />
+        {/* Onboarding specialist card */}
+        <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <p className="text-[11px] font-medium text-gray-400 tracking-wider uppercase mb-4">
+            Your onboarding specialist
+          </p>
+          <div className="flex items-center gap-3 mb-4">
+            <div
+              className="shrink-0 rounded-full bg-gray-200 flex items-center justify-center"
+              style={{ width: 44, height: 44 }}
+            >
+              <User size={20} className="text-gray-400" />
+            </div>
+            <div>
+              <p className="text-[15px] font-semibold text-gray-900">Your specialist</p>
+              <p className="text-[13px] text-gray-500">US-based · replies within 1 hour</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <button className="py-2 rounded-lg text-[13px] font-medium text-gray-700 border border-gray-200 hover:bg-gray-50 transition-colors">
+              Book a call
+            </button>
+            <button className="py-2 rounded-lg text-[13px] font-medium text-gray-700 border border-gray-200 hover:bg-gray-50 transition-colors">
+              Message
+            </button>
+          </div>
         </div>
 
-        {/* Team overview */}
-        <div className="bg-white rounded-xl border border-gray-100 p-6">
-          <h2 className="text-base font-semibold text-gray-900 mb-2">Team overview</h2>
-          <EmptySection icon={Users} message="No recent payroll activity" sub="Payroll activity will appear here" />
-          <ViewAllButton label="View all team tasks" />
+        {/* Switching from another provider card */}
+        <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <p className="text-[15px] font-semibold text-gray-900 mb-2">
+            Switching from another provider?
+          </p>
+          <p className="text-[13px] text-gray-500 mb-3">
+            Import employees, year-to-date pay and tax filings from ADP, Paylocity, Gusto or
+            Paychex. Your W-2s stay accurate for the whole year.
+          </p>
+          <button className="text-[13px] font-medium text-emerald-600 hover:text-emerald-700 transition-colors">
+            Start an import →
+          </button>
         </div>
 
       </div>
-
-      {/* Row B: Team related tasks + Last 3 months payslips */}
-      <div className="grid grid-cols-2 gap-6">
-
-        {/* Team related tasks */}
-        <div className="bg-white rounded-xl border border-gray-100 p-6">
-          <h2 className="text-base font-semibold text-gray-900 mb-2">Team related tasks</h2>
-          <EmptySection icon={Calendar} message="No team tasks" sub="Team related tasks will appear here" />
-          <ViewAllButton label="View all tasks" />
-        </div>
-
-        {/* Last 3 months payslips */}
-        <div className="bg-white rounded-xl border border-gray-100 p-6">
-          <h2 className="text-base font-semibold text-gray-900 mb-2">Last 3 months payslips</h2>
-          <EmptySection icon={FolderOpen} message="No recent payslips" sub="Payslips will appear here once payroll has been run" />
-          <ViewAllButton label="View all payslips" />
-        </div>
-
-      </div>
-
     </div>
   )
 }
