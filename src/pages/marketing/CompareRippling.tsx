@@ -4,12 +4,12 @@ import { usePageTitle } from '../../hooks/usePageTitle'
 import MarketingShell from '../../components/MarketingShell'
 
 const rows = [
-  { feature: 'Pricing model', paychamps: 'From £6/emp/mo', rippling: 'From $8/emp/mo + base fee' },
+  { feature: 'Pricing model', paychamps: 'From $8/emp/mo', rippling: 'From $8/emp/mo + base fee' },
   { feature: 'Contract length', paychamps: 'Month-to-month', rippling: 'Annual contract' },
-  { feature: 'UK payroll support', paychamps: 'Native UK payroll + RTI', rippling: 'Yes, via Rippling Payroll' },
+  { feature: 'US payroll support', paychamps: 'Full US payroll + tax filing', rippling: 'Yes, via Rippling Payroll' },
   { feature: 'Multi-currency', paychamps: 'Yes, 150+ currencies', rippling: 'Yes, additional modules' },
   { feature: 'Dedicated account manager', paychamps: 'Growth & Enterprise plans', rippling: 'Enterprise only' },
-  { feature: 'Data residency', paychamps: 'EU/UK data residency', rippling: 'US-primary' },
+  { feature: 'Data residency', paychamps: 'US data residency', rippling: 'US-primary' },
   { feature: 'Employee self-service', paychamps: 'Included on all plans', rippling: 'Included' },
   { feature: 'Benefits administration', paychamps: 'Full admin + employee portal', rippling: 'Full (US-focused)' },
   { feature: 'Time to go live', paychamps: '2 weeks', rippling: '4–6 weeks' },
@@ -17,8 +17,8 @@ const rows = [
 
 const reasons = [
   {
-    title: 'Built for UK payroll',
-    description: 'Rippling has UK payroll through an acquired product. PayChamps was built from the ground up for UK compliance — RTI, PAYE, auto-enrolment, and IR35 are first-class features, not bolted on.',
+    title: 'Built for US payroll',
+    description: 'PayChamps was built from the ground up for US payroll — federal, state, and local tax, W-2s, 1099s, and direct deposit are first-class features, not bolted on.',
   },
   {
     title: 'No modular pricing complexity',
@@ -43,10 +43,10 @@ export default function CompareRippling() {
             PayChamps vs Rippling
           </p>
           <h1 className="text-4xl font-extrabold text-gray-900 mb-4">
-            Why UK teams choose PayChamps over Rippling
+            Why US teams choose PayChamps over Rippling
           </h1>
           <p className="text-lg text-gray-500">
-            Rippling is a powerful all-in-one platform. But for UK-first teams who want simple payroll pricing and a fast setup, PayChamps is the better fit.
+            Rippling is a powerful all-in-one platform. But for US teams who want simple payroll pricing and a fast setup without annual contracts, PayChamps is the better fit.
           </p>
         </div>
       </section>
@@ -109,7 +109,7 @@ export default function CompareRippling() {
               <div>
                 <p className="text-sm font-semibold text-gray-900 mb-1">Where Rippling is stronger</p>
                 <p className="text-sm text-gray-500 leading-relaxed">
-                  If you need deep IT management, device management, or US benefits administration alongside payroll, Rippling's all-in-one approach is hard to beat. PayChamps focuses on UK payroll and HR — we do fewer things and do them better for UK-based teams.
+                  If you need deep IT management, device management, or a fully unified HRIS alongside payroll, Rippling's all-in-one approach is hard to beat. PayChamps focuses on US payroll and HR — we do fewer things and do them better for growing US teams.
                 </p>
               </div>
             </div>

@@ -7,7 +7,7 @@ import MarketingShell from '../../components/MarketingShell'
 const tiers = [
   {
     name: 'Starter',
-    price: '£6',
+    price: '$8',
     unit: '/employee/month',
     description: 'Up to 50 employees',
     features: [
@@ -23,7 +23,7 @@ const tiers = [
   },
   {
     name: 'Growth',
-    price: '£10',
+    price: '$15',
     unit: '/employee/month',
     description: '50–200 employees',
     features: [

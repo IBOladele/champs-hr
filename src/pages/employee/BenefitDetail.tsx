@@ -29,7 +29,7 @@ export default function BenefitDetail() {
   // planId must match a known plan — otherwise show not-found state
   const knownPlans: Record<string, string> = {
     health:  'Health Plan',
-    pension: 'Pension Plan',
+    '401k':  '401(k) Plan',
     leave:   'Paid Time Off',
     dental:  'Dental Plan',
   }

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronLeft, Check, Users, PoundSterling } from 'lucide-react'
+import { ChevronLeft, Check, Users, DollarSign } from 'lucide-react'
 
 const STEPS = ['Review employees', 'Review deductions', 'Confirm & submit']
 
@@ -77,9 +77,9 @@ function ReviewEmployeesStep() {
           <tr className="bg-gray-50 border-t border-gray-200">
             <td className="px-4 py-3.5 text-sm font-bold text-gray-900">Total</td>
             <td className="px-4 py-3.5 text-sm text-gray-400">—</td>
-            <td className="px-4 py-3.5 text-sm font-bold text-gray-900 text-right">£0</td>
-            <td className="px-4 py-3.5 text-sm font-bold text-gray-900 text-right">£0</td>
-            <td className="px-4 py-3.5 text-sm font-bold text-gray-900 text-right">£0</td>
+            <td className="px-4 py-3.5 text-sm font-bold text-gray-900 text-right">$0</td>
+            <td className="px-4 py-3.5 text-sm font-bold text-gray-900 text-right">$0</td>
+            <td className="px-4 py-3.5 text-sm font-bold text-gray-900 text-right">$0</td>
             <td className="px-4 py-3.5"></td>
           </tr>
         </tfoot>
@@ -96,8 +96,8 @@ function ReviewDeductionsStep() {
           <tr className="bg-gray-50 border-b border-gray-200">
             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Employee name</th>
             <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wide">Income tax</th>
-            <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wide">Nat. Insurance</th>
-            <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wide">Pension</th>
+            <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wide">FICA</th>
+            <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wide">401(k)</th>
             <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wide">Total deductions</th>
           </tr>
         </thead>
@@ -105,7 +105,7 @@ function ReviewDeductionsStep() {
           <tr>
             <td colSpan={5}>
               <div className="flex flex-col items-center justify-center py-16 text-center">
-                <PoundSterling size={40} className="text-gray-300 mb-3" />
+                <DollarSign size={40} className="text-gray-300 mb-3" />
                 <p className="text-sm font-medium text-gray-500">No deductions to review</p>
                 <p className="text-xs text-gray-400 mt-1">Deductions will appear once employees are added</p>
               </div>
@@ -116,10 +116,10 @@ function ReviewDeductionsStep() {
         <tfoot>
           <tr className="bg-gray-50 border-t border-gray-200">
             <td className="px-4 py-3.5 text-sm font-bold text-gray-900">Totals</td>
-            <td className="px-4 py-3.5 text-sm font-bold text-gray-900 text-right">£0</td>
-            <td className="px-4 py-3.5 text-sm font-bold text-gray-900 text-right">£0</td>
-            <td className="px-4 py-3.5 text-sm font-bold text-gray-900 text-right">£0</td>
-            <td className="px-4 py-3.5 text-sm font-bold text-gray-900 text-right">£0</td>
+            <td className="px-4 py-3.5 text-sm font-bold text-gray-900 text-right">$0</td>
+            <td className="px-4 py-3.5 text-sm font-bold text-gray-900 text-right">$0</td>
+            <td className="px-4 py-3.5 text-sm font-bold text-gray-900 text-right">$0</td>
+            <td className="px-4 py-3.5 text-sm font-bold text-gray-900 text-right">$0</td>
           </tr>
         </tfoot>
       </table>

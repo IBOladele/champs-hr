@@ -60,8 +60,8 @@ describe('Onboarding page', () => {
           step: 2,
           completed: false,
           settings: {
-            companyName: 'MonsterLabs', country: 'UK', businessSize: '1-10',
-            industry: 'technology', timezone: 'Europe/London', currency: 'GBP',
+            companyName: 'MonsterLabs', country: 'US', businessSize: '1-10',
+            industry: 'technology', timezone: 'America/New_York', currency: 'USD',
             address: '1 Test St', website: 'https://monsterlabs.org',
           },
         })
@@ -89,7 +89,7 @@ describe('Onboarding page', () => {
     await waitFor(() => screen.getByRole('heading', { name: 'Company profile' }))
 
     await user.type(screen.getByPlaceholderText('Enter company name'), 'MonsterLabs')
-    await user.type(screen.getByPlaceholderText('e.g. United Kingdom'), 'United Kingdom')
+    await user.type(screen.getByPlaceholderText('e.g. United States'), 'United States')
     await user.type(screen.getByPlaceholderText('Enter registered address'), '1 Test Street')
 
     await user.click(screen.getByRole('button', { name: /save and continue/i }))

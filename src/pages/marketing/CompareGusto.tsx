@@ -4,12 +4,12 @@ import { usePageTitle } from '../../hooks/usePageTitle'
 import MarketingShell from '../../components/MarketingShell'
 
 const rows = [
-  { feature: 'Pricing model', paychamps: 'From £6/emp/mo', gusto: 'From $40+$6/emp/mo' },
+  { feature: 'Pricing model', paychamps: 'From $8/emp/mo', gusto: 'From $40+$6/emp/mo' },
   { feature: 'Contract length', paychamps: 'Month-to-month', gusto: 'Month-to-month' },
-  { feature: 'UK payroll support', paychamps: 'Native UK payroll + RTI', gusto: 'US-only' },
+  { feature: 'Transparent pricing', paychamps: 'Per-employee, no base fee', gusto: '$40 base + $6/emp/mo' },
   { feature: 'Multi-currency', paychamps: 'Yes, 150+ currencies', gusto: 'USD only' },
   { feature: 'Dedicated account manager', paychamps: 'Growth & Enterprise plans', gusto: 'Add-on cost' },
-  { feature: 'Data residency', paychamps: 'EU/UK data residency', gusto: 'US data only' },
+  { feature: 'Data residency', paychamps: 'US data residency', gusto: 'US data only' },
   { feature: 'Employee self-service', paychamps: 'Included on all plans', gusto: 'Included' },
   { feature: 'Benefits administration', paychamps: 'Full admin + employee portal', gusto: 'Admin only' },
   { feature: 'Time to go live', paychamps: '2 weeks', gusto: '2–4 weeks' },
@@ -17,12 +17,12 @@ const rows = [
 
 const reasons = [
   {
-    title: 'UK-native payroll',
-    description: 'PayChamps was built for UK payroll from the ground up — RTI submissions, PAYE, auto-enrolment, and IR35. Gusto is a US product with no UK payroll support.',
+    title: 'Built for US payroll',
+    description: 'PayChamps was built for US payroll from the ground up — federal + state tax filing, W-2s, 1099s, and 401(k) enrollment are first-class features.',
   },
   {
     title: 'Multi-currency from day one',
-    description: 'Pay employees in 150+ currencies. Whether your team is in London, Lagos, or Lisbon, PayChamps handles it without add-ons.',
+    description: 'Pay employees in 150+ currencies. Whether your team is in New York, Lagos, or Lisbon, PayChamps handles it without add-ons.',
   },
   {
     title: 'Transparent pricing',
@@ -46,7 +46,7 @@ export default function CompareGusto() {
             Why teams switch from Gusto to PayChamps
           </h1>
           <p className="text-lg text-gray-500">
-            Gusto is a great product — for US companies. If you run payroll in the UK or pay employees in multiple currencies, you need something built for it.
+            Gusto is a solid product, but its base fee and per-employee cost add up fast. PayChamps is built for US payroll with transparent per-employee pricing and no hidden platform charges.
           </p>
         </div>
       </section>
@@ -109,7 +109,7 @@ export default function CompareGusto() {
               <div>
                 <p className="text-sm font-semibold text-gray-900 mb-1">Not a knock on Gusto</p>
                 <p className="text-sm text-gray-500 leading-relaxed">
-                  Gusto is a genuinely good product for US-based companies. If your team is entirely US-based with no international payroll needs, Gusto may serve you well. We're a better fit for UK-headquartered companies and teams with international employees.
+                  Gusto is a genuinely good product for US-based companies. If their pricing model works for your headcount and you don't need multi-currency support, Gusto may serve you well. PayChamps is a better fit for growing US businesses that want transparent per-employee pricing with no base fee.
                 </p>
               </div>
             </div>

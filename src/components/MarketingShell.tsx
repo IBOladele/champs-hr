@@ -151,18 +151,18 @@ export default function MarketingShell({ children }: MarketingShellProps) {
                 <Logo size={24} />
               </Link>
               <p className="text-xs text-gray-500 leading-relaxed max-w-xs">
-                Payroll and HR software for teams of 10–500. Built for the UK, ready for the world.
+                Payroll and HR software for teams of 10–500. Built for US businesses.
               </p>
               <p className="text-xs text-gray-400 mt-4">
-                PayChamps Ltd, registered in England &amp; Wales<br />
-                123 Finsbury Square, London EC2A 1DX
+                PayChamps Inc., incorporated in Delaware<br />
+                123 Market Street, San Francisco CA 94105
               </p>
               <p className="text-xs text-gray-400 mt-2">
                 <a href="mailto:support@paychamps.com" className="hover:text-gray-600">
                   support@paychamps.com
                 </a>
                 <span className="mx-2">·</span>
-                +44 20 0000 0000
+                +1 (800) 000-0000
               </p>
             </div>
 
@@ -191,7 +191,7 @@ export default function MarketingShell({ children }: MarketingShellProps) {
 
           <div className="border-t border-gray-200 pt-6">
             <p className="text-xs text-gray-400 text-center">
-              © 2026 PayChamps Ltd. All rights reserved. Registered in England &amp; Wales.
+              © 2026 PayChamps Inc. All rights reserved. Incorporated in Delaware.
             </p>
           </div>
         </div>

@@ -42,9 +42,9 @@ export default function Payslips() {
       {/* Stat cards */}
       <div className="grid grid-cols-3 gap-4 mb-6">
         {[
-          { label: 'Last pay',       value: '£0', iconCls: 'text-green-500',  bg: 'bg-green-50'  },
-          { label: 'Total sync avg', value: '£0', iconCls: 'text-blue-500',   bg: 'bg-blue-50'   },
-          { label: 'Top collection', value: '£0', iconCls: 'text-amber-500',  bg: 'bg-amber-50'  },
+          { label: 'Last pay',       value: '$0', iconCls: 'text-green-500',  bg: 'bg-green-50'  },
+          { label: 'Total sync avg', value: '$0', iconCls: 'text-blue-500',   bg: 'bg-blue-50'   },
+          { label: 'Top collection', value: '$0', iconCls: 'text-amber-500',  bg: 'bg-amber-50'  },
         ].map(({ label, value, iconCls, bg }) => (
           <div key={label} className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 flex items-start justify-between">
             <div>

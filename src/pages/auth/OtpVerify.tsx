@@ -65,7 +65,7 @@ export default function OtpVerify() {
             <span className="text-[#22c55e]">actually love</span>
           </h2>
           <p className="text-sm text-white/60 leading-relaxed max-w-xs">
-            Health, pension, leave, and perks — all managed in one place. Employees self-enrol, HR approves, and everyone stays aligned in real time.
+            Health, 401(k), leave, and perks — all managed in one place. Employees self-enroll, HR approves, and everyone stays aligned in real time.
           </p>
         </div>
       </div>

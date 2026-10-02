@@ -67,7 +67,7 @@ function CompanySection() {
           <InfoField label="Industry"            value="Technology"             />
           <InfoField label="Company size"        value="201 – 500 employees"    />
           <InfoField label="Timezone"            value="GMT+0 — London"         />
-          <InfoField label="Currency"            value="GBP (£)"                />
+          <InfoField label="Currency"            value="USD ($)"                />
           <InfoField label="Website"             value="www.skywrapper.io"      />
           <InfoField label="Registered address"  value="12 Finsbury Square, London, EC2A 1AB" />
         </div>
@@ -123,7 +123,7 @@ function PayrollSection() {
           <div>
             <label className="block text-xs font-medium text-gray-500 mb-1.5">Base currency</label>
             <select className={inputCls}>
-              <option>GBP (£)</option>
+              <option>USD ($)</option>
               <option>USD ($)</option>
               <option>EUR (€)</option>
             </select>
@@ -182,7 +182,7 @@ function LeaveSection() {
           <div>
             <label className="block text-xs font-medium text-gray-500 mb-1.5">Public holidays</label>
             <select className={inputCls}>
-              <option>United Kingdom</option>
+              <option>United States</option>
               <option>United States</option>
               <option>Nigeria</option>
             </select>

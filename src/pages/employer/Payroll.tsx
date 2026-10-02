@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Download, Plus, ChevronDown,
-  ChevronLeft, ChevronRight, PoundSterling, Users, Clock, Calendar, Play
+  ChevronLeft, ChevronRight, DollarSign, Users, Clock, Calendar, Play
 } from 'lucide-react'
 
 import { usePageTitle } from '../../hooks/usePageTitle'
@@ -22,9 +22,9 @@ interface PayCycle {
 const statCards = [
   {
     label: 'Total payroll',
-    value: '£0',
+    value: '$0',
     sub: 'this month',
-    icon: <PoundSterling size={18} className="text-emerald-600" />,
+    icon: <DollarSign size={18} className="text-emerald-600" />,
     iconBg: 'bg-emerald-50',
   },
   {
@@ -238,7 +238,7 @@ export default function Payroll() {
 
             {payCycles.length === 0 && (
               <div className="py-16 text-center">
-                <PoundSterling size={40} className="mx-auto mb-3 text-gray-300" />
+                <DollarSign size={40} className="mx-auto mb-3 text-gray-300" />
                 <p className="text-sm font-medium text-gray-500">No payroll runs yet</p>
                 <p className="text-xs text-gray-400 mt-1">Run your first payroll to get started</p>
               </div>
@@ -276,7 +276,7 @@ export default function Payroll() {
       {/* Pay components tab placeholder */}
       {activeTab === 'components' && (
         <div className="bg-white rounded-lg border border-gray-200 p-16 text-center text-gray-400">
-          <PoundSterling size={32} className="mx-auto mb-3 opacity-30" />
+          <DollarSign size={32} className="mx-auto mb-3 opacity-30" />
           <p className="text-sm">Pay components will appear here</p>
         </div>
       )}

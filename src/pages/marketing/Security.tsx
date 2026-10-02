@@ -41,8 +41,8 @@ const sections = [
     title: 'Data Privacy',
     color: 'bg-amber-50 text-amber-600',
     items: [
-      'UK GDPR and EU GDPR compliant',
-      'EU/UK data residency options on Enterprise plans',
+      'SOC 2 Type II certified',
+      'US data residency on all plans',
       'Data Processing Agreement (DPA) available on request',
       'Right to erasure and data portability supported',
     ],
@@ -63,10 +63,10 @@ const sections = [
     title: 'Compliance',
     color: 'bg-teal-50 text-teal-600',
     items: [
-      'UK GDPR and Data Protection Act 2018',
-      'PAYE compliance and RTI submissions to HMRC',
-      'Auto-enrolment pension compliance',
-      'IR35 and off-payroll working support',
+      'CCPA compliance',
+      'IRS W-2, 1099, and payroll tax filing',
+      '401(k) plan administration and compliance',
+      'HIPAA / ERISA aligned data handling',
     ],
   },
 ]
@@ -129,7 +129,7 @@ export default function Security() {
             We follow industry-leading standards and best practices so you don't have to think about it.
           </p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {['AWS Hosted', 'AES-256', 'TLS 1.3', 'UK GDPR'].map((badge) => (
+            {['AWS Hosted', 'AES-256', 'TLS 1.3', 'SOC 2'].map((badge) => (
               <div key={badge} className="bg-white rounded-xl border border-gray-100 p-5 text-center shadow-sm">
                 <p className="text-sm font-semibold text-gray-900">{badge}</p>
               </div>

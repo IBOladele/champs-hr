@@ -84,8 +84,8 @@ const INDUSTRIES = [
 ]
 
 const TIMEZONES = [
-  { value: 'Europe/London', label: 'London (GMT/BST)' },
   { value: 'America/New_York', label: 'New York (ET)' },
+  { value: 'Europe/London', label: 'London (GMT/BST)' },
   { value: 'America/Chicago', label: 'Chicago (CT)' },
   { value: 'America/Denver', label: 'Denver (MT)' },
   { value: 'America/Los_Angeles', label: 'Los Angeles (PT)' },
@@ -97,8 +97,8 @@ const TIMEZONES = [
 ]
 
 const CURRENCIES = [
-  { value: 'GBP', label: 'GBP – British Pound' },
   { value: 'USD', label: 'USD – US Dollar' },
+  { value: 'GBP', label: 'GBP – British Pound' },
   { value: 'EUR', label: 'EUR – Euro' },
   { value: 'NGN', label: 'NGN – Nigerian Naira' },
   { value: 'KES', label: 'KES – Kenyan Shilling' },
@@ -116,7 +116,7 @@ function Step0({ data, set }: { data: Step0Data; set: (d: Step0Data) => void }) 
           <Input value={data.companyName} onChange={f('companyName')} placeholder="Enter company name" />
         </Field>
         <Field label="Country">
-          <Input value={data.country} onChange={f('country')} placeholder="e.g. United Kingdom" />
+          <Input value={data.country} onChange={f('country')} placeholder="e.g. United States" />
         </Field>
       </div>
       <div className="grid grid-cols-2 gap-4">
@@ -180,7 +180,7 @@ function Step1({ data, set }: { data: Step1Data; set: (d: Step1Data) => void }) 
           <Input value={data.incorporationDate} onChange={f('incorporationDate')} placeholder="YYYY-MM-DD" type="date" />
         </Field>
       </div>
-      <Field label="Registered with HMRC?">
+      <Field label="EIN / Tax ID on file?">
         <Select
           value={data.hmrcRegistered}
           onChange={f('hmrcRegistered')}
@@ -188,8 +188,8 @@ function Step1({ data, set }: { data: Step1Data; set: (d: Step1Data) => void }) 
           options={[{ value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' }, { value: 'pending', label: 'Pending' }]}
         />
       </Field>
-      <Field label="PAYE reference number">
-        <Input value={data.payeReference} onChange={f('payeReference')} placeholder="Enter PAYE reference" />
+      <Field label="Federal EIN">
+        <Input value={data.payeReference} onChange={f('payeReference')} placeholder="e.g. 12-3456789" />
       </Field>
     </div>
   )
@@ -198,17 +198,16 @@ function Step1({ data, set }: { data: Step1Data; set: (d: Step1Data) => void }) 
 // ── Step 2: Compliance (2) ────────────────────────────────────────────────────
 
 interface Step2Data {
-  niNumber: string; vatNumber: string; pensionProvider: string
+  niNumber: string; pensionProvider: string
   autoEnrolmentDate: string; dataProtectionOfficer: string
 }
 
 const PENSION_PROVIDERS = [
-  { value: 'nest', label: 'NEST' },
-  { value: 'peoples_pension', label: "The People's Pension" },
-  { value: 'now_pensions', label: 'NOW: Pensions' },
-  { value: 'aviva', label: 'Aviva' },
-  { value: 'standard_life', label: 'Standard Life' },
-  { value: 'legal_general', label: 'Legal & General' },
+  { value: 'fidelity', label: 'Fidelity' },
+  { value: 'vanguard', label: 'Vanguard' },
+  { value: 'schwab', label: 'Charles Schwab' },
+  { value: 'empower', label: 'Empower' },
+  { value: 'principal', label: 'Principal' },
   { value: 'other', label: 'Other' },
   { value: 'none', label: 'Not applicable' },
 ]
@@ -217,16 +216,13 @@ function Step2({ data, set }: { data: Step2Data; set: (d: Step2Data) => void }) 
   const f = <K extends keyof Step2Data>(k: K) => (v: string) => set({ ...data, [k]: v })
   return (
     <div className="space-y-4">
-      <Field label="National insurance number">
-        <Input value={data.niNumber} onChange={f('niNumber')} placeholder="Enter NI number" />
+      <Field label="SSN (last 4 digits)">
+        <Input value={data.niNumber} onChange={f('niNumber')} placeholder="e.g. 6789" />
       </Field>
-      <Field label="VAT registration number">
-        <Input value={data.vatNumber} onChange={f('vatNumber')} placeholder="Enter VAT number" />
-      </Field>
-      <Field label="Pension provider">
+      <Field label="401(k) provider">
         <Select value={data.pensionProvider} onChange={f('pensionProvider')} placeholder="Select provider" options={PENSION_PROVIDERS} />
       </Field>
-      <Field label="Auto-enrolment staging date">
+      <Field label="401(k) enrollment date">
         <Input value={data.autoEnrolmentDate} onChange={f('autoEnrolmentDate')} placeholder="YYYY-MM-DD" type="date" />
       </Field>
       <Field label="Data protection officer">
@@ -293,11 +289,11 @@ interface Step4Data {
 }
 
 const PAYMENT_METHODS = [
+  { value: 'ach', label: 'ACH (bank transfer)' },
+  { value: 'wire', label: 'Wire transfer' },
+  { value: 'faster_payments', label: 'Faster Payments' },
   { value: 'bacs', label: 'BACS (UK bank transfer)' },
   { value: 'chaps', label: 'CHAPS (same-day UK transfer)' },
-  { value: 'faster_payments', label: 'Faster Payments' },
-  { value: 'ach', label: 'ACH (US)' },
-  { value: 'wire', label: 'Wire transfer' },
 ]
 
 function Step4({ data, set }: { data: Step4Data; set: (d: Step4Data) => void }) {
@@ -472,7 +468,7 @@ export default function Onboarding() {
     incorporationDate: '', hmrcRegistered: '', payeReference: '',
   })
   const [step2, setStep2] = useState<Step2Data>({
-    niNumber: '', vatNumber: '', pensionProvider: '',
+    niNumber: '', pensionProvider: '',
     autoEnrolmentDate: '', dataProtectionOfficer: '',
   })
   const [step3, setStep3] = useState<Step3Data>({
@@ -498,7 +494,7 @@ export default function Onboarding() {
           setStep1({ registrationNumber: s.registrationNumber ?? '', taxId: s.taxId ?? '', companyType: s.companyType ?? '', incorporationDate: s.incorporationDate ?? '', hmrcRegistered: s.hmrcRegistered ?? '', payeReference: s.payeReference ?? '' })
         }
         if (step > 2) {
-          setStep2({ niNumber: s.niNumber ?? '', vatNumber: s.vatNumber ?? '', pensionProvider: s.pensionProvider ?? '', autoEnrolmentDate: s.autoEnrolmentDate ?? '', dataProtectionOfficer: s.dataProtectionOfficer ?? '' })
+          setStep2({ niNumber: s.niNumber ?? '', pensionProvider: s.pensionProvider ?? '', autoEnrolmentDate: s.autoEnrolmentDate ?? '', dataProtectionOfficer: s.dataProtectionOfficer ?? '' })
         }
         if (step > 3) {
           setStep3({ payFrequency: s.payFrequency ?? '', payDay: s.payDay ?? '', payrollStart: s.payrollStart ?? '', baseCurrency: s.baseCurrency ?? '', overtimePolicy: s.overtimePolicy ?? '', workingHours: s.workingHours ?? '' })

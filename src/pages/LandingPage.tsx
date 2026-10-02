@@ -41,7 +41,7 @@ const features = [
   {
     icon: Shield,
     title: 'Benefits Administration',
-    description: 'Create and manage benefit plans across health, pension, and more. Let employees self-enrol and track their coverage.',
+    description: 'Create and manage benefit plans across health, 401(k), and more. Let employees self-enroll and track their coverage.',
     color: 'bg-teal-50 text-teal-600',
   },
 ]
@@ -213,7 +213,7 @@ export default function LandingPage() {
             <div className="space-y-4">
               {[
                 { icon: Zap, text: 'Set up in minutes, not months' },
-                { icon: Globe, text: 'Multi-currency & multi-country payroll' },
+                { icon: Globe, text: 'Multi-state payroll & tax compliance' },
                 { icon: Lock, text: 'Enterprise-grade security & compliance' },
                 { icon: Users, text: 'Self-service portal for employees' },
               ].map(({ icon: Icon, text }) => (
@@ -231,7 +231,7 @@ export default function LandingPage() {
           <div className="relative h-80 hidden md:block">
             <div className="absolute top-0 right-0 w-72 bg-white rounded-2xl border border-gray-100 shadow-xl p-5">
               <p className="text-xs text-gray-400 mb-1">Monthly payroll</p>
-              <p className="text-2xl font-bold text-gray-900 mb-3">£94,200</p>
+              <p className="text-2xl font-bold text-gray-900 mb-3">$94,200</p>
               <div className="flex items-center gap-2">
                 <span className="text-xs px-2 py-0.5 rounded-full bg-green-50 text-green-600 border border-green-200">Approved ✓</span>
                 <span className="text-xs text-gray-400">40 employees paid</span>

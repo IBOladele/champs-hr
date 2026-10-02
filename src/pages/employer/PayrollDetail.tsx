@@ -12,9 +12,9 @@ const tabs: { key: DetailTab; label: string }[] = [
 ]
 
 const statCards = [
-  { label: 'Total gross pay', value: '£0' },
-  { label: 'Total deductions', value: '£0' },
-  { label: 'Net pay', value: '£0' },
+  { label: 'Total gross pay', value: '$0' },
+  { label: 'Total deductions', value: '$0' },
+  { label: 'Net pay', value: '$0' },
   { label: 'Employees paid', value: '0' },
 ]
 
@@ -136,8 +136,8 @@ function DeductionsTab() {
           <tr className="bg-gray-50 border-b border-gray-200">
             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Employee</th>
             <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wide">Income tax</th>
-            <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wide">Nat. Insurance</th>
-            <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wide">Pension</th>
+            <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wide">FICA</th>
+            <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wide">401(k)</th>
             <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wide">Total</th>
           </tr>
         </thead>
@@ -152,10 +152,10 @@ function DeductionsTab() {
         <tfoot>
           <tr className="bg-gray-50 border-t border-gray-200">
             <td className="px-4 py-3.5 text-sm font-bold text-gray-900">Total</td>
-            <td className="px-4 py-3.5 text-sm font-bold text-gray-900 text-right">£0</td>
-            <td className="px-4 py-3.5 text-sm font-bold text-gray-900 text-right">£0</td>
-            <td className="px-4 py-3.5 text-sm font-bold text-gray-900 text-right">£0</td>
-            <td className="px-4 py-3.5 text-sm font-bold text-gray-900 text-right">£0</td>
+            <td className="px-4 py-3.5 text-sm font-bold text-gray-900 text-right">$0</td>
+            <td className="px-4 py-3.5 text-sm font-bold text-gray-900 text-right">$0</td>
+            <td className="px-4 py-3.5 text-sm font-bold text-gray-900 text-right">$0</td>
+            <td className="px-4 py-3.5 text-sm font-bold text-gray-900 text-right">$0</td>
           </tr>
         </tfoot>
       </table>
@@ -165,10 +165,10 @@ function DeductionsTab() {
 
 function TaxTab() {
   const taxRows = [
-    { label: 'PAYE', value: '—' },
-    { label: 'National Insurance (NI)', value: '—' },
+    { label: 'Federal withholding', value: '—' },
+    { label: 'FICA (Social Security + Medicare)', value: '—' },
     { label: 'Total submitted', value: '—' },
-    { label: 'HMRC submission status', value: 'No data' },
+    { label: 'IRS filing status', value: 'No data' },
   ]
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-6">

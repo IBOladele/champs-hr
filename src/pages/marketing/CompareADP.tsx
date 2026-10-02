@@ -4,12 +4,12 @@ import { usePageTitle } from '../../hooks/usePageTitle'
 import MarketingShell from '../../components/MarketingShell'
 
 const rows = [
-  { feature: 'Pricing model', paychamps: 'From £6/emp/mo', adp: 'Custom/opaque pricing' },
+  { feature: 'Pricing model', paychamps: 'From $8/emp/mo', adp: 'Custom/opaque pricing' },
   { feature: 'Contract length', paychamps: 'Month-to-month', adp: '12-24 month contracts' },
-  { feature: 'UK payroll support', paychamps: 'Native UK payroll + RTI', adp: 'Yes, complex setup' },
+  { feature: 'US payroll support', paychamps: 'Full US payroll + tax filing', adp: 'Yes, with full support' },
   { feature: 'Multi-currency', paychamps: 'Yes, 150+ currencies', adp: 'Yes, extra cost' },
   { feature: 'Dedicated account manager', paychamps: 'Growth & Enterprise plans', adp: 'Yes, add-on cost' },
-  { feature: 'Data residency', paychamps: 'EU/UK data residency', adp: 'US/EU' },
+  { feature: 'Data residency', paychamps: 'US data residency', adp: 'US/EU' },
   { feature: 'Employee self-service', paychamps: 'Included on all plans', adp: 'Yes, add-on' },
   { feature: 'Benefits administration', paychamps: 'Full admin + employee portal', adp: 'Full' },
   { feature: 'Time to go live', paychamps: '2 weeks', adp: '8-12 weeks' },
@@ -69,7 +69,7 @@ export default function CompareADP() {
           {[
             { label: 'PayChamps contract', value: 'Month-to-month' },
             { label: 'PayChamps setup', value: '2 weeks' },
-            { label: 'PayChamps pricing', value: 'From £6/emp/mo' },
+            { label: 'PayChamps pricing', value: 'From $8/emp/mo' },
           ].map((item) => (
             <div key={item.label} className="bg-green-50 border border-green-100 rounded-xl p-4 text-center">
               <p className="text-xs text-green-600 mb-1">{item.label}</p>
@@ -137,7 +137,7 @@ export default function CompareADP() {
               <div>
                 <p className="text-sm font-semibold text-gray-900 mb-1">Fair comparison note</p>
                 <p className="text-sm text-gray-500 leading-relaxed">
-                  ADP is a mature, capable product used by large enterprises. For companies with complex multi-country payroll or deep HR needs, ADP may be appropriate. PayChamps is a better fit for growing UK businesses that want speed, transparency, and a modern experience without the enterprise overhead.
+                  ADP is a mature, capable product used by large enterprises. For companies with complex multi-country payroll or deep HR needs, ADP may be appropriate. PayChamps is a better fit for growing US businesses that want speed, transparency, and a modern experience without the enterprise overhead.
                 </p>
               </div>
             </div>

@@ -92,7 +92,7 @@ export default function CreateBenefitPlan() {
               <option>Dental</option>
               <option>Vision</option>
               <option>Life insurance</option>
-              <option>Pension</option>
+              <option>401(k)</option>
               <option>Paid time off</option>
               <option>Remote work</option>
               <option>Professional development</option>
@@ -118,7 +118,7 @@ export default function CreateBenefitPlan() {
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1.5">Monthly cost per employee</label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">£</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">$</span>
                 <input
                   type="number"
                   placeholder="0.00"
