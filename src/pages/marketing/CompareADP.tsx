@@ -4,7 +4,6 @@ import { usePageTitle } from '../../hooks/usePageTitle'
 import MarketingShell from '../../components/MarketingShell'
 
 const rows = [
-  { feature: 'Pricing model', paychamps: 'From $8/emp/mo', adp: 'Custom/opaque pricing' },
   { feature: 'Contract length', paychamps: 'Month-to-month', adp: '12-24 month contracts' },
   { feature: 'US payroll support', paychamps: 'Full US payroll + tax filing', adp: 'Yes, with full support' },
   { feature: 'Multi-currency', paychamps: 'Yes, 150+ currencies', adp: 'Yes, extra cost' },
@@ -22,7 +21,7 @@ const reasons = [
   },
   {
     title: 'Transparent pricing',
-    description: 'ADP pricing is notoriously opaque — quotes vary widely, and add-ons accumulate quickly. PayChamps publishes one clear rate per employee with no hidden line items.',
+    description: 'ADP pricing is notoriously opaque — quotes vary widely, and add-ons accumulate quickly. PayChamps charges one clear rate per employee with no hidden line items.',
   },
   {
     title: 'Setup in 2 weeks, not 2 months',
@@ -57,7 +56,7 @@ export default function CompareADP() {
           {[
             { label: 'ADP contract length', value: '12–24 months', bad: true },
             { label: 'ADP setup time', value: '8–12 weeks', bad: true },
-            { label: 'ADP pricing', value: 'Custom / opaque', bad: true },
+            { label: 'ADP contract', value: 'Lock-in required', bad: true },
           ].map((item) => (
             <div key={item.label} className="bg-red-50 border border-red-100 rounded-xl p-4 text-center">
               <p className="text-xs text-red-400 mb-1">{item.label}</p>
@@ -69,7 +68,7 @@ export default function CompareADP() {
           {[
             { label: 'PayChamps contract', value: 'Month-to-month' },
             { label: 'PayChamps setup', value: '2 weeks' },
-            { label: 'PayChamps pricing', value: 'From $8/emp/mo' },
+            { label: 'PayChamps contract', value: 'Month-to-month' },
           ].map((item) => (
             <div key={item.label} className="bg-green-50 border border-green-100 rounded-xl p-4 text-center">
               <p className="text-xs text-green-600 mb-1">{item.label}</p>

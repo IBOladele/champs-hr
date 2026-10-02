@@ -4,9 +4,8 @@ import { usePageTitle } from '../../hooks/usePageTitle'
 import MarketingShell from '../../components/MarketingShell'
 
 const rows = [
-  { feature: 'Pricing model', paychamps: 'From $8/emp/mo', gusto: 'From $40+$6/emp/mo' },
   { feature: 'Contract length', paychamps: 'Month-to-month', gusto: 'Month-to-month' },
-  { feature: 'Transparent pricing', paychamps: 'Per-employee, no base fee', gusto: '$40 base + $6/emp/mo' },
+  { feature: 'Transparent pricing', paychamps: 'Per-employee, no base fee', gusto: 'Base fee + per-employee' },
   { feature: 'Multi-currency', paychamps: 'Yes, 150+ currencies', gusto: 'USD only' },
   { feature: 'Dedicated account manager', paychamps: 'Growth & Enterprise plans', gusto: 'Add-on cost' },
   { feature: 'Data residency', paychamps: 'US data residency', gusto: 'US data only' },

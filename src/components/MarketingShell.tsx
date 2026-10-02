@@ -29,9 +29,6 @@ export default function MarketingShell({ children }: MarketingShellProps) {
             <Link to="/features" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
               Features
             </Link>
-            <Link to="/pricing" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
-              Pricing
-            </Link>
             <Link to="/security" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
               Security
             </Link>
@@ -111,7 +108,6 @@ export default function MarketingShell({ children }: MarketingShellProps) {
         {mobileMenuOpen && (
           <div className="md:hidden border-t border-gray-100 px-6 py-4 flex flex-col gap-4 bg-white">
             <Link to="/features" className="text-sm text-gray-600" onClick={() => setMobileMenuOpen(false)}>Features</Link>
-            <Link to="/pricing" className="text-sm text-gray-600" onClick={() => setMobileMenuOpen(false)}>Pricing</Link>
             <Link to="/security" className="text-sm text-gray-600" onClick={() => setMobileMenuOpen(false)}>Security</Link>
             <Link to="/switch" className="text-sm text-gray-600" onClick={() => setMobileMenuOpen(false)}>Switch</Link>
             <div className="pl-2 flex flex-col gap-2 border-l border-gray-100">
@@ -171,7 +167,6 @@ export default function MarketingShell({ children }: MarketingShellProps) {
               <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-4">Product</p>
               <ul className="space-y-2 text-sm text-gray-500">
                 <li><Link to="/features" className="hover:text-gray-900">Features</Link></li>
-                <li><Link to="/pricing" className="hover:text-gray-900">Pricing</Link></li>
                 <li><Link to="/security" className="hover:text-gray-900">Security</Link></li>
                 <li><Link to="/switch" className="hover:text-gray-900">Switch</Link></li>
               </ul>

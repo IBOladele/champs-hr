@@ -4,7 +4,6 @@ import { usePageTitle } from '../../hooks/usePageTitle'
 import MarketingShell from '../../components/MarketingShell'
 
 const rows = [
-  { feature: 'Pricing model', paychamps: 'From $8/emp/mo', rippling: 'From $8/emp/mo + base fee' },
   { feature: 'Contract length', paychamps: 'Month-to-month', rippling: 'Annual contract' },
   { feature: 'US payroll support', paychamps: 'Full US payroll + tax filing', rippling: 'Yes, via Rippling Payroll' },
   { feature: 'Multi-currency', paychamps: 'Yes, 150+ currencies', rippling: 'Yes, additional modules' },

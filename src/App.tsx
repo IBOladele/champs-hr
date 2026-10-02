@@ -4,7 +4,6 @@ import RequireAuth from './components/RequireAuth'
 
 // Marketing
 import LandingPage from './pages/LandingPage'
-import Pricing from './pages/marketing/Pricing'
 import Security from './pages/marketing/Security'
 import Switch from './pages/marketing/Switch'
 import CompareGusto from './pages/marketing/CompareGusto'
@@ -61,7 +60,6 @@ export default function App() {
         <Routes>
           {/* Marketing pages — public, no auth */}
           <Route path="/" element={<LandingPage />} />
-          <Route path="/pricing" element={<Pricing />} />
           <Route path="/security" element={<Security />} />
           <Route path="/switch" element={<Switch />} />
           <Route path="/compare/gusto" element={<CompareGusto />} />

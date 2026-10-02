@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import {
   Users, BarChart2, FileText, Shield, Clock, CreditCard,
-  CheckCircle2, ArrowRight, ChevronRight,
+  CheckCircle2, ArrowRight,
   Zap, Globe, Lock
 } from 'lucide-react'
 import { usePageTitle } from '../hooks/usePageTitle'
@@ -104,13 +104,6 @@ export default function LandingPage() {
             >
               Start for free
               <ArrowRight size={16} />
-            </button>
-            <button
-              onClick={() => navigate('/pricing')}
-              className="flex items-center gap-2 px-6 py-3 text-sm font-semibold text-white rounded-xl border border-white/20 hover:bg-white/10 transition-colors"
-            >
-              See pricing
-              <ChevronRight size={16} />
             </button>
           </div>
 
@@ -297,12 +290,6 @@ export default function LandingPage() {
             >
               Get started for free
               <ArrowRight size={16} />
-            </button>
-            <button
-              onClick={() => navigate('/pricing')}
-              className="px-8 py-3.5 text-sm font-semibold text-white rounded-xl border border-white/20 hover:bg-white/10 transition-colors"
-            >
-              See pricing
             </button>
           </div>
         </div>
