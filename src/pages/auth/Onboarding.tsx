@@ -455,6 +455,7 @@ export default function Onboarding() {
   usePageTitle('Set up your workspace')
 
   const navigate = useNavigate()
+  const { refreshUser } = useAuth()
 
   const [currentStep, setCurrentStep] = useState(0)
   const [saving, setSaving] = useState(false)
@@ -524,8 +525,12 @@ export default function Onboarding() {
   async function handleNext() {
     setError('')
 
-    // Final step — just navigate
-    if (currentStep === 6) { navigate('/employer'); return }
+    // Final step — refresh user so onboardingCompleted is up-to-date, then navigate
+    if (currentStep === 6) {
+      try { await refreshUser() } catch { /* non-fatal */ }
+      navigate('/employer')
+      return
+    }
 
     // Success screen — complete onboarding
     if (currentStep === 5) {
@@ -655,7 +660,7 @@ export default function Onboarding() {
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-2">You're all set!</h3>
               <p className="text-sm text-gray-500 max-w-xs mx-auto">
-                Your CHAMP workspace is ready. You can now start managing your team, payroll, and benefits.
+                Your PayChamps workspace is ready. You can now start managing your team, payroll, and benefits.
               </p>
             </div>
           )}
