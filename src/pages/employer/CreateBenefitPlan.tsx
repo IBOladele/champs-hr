@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { api } from '../../lib/api'
+import { benefits as benefitsApi } from '../../lib/api'
 
 type CoverageType = 'Employee only' | 'Employee + Spouse' | 'Employee + Family'
 
@@ -38,7 +38,7 @@ export default function CreateBenefitPlan() {
     setError(null)
     setSaving(true)
     try {
-      await api.benefits.create({
+      await benefitsApi.create({
         name: planName.trim(),
         description: description.trim() || undefined,
         benefitType: planType,
