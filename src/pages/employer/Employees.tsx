@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Search, Plus, Users, UserCheck, UserPlus, Clock,
@@ -6,6 +6,8 @@ import {
 } from 'lucide-react'
 
 import { usePageTitle } from '../../hooks/usePageTitle'
+import { employees as employeesApi, type Employee as ApiEmployee } from '../../lib/api'
+
 type Tab = 'active' | 'invited' | 'pending' | 'terminated'
 
 interface Employee {
@@ -20,6 +22,25 @@ interface Employee {
   status: 'Active' | 'Invited' | 'Pending review' | 'Terminated'
 }
 
+const AVATAR_COLORS = ['bg-violet-500','bg-blue-500','bg-green-500','bg-amber-500','bg-pink-500','bg-teal-500']
+
+function mapEmployee(e: ApiEmployee, i: number): Employee {
+  return {
+    id: e.id,
+    employeeId: e.employeeNumber,
+    name: e.fullName,
+    initial: e.fullName.charAt(0).toUpperCase(),
+    avatarColor: AVATAR_COLORS[i % AVATAR_COLORS.length],
+    email: e.email,
+    department: e.departmentName ?? '—',
+    jobTitle: e.jobTitle ?? '—',
+    status: e.employmentStatus === 'active' ? 'Active'
+          : e.employmentStatus === 'invited' ? 'Invited'
+          : e.employmentStatus === 'terminated' ? 'Terminated'
+          : 'Pending review',
+  }
+}
+
 const tabs: { key: Tab; label: string }[] = [
   { key: 'active', label: 'Active' },
   { key: 'invited', label: 'Invited' },
@@ -32,10 +53,26 @@ export default function Employees() {
 
   const [activeTab, setActiveTab] = useState<Tab>('active')
   const [search, setSearch] = useState('')
-  const [employees] = useState<Employee[]>([])
+  const [employees, setEmployees] = useState<Employee[]>([])
+  const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
 
-  const filtered = employees.filter(
+  useEffect(() => {
+    employeesApi.list()
+      .then(data => setEmployees(data.map(mapEmployee)))
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [])
+
+  const tabFiltered = employees.filter(e => {
+    if (activeTab === 'active') return e.status === 'Active'
+    if (activeTab === 'invited') return e.status === 'Invited'
+    if (activeTab === 'pending') return e.status === 'Pending review'
+    if (activeTab === 'terminated') return e.status === 'Terminated'
+    return true
+  })
+
+  const filtered = tabFiltered.filter(
     (e) =>
       e.name.toLowerCase().includes(search.toLowerCase()) ||
       e.email.toLowerCase().includes(search.toLowerCase()) ||
@@ -72,7 +109,7 @@ export default function Employees() {
             </div>
           </div>
           <p className="text-sm text-gray-500 mb-1">Total employees</p>
-          <p className="text-2xl font-bold text-gray-900">0</p>
+          <p className="text-2xl font-bold text-gray-900">{employees.length}</p>
         </div>
 
         {/* Active employees */}
@@ -83,7 +120,7 @@ export default function Employees() {
             </div>
           </div>
           <p className="text-sm text-gray-500 mb-1">Active employees</p>
-          <p className="text-2xl font-bold text-gray-900">0</p>
+          <p className="text-2xl font-bold text-gray-900">{employees.filter(e => e.status === 'Active').length}</p>
         </div>
 
         {/* Invited employees */}
@@ -94,7 +131,7 @@ export default function Employees() {
             </div>
           </div>
           <p className="text-sm text-gray-500 mb-1">Invited employees</p>
-          <p className="text-2xl font-bold text-gray-900">0</p>
+          <p className="text-2xl font-bold text-gray-900">{employees.filter(e => e.status === 'Invited').length}</p>
         </div>
 
         {/* Pending review */}
@@ -105,7 +142,7 @@ export default function Employees() {
             </div>
           </div>
           <p className="text-sm text-gray-500 mb-1">Pending review</p>
-          <p className="text-2xl font-bold text-gray-900">0</p>
+          <p className="text-2xl font-bold text-gray-900">{employees.filter(e => e.status === 'Pending review').length}</p>
         </div>
       </div>
 

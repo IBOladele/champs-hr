@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, Gift, Download } from 'lucide-react'
+import { benefits as benefitsApi, type Benefit as ApiBenefit } from '../../lib/api'
 
 interface ClaimRow {
   date: string
@@ -25,18 +26,29 @@ export default function BenefitDetail() {
   const navigate = useNavigate()
   const { planId } = useParams<{ planId: string }>()
   const [claims] = useState<ClaimRow[]>([])
+  const [plan, setPlan] = useState<ApiBenefit | null>(null)
+  const [loading, setLoading] = useState(true)
 
-  // planId must match a known plan — otherwise show not-found state
-  const knownPlans: Record<string, string> = {
-    health:  'Health Plan',
-    '401k':  '401(k) Plan',
-    leave:   'Paid Time Off',
-    dental:  'Dental Plan',
+  useEffect(() => {
+    if (!planId) { setLoading(false); return }
+    benefitsApi.list()
+      .then(data => {
+        const found = data.find(b => b.id === planId) ?? null
+        setPlan(found)
+      })
+      .catch(() => setPlan(null))
+      .finally(() => setLoading(false))
+  }, [planId])
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-24">
+        <div className="w-6 h-6 border-2 border-gray-200 border-t-green-500 rounded-full animate-spin" />
+      </div>
+    )
   }
 
-  const planTitle = planId && knownPlans[planId] ? knownPlans[planId] : null
-
-  if (!planTitle) {
+  if (!plan) {
     return (
       <div className="">
         <button
@@ -70,16 +82,16 @@ export default function BenefitDetail() {
         >
           <ArrowLeft size={14} /> Back to benefits
         </button>
-        <h1 className="text-2xl font-bold text-gray-900">{planTitle}</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{plan.name}</h1>
       </div>
 
       {/* Plan header card */}
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 mb-5 flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold text-gray-900">{planTitle}</h2>
-          <p className="text-sm text-gray-500 mt-0.5">Provider: —</p>
-          <span className="inline-flex items-center mt-2 px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-500">
-            No data
+          <h2 className="text-xl font-bold text-gray-900">{plan.name}</h2>
+          <p className="text-sm text-gray-500 mt-0.5">Provider: {plan.benefitType ?? '—'}</p>
+          <span className={`inline-flex items-center mt-2 px-2.5 py-0.5 rounded-full text-xs font-medium ${plan.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+            {plan.isActive ? 'Active' : 'Inactive'}
           </span>
         </div>
         <button className="flex items-center gap-2 border border-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors">
@@ -94,13 +106,13 @@ export default function BenefitDetail() {
           <h3 className="text-sm font-semibold text-gray-900 mb-4">Plan details</h3>
           <div className="space-y-3">
             {[
-              { label: 'Coverage',              value: '—' },
-              { label: 'Start date',            value: '—' },
+              { label: 'Coverage',              value: plan.description ?? '—' },
+              { label: 'Start date',            value: new Date(plan.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) },
               { label: 'Renewal date',          value: '—' },
-              { label: 'Monthly premium',       value: '—' },
+              { label: 'Monthly premium',       value: plan.value ? `$${parseFloat(plan.value).toFixed(2)}/mo` : '—' },
               { label: 'Employer contribution', value: '—' },
               { label: 'Employee contribution', value: '—' },
-              { label: 'Policy number',         value: '—' },
+              { label: 'Policy number',         value: plan.id.slice(0, 8).toUpperCase() },
             ].map(({ label, value }) => (
               <div key={label} className="flex justify-between text-sm">
                 <span className="text-gray-500">{label}</span>

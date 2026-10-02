@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Download, Plus, ChevronDown,
@@ -6,6 +6,8 @@ import {
 } from 'lucide-react'
 
 import { usePageTitle } from '../../hooks/usePageTitle'
+import { payroll as payrollApi, type PayrollRun } from '../../lib/api'
+
 type PayTab = 'cycle' | 'employees' | 'components'
 type CycleStatus = 'Completed' | 'Pending' | 'Processing'
 
@@ -19,36 +21,20 @@ interface PayCycle {
   status: CycleStatus
 }
 
-const statCards = [
-  {
-    label: 'Total payroll',
-    value: '$0',
-    sub: 'this month',
-    icon: <DollarSign size={18} className="text-emerald-600" />,
-    iconBg: 'bg-emerald-50',
-  },
-  {
-    label: 'Employees paid',
-    value: '0',
-    sub: null,
-    icon: <Users size={18} className="text-blue-600" />,
-    iconBg: 'bg-blue-50',
-  },
-  {
-    label: 'Pending approvals',
-    value: '0',
-    sub: null,
-    icon: <Clock size={18} className="text-amber-600" />,
-    iconBg: 'bg-amber-50',
-  },
-  {
-    label: 'Next pay date',
-    value: '—',
-    sub: null,
-    icon: <Calendar size={18} className="text-purple-600" />,
-    iconBg: 'bg-purple-50',
-  },
-]
+function fmt(v: string | null) { return v ? `$${parseFloat(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '—' }
+
+function mapRun(r: PayrollRun): PayCycle {
+  const start = new Date(r.periodStart)
+  return {
+    id: r.id,
+    cycleMonth: start.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+    payDate: new Date(r.periodEnd).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+    numEmployees: r.items?.length ?? null,
+    totalGross: r.totalGross,
+    totalNet: r.totalNet,
+    status: r.status === 'completed' ? 'Completed' : 'Pending',
+  }
+}
 
 const payTabs: { key: PayTab; label: string }[] = [
   { key: 'cycle', label: 'Pay cycle' },
@@ -86,7 +72,49 @@ export default function Payroll() {
 
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<PayTab>('cycle')
-  const [payCycles] = useState<PayCycle[]>([])
+  const [payCycles, setPayCycles] = useState<PayCycle[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    payrollApi.list()
+      .then(data => setPayCycles(data.map(mapRun)))
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [])
+
+  const latestRun = payCycles[0]
+  const pendingCount = payCycles.filter(c => c.status === 'Pending').length
+
+  const statCards = [
+    {
+      label: 'Total payroll',
+      value: latestRun ? fmt(latestRun.totalGross) : '$0',
+      sub: 'last run',
+      icon: <DollarSign size={18} className="text-emerald-600" />,
+      iconBg: 'bg-emerald-50',
+    },
+    {
+      label: 'Employees paid',
+      value: String(latestRun?.numEmployees ?? 0),
+      sub: null,
+      icon: <Users size={18} className="text-blue-600" />,
+      iconBg: 'bg-blue-50',
+    },
+    {
+      label: 'Pending approvals',
+      value: String(pendingCount),
+      sub: null,
+      icon: <Clock size={18} className="text-amber-600" />,
+      iconBg: 'bg-amber-50',
+    },
+    {
+      label: 'Total runs',
+      value: String(payCycles.length),
+      sub: null,
+      icon: <Calendar size={18} className="text-purple-600" />,
+      iconBg: 'bg-purple-50',
+    },
+  ]
 
   return (
     <div className="">
@@ -198,7 +226,7 @@ export default function Payroll() {
                 {payCycles.map((cycle) => (
                   <tr
                     key={cycle.id}
-                    onClick={() => navigate(`/employer/payroll/feb-2025`)}
+                    onClick={() => navigate(`/employer/payroll/${cycle.id}`)}
                     className="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer"
                   >
                     <td className="px-4 py-3.5 text-sm font-medium text-gray-800">

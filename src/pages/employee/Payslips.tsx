@@ -1,11 +1,13 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FileText, Download, Search, ChevronDown, Eye } from 'lucide-react'
 import { usePageTitle } from '../../hooks/usePageTitle'
+import { employeeDashboard, type EmployeeDashboardData } from '../../lib/api'
 
 type PayslipStatus = 'Loaded' | 'Pending' | 'Refund'
 
 interface PayslipRow {
+  id: string
   period: string
   payDate: string
   netPay: string
@@ -31,7 +33,32 @@ export default function Payslips() {
   usePageTitle('My Payslips')
 
   const navigate = useNavigate()
-  const [rows] = useState<PayslipRow[]>([])
+  const [rows, setRows] = useState<PayslipRow[]>([])
+  const [search, setSearch] = useState('')
+
+  useEffect(() => {
+    employeeDashboard.get()
+      .then((data: EmployeeDashboardData) => {
+        setRows(data.recentPayslips.map(p => ({
+          period: p.periodStart
+            ? new Date(p.periodStart).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+            : '—',
+          payDate: p.periodEnd
+            ? new Date(p.periodEnd).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+            : '—',
+          netPay: p.netPay ? `$${parseFloat(p.netPay).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '—',
+          accountNumber: '****',
+          status: p.status === 'completed' ? 'Loaded' : 'Pending' as PayslipStatus,
+          id: p.id,
+        })))
+      })
+      .catch(() => {})
+  }, [])
+
+  const filtered = rows.filter(r =>
+    r.period.toLowerCase().includes(search.toLowerCase()) ||
+    r.payDate.toLowerCase().includes(search.toLowerCase())
+  )
 
   return (
     <div className="">
@@ -42,9 +69,9 @@ export default function Payslips() {
       {/* Stat cards */}
       <div className="grid grid-cols-3 gap-4 mb-6">
         {[
-          { label: 'Last pay',       value: '$0', iconCls: 'text-green-500',  bg: 'bg-green-50'  },
-          { label: 'Total sync avg', value: '$0', iconCls: 'text-blue-500',   bg: 'bg-blue-50'   },
-          { label: 'Top collection', value: '$0', iconCls: 'text-amber-500',  bg: 'bg-amber-50'  },
+          { label: 'Last pay',      value: rows[0]?.netPay ?? '—', iconCls: 'text-green-500',  bg: 'bg-green-50'  },
+          { label: 'Total payslips', value: String(rows.length),   iconCls: 'text-blue-500',   bg: 'bg-blue-50'   },
+          { label: 'Pending',       value: String(rows.filter(r => r.status === 'Pending').length), iconCls: 'text-amber-500', bg: 'bg-amber-50' },
         ].map(({ label, value, iconCls, bg }) => (
           <div key={label} className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 flex items-start justify-between">
             <div>
@@ -64,6 +91,8 @@ export default function Payslips() {
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
             type="text"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
             placeholder="Search for payslip..."
             className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[#22c55e]"
           />
@@ -93,11 +122,11 @@ export default function Payslips() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {rows.map((row, i) => (
+              {filtered.map((row) => (
                 <tr
-                  key={i}
+                  key={row.id}
                   className="hover:bg-gray-50 transition-colors cursor-pointer"
-                  onClick={() => navigate('/employee/payslips/detail')}
+                  onClick={() => navigate(`/employee/payslips/${row.id}`)}
                 >
                   <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">{row.period}</td>
                   <td className="px-6 py-4 text-gray-600 whitespace-nowrap">{row.payDate}</td>
@@ -108,7 +137,7 @@ export default function Payslips() {
                     <div className="flex items-center gap-3">
                       <button
                         className="flex items-center gap-1 text-xs text-gray-600 hover:text-gray-900"
-                        onClick={e => { e.stopPropagation(); navigate('/employee/payslips/detail') }}
+                        onClick={e => { e.stopPropagation(); navigate(`/employee/payslips/${row.id}`) }}
                       >
                         <Eye size={12} /> View details
                       </button>
@@ -124,7 +153,7 @@ export default function Payslips() {
               ))}
             </tbody>
           </table>
-          {rows.length === 0 && (
+          {filtered.length === 0 && (
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <FileText size={40} className="text-gray-300 mb-3" />
               <p className="text-sm font-medium text-gray-500">No payslips yet</p>

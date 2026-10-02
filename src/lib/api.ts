@@ -333,6 +333,38 @@ export const onboarding = {
     request<{ ok: boolean }>('/onboarding/complete', { method: 'POST' }),
 }
 
+// ── Employer dashboard ────────────────────────────────────────────────────────
+
+export interface EmployerDashboard {
+  onboardingStep: number
+  onboardingCompleted: boolean
+  employeeCount: number
+  invitedCount: number
+  nextPayrollDate: string | null
+  recentPayrolls: { id: string; periodStart: string; periodEnd: string; status: string; totalGross: string | null }[]
+  upcomingStarters: { id: string; fullName: string; startDate: string }[]
+  pendingLeaveCount: number
+  todayPresent: number
+}
+
+export const employerDashboard = {
+  get: (): Promise<EmployerDashboard> => request<EmployerDashboard>('/dashboard'),
+}
+
+// ── Employee dashboard ────────────────────────────────────────────────────────
+
+export interface EmployeeDashboardData {
+  profile: { fullName: string; jobTitle: string | null; employmentStatus: string; startDate: string | null }
+  recentPayslips: PayrollRunItem[]
+  leaveBalances: { annual: number; sick: number; other: number }
+  enrolledBenefits: Benefit[]
+  recentAttendance: AttendanceRecord[]
+}
+
+export const employeeDashboard = {
+  get: (): Promise<EmployeeDashboardData> => request<EmployeeDashboardData>('/employee/dashboard'),
+}
+
 // ── Stats ─────────────────────────────────────────────────────────────────────
 
 export const stats = {

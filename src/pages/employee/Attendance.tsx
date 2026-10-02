@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Clock, MapPin, ChevronLeft, ChevronRight, ChevronDown, FileText } from 'lucide-react'
 import { usePageTitle } from '../../hooks/usePageTitle'
+import { attendance as attendanceApi, type AttendanceRecord } from '../../lib/api'
 
 type AttendanceStatus = 'Early' | 'Overtime' | 'Absent' | 'Late'
 
@@ -30,11 +31,48 @@ function StatusPill({ status }: { status: AttendanceStatus }) {
   )
 }
 
+function mapRecord(r: AttendanceRecord): AttendanceRow {
+  const clockInTime = r.clockIn ? new Date(r.clockIn).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '—'
+  const clockOutTime = r.clockOut ? new Date(r.clockOut).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '—'
+  let hours = '—'
+  if (r.clockIn && r.clockOut) {
+    const diff = (new Date(r.clockOut).getTime() - new Date(r.clockIn).getTime()) / 3600000
+    hours = `${diff.toFixed(1)} hrs`
+  }
+  const statusMap: Record<string, AttendanceStatus> = { present: 'Early', late: 'Late', absent: 'Absent', overtime: 'Overtime' }
+  return {
+    date: new Date(r.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+    clockIn: clockInTime,
+    clockOut: clockOutTime,
+    hours,
+    location: 'Office',
+    status: statusMap[r.status] ?? 'Early',
+  }
+}
+
 export default function Attendance() {
   usePageTitle('Attendance')
 
   const navigate = useNavigate()
-  const [rows] = useState<AttendanceRow[]>([])
+  const [rows, setRows] = useState<AttendanceRow[]>([])
+  const [clockingIn, setClockingIn] = useState(false)
+
+  useEffect(() => {
+    attendanceApi.list()
+      .then(data => setRows(data.map(mapRecord)))
+      .catch(() => {})
+  }, [])
+
+  async function handleClockIn() {
+    setClockingIn(true)
+    try {
+      await attendanceApi.clockIn()
+      const data = await attendanceApi.list()
+      setRows(data.map(mapRecord))
+    } finally {
+      setClockingIn(false)
+    }
+  }
 
   return (
     <div className="">
@@ -42,9 +80,13 @@ export default function Attendance() {
       {/* Page heading */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Attendance</h1>
-        <button className="flex items-center gap-2 bg-[#22c55e] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-600 transition-colors">
+        <button
+          onClick={handleClockIn}
+          disabled={clockingIn}
+          className="flex items-center gap-2 bg-[#22c55e] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-600 transition-colors disabled:opacity-60"
+        >
           <Clock size={14} />
-          Clock in time
+          {clockingIn ? 'Clocking in…' : 'Clock in'}
         </button>
       </div>
 

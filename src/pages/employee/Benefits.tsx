@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Gift, ChevronRight } from 'lucide-react'
 import { usePageTitle } from '../../hooks/usePageTitle'
+import { benefits as benefitsApi, type Benefit as ApiBenefit } from '../../lib/api'
 
 type BenefitStatus = 'Active' | 'Pending' | 'Inactive'
 type SideSection = 'plans' | 'dependants'
@@ -30,12 +31,30 @@ function StatusPill({ status }: { status: BenefitStatus }) {
   )
 }
 
+function mapBenefit(b: ApiBenefit): BenefitItem {
+  return {
+    name: b.name,
+    provider: b.benefitType ?? 'Unknown',
+    dependants: 0,
+    coverage: b.value ? `$${parseFloat(b.value).toLocaleString('en-US', { minimumFractionDigits: 2 })}/mo` : '—',
+    renewalDate: '—',
+    status: b.isActive ? 'Active' : 'Inactive',
+    planId: b.id,
+  }
+}
+
 export default function Benefits() {
   usePageTitle('My Benefits')
 
   const navigate = useNavigate()
   const [activeSection, setActiveSection] = useState<SideSection>('plans')
-  const [benefits] = useState<BenefitItem[]>([])
+  const [benefits, setBenefits] = useState<BenefitItem[]>([])
+
+  useEffect(() => {
+    benefitsApi.list()
+      .then(data => setBenefits(data.map(mapBenefit)))
+      .catch(() => {})
+  }, [])
 
   const sidebarItems: { key: SideSection; label: string }[] = [
     { key: 'plans',      label: 'Benefit plans'         },

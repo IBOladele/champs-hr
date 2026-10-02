@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { employees as employeesApi, type Employee as ApiEmployee } from '../../lib/api'
 import {
   ChevronLeft, Pencil, FileText,
   User,
@@ -135,9 +136,24 @@ export default function EmployeeDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<DetailTab>('personal')
+  const [emp, setEmp] = useState<ApiEmployee | null>(null)
+  const [loading, setLoading] = useState(true)
 
-  // No employee data — show not found state
-  const emp = null
+  useEffect(() => {
+    if (!id) return
+    employeesApi.get(id)
+      .then(setEmp)
+      .catch(() => setEmp(null))
+      .finally(() => setLoading(false))
+  }, [id])
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-24">
+        <div className="w-6 h-6 border-2 border-gray-200 border-t-green-500 rounded-full animate-spin" />
+      </div>
+    )
+  }
 
   if (!emp) {
     return (
@@ -168,7 +184,7 @@ export default function EmployeeDetail() {
   return (
     <div className="">
 
-      {/* Breadcrumb */}
+      {/* Breadcrumb + name */}
       <button
         onClick={() => navigate('/employer/employees')}
         className="flex items-center gap-1 text-sm text-[#22c55e] hover:text-green-600 transition-colors mb-2"
@@ -176,6 +192,9 @@ export default function EmployeeDetail() {
         <ChevronLeft size={16} />
         Back to employees
       </button>
+      {emp && (
+        <h1 className="text-2xl font-bold text-gray-900 mb-4">{emp.fullName}</h1>
+      )}
 
       {/* Tabs */}
       <div className="flex border-b border-gray-200 bg-white -mt-px">
@@ -200,7 +219,36 @@ export default function EmployeeDetail() {
         {activeTab === 'attendance' && <AttendanceTab />}
         {activeTab === 'document' && <DocumentTab />}
         {activeTab === 'logs' && <LogsTab />}
-        {(activeTab === 'personal' || activeTab === 'employment' || activeTab === 'compensation') && (
+        {(activeTab === 'personal') && emp && (
+          <SectionCard title="Personal information" action={<EditBtn />}>
+            <div className="grid grid-cols-3 gap-x-8 gap-y-5">
+              <InfoField label="Full name"    value={emp.fullName} />
+              <InfoField label="Email"        value={emp.email} />
+              <InfoField label="Phone"        value={emp.phone ?? '—'} />
+              <InfoField label="Employee #"   value={emp.employeeNumber} />
+              <InfoField label="Department"   value={emp.departmentName ?? '—'} />
+              <InfoField label="Job title"    value={emp.jobTitle ?? '—'} />
+            </div>
+          </SectionCard>
+        )}
+        {(activeTab === 'employment') && emp && (
+          <SectionCard title="Employment details" action={<EditBtn />}>
+            <div className="grid grid-cols-3 gap-x-8 gap-y-5">
+              <InfoField label="Employment type"   value={emp.employmentType ?? '—'} />
+              <InfoField label="Start date"        value={emp.startDate ?? '—'} />
+              <InfoField label="Status"            value={emp.employmentStatus} />
+            </div>
+          </SectionCard>
+        )}
+        {(activeTab === 'compensation') && emp && (
+          <SectionCard title="Compensation" action={<EditBtn />}>
+            <div className="grid grid-cols-3 gap-x-8 gap-y-5">
+              <InfoField label="Gross salary"   value={emp.grossSalary ? `$${parseFloat(emp.grossSalary).toLocaleString('en-US')}` : '—'} />
+              <InfoField label="Pay frequency"  value={emp.payFrequency ?? '—'} />
+            </div>
+          </SectionCard>
+        )}
+        {(activeTab === 'personal' || activeTab === 'employment' || activeTab === 'compensation') && !emp && (
           <EmptyTabState icon={User} message="No data available" sub="Employee data will appear once added" />
         )}
       </div>

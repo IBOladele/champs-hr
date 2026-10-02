@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Search, ChevronDown, Gift } from 'lucide-react'
 import { usePageTitle } from '../../hooks/usePageTitle'
+import { benefits as benefitsApi, type Benefit as ApiBenefit } from '../../lib/api'
 
 type SubTab = 'Benefit plans' | 'Benefit sync' | 'Benefit requests'
 type BenefitStatus = 'Active' | 'Inactive' | 'Disable'
@@ -16,6 +17,22 @@ interface Benefit {
   monthlyCost: string
   documentRequired: boolean
   status: BenefitStatus
+}
+
+const PROVIDER_COLORS = ['bg-violet-500','bg-blue-500','bg-green-500','bg-amber-500','bg-pink-500']
+
+function mapBenefit(b: ApiBenefit, i: number): Benefit {
+  return {
+    id: b.id,
+    dateCreated: new Date(b.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+    provider: b.benefitType ?? 'Unknown',
+    providerInitial: (b.benefitType ?? 'U').charAt(0).toUpperCase(),
+    providerColor: PROVIDER_COLORS[i % PROVIDER_COLORS.length],
+    planName: b.name,
+    monthlyCost: b.value ? `$${parseFloat(b.value).toFixed(2)}/mo` : '—',
+    documentRequired: false,
+    status: b.isActive ? 'Active' : 'Inactive',
+  }
 }
 
 const subTabs: SubTab[] = ['Benefit plans', 'Benefit sync', 'Benefit requests']
@@ -40,7 +57,13 @@ export default function Benefits() {
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<SubTab>('Benefit plans')
   const [search, setSearch] = useState('')
-  const [benefits] = useState<Benefit[]>([])
+  const [benefits, setBenefits] = useState<Benefit[]>([])
+
+  useEffect(() => {
+    benefitsApi.list()
+      .then(data => setBenefits(data.map(mapBenefit)))
+      .catch(() => {})
+  }, [])
 
   const filtered = benefits.filter((b) =>
     b.planName.toLowerCase().includes(search.toLowerCase()) ||

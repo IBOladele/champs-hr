@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CalendarDays, Plus, ChevronDown, ChevronLeft, ChevronRight, Eye } from 'lucide-react'
 import { usePageTitle } from '../../hooks/usePageTitle'
+import { leave as leaveApi, type LeaveRequest } from '../../lib/api'
 
 type LeaveStatus = 'Pending' | 'Approved' | 'Denied'
 
@@ -28,11 +29,28 @@ function StatusPill({ status }: { status: LeaveStatus }) {
   )
 }
 
+function mapLeave(r: LeaveRequest): LeaveRow {
+  return {
+    name: r.leaveType,
+    type: r.leaveType,
+    startDate: new Date(r.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+    endDate: new Date(r.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+    totalDays: `${r.daysRequested} day${parseFloat(r.daysRequested) !== 1 ? 's' : ''}`,
+    status: r.status === 'approved' ? 'Approved' : r.status === 'rejected' ? 'Denied' : 'Pending',
+  }
+}
+
 export default function LeaveRequests() {
   usePageTitle('Leave Requests')
 
   const navigate = useNavigate()
-  const [rows] = useState<LeaveRow[]>([])
+  const [rows, setRows] = useState<LeaveRow[]>([])
+
+  useEffect(() => {
+    leaveApi.list()
+      .then(data => setRows(data.map(mapLeave)))
+      .catch(() => {})
+  }, [])
 
   return (
     <div className="">
@@ -52,9 +70,9 @@ export default function LeaveRequests() {
       {/* Stat cards */}
       <div className="grid grid-cols-3 gap-4 mb-6">
         {[
-          { label: 'Annual leave', value: '0', iconCls: 'text-green-500', bg: 'bg-green-50' },
-          { label: 'Sick leave',   value: '0', iconCls: 'text-red-400',   bg: 'bg-red-50'   },
-          { label: 'Unpaid leave', value: '0', iconCls: 'text-amber-500', bg: 'bg-amber-50' },
+          { label: 'Total requests', value: String(rows.length),                                              iconCls: 'text-green-500', bg: 'bg-green-50' },
+          { label: 'Approved',       value: String(rows.filter(r => r.status === 'Approved').length),         iconCls: 'text-red-400',   bg: 'bg-red-50'   },
+          { label: 'Pending',        value: String(rows.filter(r => r.status === 'Pending').length),          iconCls: 'text-amber-500', bg: 'bg-amber-50' },
         ].map(({ label, value, iconCls, bg }) => (
           <div key={label} className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 flex items-start justify-between">
             <div>
