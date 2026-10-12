@@ -33,8 +33,8 @@ router.get(
       }
 
       const result = await pool.query(
-        `SELECT * FROM employee_w4 WHERE employee_id = $1`,
-        [emp.id],
+        `SELECT * FROM employee_w4 WHERE employee_id = $1 AND tenant_id = $2`,
+        [emp.id, tenantId],
       );
       if (!result.rows[0]) { res.status(404).json({ error: 'No W-4 on file' }); return; }
       res.json(result.rows[0]);

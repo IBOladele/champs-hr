@@ -163,8 +163,8 @@ router.post(
         await client.query('COMMIT');
 
         const fresh = await pool.query(
-          `SELECT * FROM payroll_runs WHERE id = $1`,
-          [runId]
+          `SELECT * FROM payroll_runs WHERE id = $1 AND tenant_id = $2`,
+          [runId, tenantId]
         );
         res.status(201).json(fresh.rows[0]);
       } catch (err) {

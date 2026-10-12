@@ -250,8 +250,8 @@ router.post('/resend-verification', requireAuth, async (req: Request, res: Respo
     const token = crypto.randomBytes(32).toString('hex');
     await pool.query(
       `UPDATE users SET email_verification_token = $1, email_verification_sent_at = NOW()
-       WHERE id = $2`,
-      [token, userId],
+       WHERE id = $2 AND tenant_id = $3`,
+      [token, userId, tenantId],
     );
 
     sendVerificationEmail(user.email, token).catch((err) =>

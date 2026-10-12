@@ -24,8 +24,8 @@ router.get(
       if (!emp) { res.status(404).json({ error: 'Employee not found' }); return; }
 
       const result = await pool.query(
-        `SELECT * FROM employee_i9 WHERE employee_id = $1`,
-        [emp.id],
+        `SELECT * FROM employee_i9 WHERE employee_id = $1 AND tenant_id = $2`,
+        [emp.id, tenantId],
       );
       if (!result.rows[0]) { res.status(404).json({ error: 'No I-9 on file' }); return; }
       res.json(result.rows[0]);
@@ -121,11 +121,11 @@ router.put(
            section2_completed_by  = $6,
            status                 = 'completed',
            updated_at             = NOW()
-         WHERE employee_id = $7
+         WHERE employee_id = $7 AND tenant_id = $8
          RETURNING *`,
         [
           body.docListUsed, body.docTitle, body.docIssuingAuthority,
-          body.docNumber, body.docExpiry ?? null, userId, emp.id,
+          body.docNumber, body.docExpiry ?? null, userId, emp.id, tenantId,
         ],
       );
       if (!result.rows[0]) { res.status(404).json({ error: 'No I-9 found — employee must complete Section 1 first' }); return; }

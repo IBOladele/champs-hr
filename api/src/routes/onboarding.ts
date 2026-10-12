@@ -135,8 +135,8 @@ router.post('/invite', async (req: Request, res: Response, next: NextFunction) =
 
       // Check if user already exists for this tenant
       const existing = await pool.query(
-        `SELECT id FROM users WHERE email = $1`,
-        [norm],
+        `SELECT id FROM users WHERE email = $1 AND tenant_id = $2`,
+        [norm, tenantId],
       );
       if (existing.rows.length > 0) { skipped.push(norm); continue; }
 

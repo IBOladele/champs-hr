@@ -37,9 +37,9 @@ router.get(
         `SELECT id, bank_name, routing_number, account_number, account_type,
                 is_primary, is_active, created_at, updated_at
          FROM employee_direct_deposit
-         WHERE employee_id = $1 AND is_active = TRUE
+         WHERE employee_id = $1 AND tenant_id = $2 AND is_active = TRUE
          ORDER BY is_primary DESC`,
-        [emp.id],
+        [emp.id, tenantId],
       );
 
       // Always return masked values
@@ -91,8 +91,8 @@ router.put(
         if (body.isPrimary) {
           await client.query(
             `UPDATE employee_direct_deposit SET is_primary = FALSE
-             WHERE employee_id = $1`,
-            [emp.id],
+             WHERE employee_id = $1 AND tenant_id = $2`,
+            [emp.id, tenantId],
           );
         }
 

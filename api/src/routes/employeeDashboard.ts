@@ -63,48 +63,48 @@ router.get(
                   pri.gross_pay, pri.net_pay, pri.status
            FROM payroll_run_items pri
            JOIN payroll_runs pr ON pr.id = pri.payroll_run_id
-           WHERE pri.employee_id = $1
+           WHERE pri.employee_id = $1 AND pri.tenant_id = $2
            ORDER BY pr.period_end DESC
            LIMIT 3`,
-          [employeeId],
+          [employeeId, tenantId],
         ),
 
         // Annual leave used this calendar year
         pool.query<{ days_used: string }>(
           `SELECT COALESCE(SUM(days_requested), 0) AS days_used
            FROM leave_requests
-           WHERE employee_id = $1
+           WHERE employee_id = $1 AND tenant_id = $2
              AND leave_type = 'annual'
              AND status = 'approved'
              AND DATE_PART('year', start_date) = DATE_PART('year', CURRENT_DATE)`,
-          [employeeId],
+          [employeeId, tenantId],
         ),
 
         // Sick leave used this calendar year
         pool.query<{ days_used: string }>(
           `SELECT COALESCE(SUM(days_requested), 0) AS days_used
            FROM leave_requests
-           WHERE employee_id = $1
+           WHERE employee_id = $1 AND tenant_id = $2
              AND leave_type = 'sick'
              AND status = 'approved'
              AND DATE_PART('year', start_date) = DATE_PART('year', CURRENT_DATE)`,
-          [employeeId],
+          [employeeId, tenantId],
         ),
 
         // Pending leave requests count
         pool.query<{ count: string }>(
           `SELECT COUNT(*) AS count
            FROM leave_requests
-           WHERE employee_id = $1 AND status = 'pending'`,
-          [employeeId],
+           WHERE employee_id = $1 AND tenant_id = $2 AND status = 'pending'`,
+          [employeeId, tenantId],
         ),
 
         // Count of active enrolled benefits
         pool.query<{ count: string }>(
           `SELECT COUNT(*) AS count
            FROM employee_benefits
-           WHERE employee_id = $1 AND status = 'active'`,
-          [employeeId],
+           WHERE employee_id = $1 AND tenant_id = $2 AND status = 'active'`,
+          [employeeId, tenantId],
         ),
 
         // Benefit plan details
@@ -118,8 +118,8 @@ router.get(
           `SELECT b.id, b.name, b.benefit_type, b.value, b.currency
            FROM employee_benefits eb
            JOIN benefits b ON b.id = eb.benefit_id
-           WHERE eb.employee_id = $1 AND eb.status = 'active'`,
-          [employeeId],
+           WHERE eb.employee_id = $1 AND eb.tenant_id = $2 AND eb.status = 'active'`,
+          [employeeId, tenantId],
         ),
 
         // Attendance for current calendar month
@@ -140,9 +140,9 @@ router.get(
                1
              ) AS hours_worked
            FROM attendance_records
-           WHERE employee_id = $1
+           WHERE employee_id = $1 AND tenant_id = $2
              AND DATE_TRUNC('month', date) = DATE_TRUNC('month', CURRENT_DATE)`,
-          [employeeId],
+          [employeeId, tenantId],
         ),
       ]);
 

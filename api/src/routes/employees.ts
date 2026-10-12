@@ -244,8 +244,9 @@ router.patch(
           }
           if (userUpdates.length > 0) {
             userValues.push(userId);
+            userValues.push(tenantId);
             await client.query(
-              `UPDATE users SET ${userUpdates.join(', ')} WHERE id = $${idx}`,
+              `UPDATE users SET ${userUpdates.join(', ')} WHERE id = $${idx} AND tenant_id = $${idx + 1}`,
               userValues
             );
           }

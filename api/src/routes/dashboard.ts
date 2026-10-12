@@ -140,8 +140,8 @@ router.get(
       if (nextPayrollRow.rows[0]) {
         const run = nextPayrollRow.rows[0];
         const countRes = await pool.query<{ count: string }>(
-          `SELECT COUNT(*) AS count FROM payroll_run_items WHERE payroll_run_id = $1`,
-          [run.id],
+          `SELECT COUNT(*) AS count FROM payroll_run_items WHERE payroll_run_id = $1 AND tenant_id = $2`,
+          [run.id, tenantId],
         );
         nextPayroll = {
           id: run.id,

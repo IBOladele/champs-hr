@@ -46,8 +46,8 @@ router.get(
          FROM employees e
          JOIN users u ON u.id = e.user_id
          JOIN tenants t ON t.id = e.tenant_id
-         WHERE e.id = $1`,
-        [emp.id],
+         WHERE e.id = $1 AND e.tenant_id = $2`,
+        [emp.id, tenantId],
       );
       const info = empDetails.rows[0];
 
