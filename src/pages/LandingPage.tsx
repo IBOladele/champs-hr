@@ -153,16 +153,6 @@ function DashboardMockup() {
   )
 }
 
-// ─── Section wrapper ──────────────────────────────────────────────────────────
-function Section({ bg = '#fff', id, children, style }: { bg?: string; id?: string; children: React.ReactNode; style?: React.CSSProperties }) {
-  return (
-    <section id={id} style={{ background: bg, ...style }}>
-      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px' }}>
-        {children}
-      </div>
-    </section>
-  )
-}
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
   return <div style={{ fontFamily: JAKARTA, fontSize: 12, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase' as const, color: GREEN_D, marginBottom: 12 }}>{children}</div>

@@ -72,6 +72,11 @@ export default function EmployeeDashboard() {
     sub: 'Office',
     status: r.status === 'present' ? 'Early' : r.status === 'late' ? 'Overtime' : 'Absent',
   }))
+  const leaveRequests = (data?.leaveRequests ?? []).slice(0, 3).map(r => ({
+    name: r.leaveType ?? 'Leave',
+    sub: r.startDate ? new Date(r.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '',
+    status: r.status ?? 'pending',
+  }))
 
   return (
     <div className="">
@@ -206,7 +211,7 @@ export default function EmployeeDashboard() {
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
                       <StatusPill status={item.status} />
-                      <button className="text-xs text-gray-500 hover:text-gray-700">{item.action}</button>
+                      <button className="text-xs text-gray-500 hover:text-gray-700">View</button>
                     </div>
                   </div>
                 ))}

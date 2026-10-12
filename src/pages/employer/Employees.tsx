@@ -54,14 +54,12 @@ export default function Employees() {
   const [activeTab, setActiveTab] = useState<Tab>('active')
   const [search, setSearch] = useState('')
   const [employees, setEmployees] = useState<Employee[]>([])
-  const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
 
   useEffect(() => {
     employeesApi.list()
       .then(data => setEmployees(data.map(mapEmployee)))
       .catch(() => {})
-      .finally(() => setLoading(false))
   }, [])
 
   const tabFiltered = employees.filter(e => {

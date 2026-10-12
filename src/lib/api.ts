@@ -411,6 +411,7 @@ export interface EmployeeDashboardData {
   leaveBalances: { annual: number; sick: number; other: number }
   enrolledBenefits: Benefit[]
   recentAttendance: AttendanceRecord[]
+  leaveRequests?: { leaveType?: string; startDate?: string; endDate?: string; status?: string }[]
 }
 
 export const employeeDashboard = {

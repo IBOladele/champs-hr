@@ -73,13 +73,11 @@ export default function Payroll() {
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<PayTab>('cycle')
   const [payCycles, setPayCycles] = useState<PayCycle[]>([])
-  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     payrollApi.list()
       .then(data => setPayCycles(data.map(mapRun)))
       .catch(() => {})
-      .finally(() => setLoading(false))
   }, [])
 
   const latestRun = payCycles[0]
