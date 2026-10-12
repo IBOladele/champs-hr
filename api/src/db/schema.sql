@@ -243,6 +243,27 @@ CREATE TABLE IF NOT EXISTS employee_direct_deposit (
 CREATE INDEX IF NOT EXISTS idx_direct_deposit_tenant_id ON employee_direct_deposit(tenant_id);
 CREATE INDEX IF NOT EXISTS idx_direct_deposit_employee_id ON employee_direct_deposit(employee_id);
 
+CREATE TABLE IF NOT EXISTS documents (
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  tenant_id       UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+  uploaded_by     UUID REFERENCES users(id) ON DELETE SET NULL,
+  employee_id     UUID REFERENCES employees(id) ON DELETE SET NULL,
+  name            TEXT NOT NULL,
+  doc_type        TEXT NOT NULL DEFAULT 'Other',
+  description     TEXT,
+  file_name       TEXT NOT NULL,
+  file_size       INTEGER,
+  mime_type       TEXT,
+  file_data       BYTEA,
+  expiry_date     DATE,
+  require_signature BOOLEAN NOT NULL DEFAULT FALSE,
+  status          TEXT NOT NULL DEFAULT 'live' CHECK (status IN ('live','archived','pending')),
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_documents_tenant_id   ON documents(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_documents_employee_id ON documents(employee_id);
+
 -- Idempotent additions for existing databases
 ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified             BOOLEAN NOT NULL DEFAULT FALSE;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verification_token   TEXT;

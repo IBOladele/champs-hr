@@ -1,7 +1,6 @@
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { Menu, X, ChevronDown } from 'lucide-react'
-import { Logo } from './Logo'
+import { useState, useEffect } from 'react'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
+import { Menu, X } from 'lucide-react'
 
 interface MarketingShellProps {
   children: React.ReactNode
@@ -11,85 +10,138 @@ interface MarketingShellProps {
 
 export default function MarketingShell({ children }: MarketingShellProps) {
   const navigate = useNavigate()
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [compareOpen, setCompareOpen] = useState(false)
+  const location = useLocation()
+  const [mobileOpen, setMobileOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
+
+  const onLanding = location.pathname === '/' || location.pathname === ''
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 40)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  const navTransparent = onLanding && !scrolled && !mobileOpen
 
   return (
-    <div className="min-h-screen bg-white font-sans flex flex-col">
-      {/* ── Header ── */}
-      <header className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          {/* Logo */}
-          <Link to="/" className="flex items-center">
-            <Logo size={28} />
+    <div className="min-h-screen flex flex-col" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+      {/* ── Announcement bar ── */}
+      <div style={{ background: '#d97706', color: '#fff', textAlign: 'center', padding: '9px 16px', fontSize: 13, fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif", fontWeight: 500, letterSpacing: '.01em', position: 'relative', zIndex: 100 }}>
+        ✦ New: Multi-state payroll &amp; compliance now available
+        <a href="#pricing" style={{ color: '#fff', textDecoration: 'underline', marginLeft: 8, opacity: .9 }}>See plans →</a>
+      </div>
+
+      {/* ── Sticky header ── */}
+      <header
+        style={{
+          position: 'sticky',
+          top: 0,
+          zIndex: 90,
+          background: navTransparent ? 'transparent' : 'rgba(255,255,255,0.96)',
+          backdropFilter: navTransparent ? 'none' : 'blur(12px)',
+          borderBottom: `1px solid ${navTransparent ? 'transparent' : '#dde5ef'}`,
+          boxShadow: navTransparent ? 'none' : '0 1px 20px rgba(0,0,0,.06)',
+          transition: 'background .25s, border-color .25s, box-shadow .25s',
+        }}
+      >
+        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px', height: 64, display: 'flex', alignItems: 'center', gap: 40 }}>
+          {/* Wordmark */}
+          <Link
+            to="/"
+            style={{
+              fontFamily: "'Space Grotesk', system-ui, sans-serif",
+              fontWeight: 700,
+              fontSize: 20,
+              letterSpacing: '-0.045em',
+              color: navTransparent ? '#fff' : '#1D2230',
+              display: 'flex',
+              alignItems: 'baseline',
+              gap: 0,
+              flexShrink: 0,
+              textDecoration: 'none',
+              transition: 'color .25s',
+            }}
+          >
+            Pay
+            <svg width="14" height="14" viewBox="0 0 24 24" style={{ transform: 'translateY(.05em)', margin: '0 .01em' }} aria-hidden="true">
+              <circle cx="12" cy="12" r="9" fill="none" stroke={navTransparent ? '#F8F7F3' : '#1D2230'} strokeWidth="4.2" strokeDasharray="47 9.5" transform="rotate(30 12 12)" />
+              <circle cx="12" cy="12" r="3.4" fill={navTransparent ? '#E2B85A' : '#B8892B'} />
+            </svg>
+            hamps
           </Link>
 
           {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-8">
-            <Link to="/features" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
-              Features
-            </Link>
-            <Link to="/security" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
-              Security
-            </Link>
-            <Link to="/switch" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
-              Switch
-            </Link>
-            {/* Compare dropdown */}
-            <div className="relative">
-              <button
-                className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-900 transition-colors"
-                onMouseEnter={() => setCompareOpen(true)}
-                onMouseLeave={() => setCompareOpen(false)}
-                onClick={() => setCompareOpen(!compareOpen)}
+          <nav style={{ display: 'flex', gap: 32, flex: 1 }} className="hidden md:flex">
+            {[
+              ['#features', 'Features'],
+              ['#compare', 'Compare'],
+              ['#pricing', 'Pricing'],
+              ['#faq', 'FAQ'],
+            ].map(([href, label]) => (
+              <a
+                key={label}
+                href={href}
+                style={{
+                  fontSize: 14,
+                  fontWeight: 500,
+                  color: navTransparent ? 'rgba(255,255,255,.6)' : '#4a5568',
+                  textDecoration: 'none',
+                  transition: 'color .2s',
+                  fontFamily: "'Inter', system-ui, sans-serif",
+                }}
+                onMouseEnter={e => (e.currentTarget.style.color = navTransparent ? '#fff' : '#0c1929')}
+                onMouseLeave={e => (e.currentTarget.style.color = navTransparent ? 'rgba(255,255,255,.6)' : '#4a5568')}
               >
-                Compare
-                <ChevronDown size={14} />
-              </button>
-              {compareOpen && (
-                <div
-                  className="absolute top-full left-0 mt-1 bg-white border border-gray-100 rounded-xl shadow-lg py-2 min-w-44 z-50"
-                  onMouseEnter={() => setCompareOpen(true)}
-                  onMouseLeave={() => setCompareOpen(false)}
-                >
-                  <Link
-                    to="/compare/gusto"
-                    className="block px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-                    onClick={() => setCompareOpen(false)}
-                  >
-                    vs Gusto
-                  </Link>
-                  <Link
-                    to="/compare/adp"
-                    className="block px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-                    onClick={() => setCompareOpen(false)}
-                  >
-                    vs ADP
-                  </Link>
-                  <Link
-                    to="/compare/rippling"
-                    className="block px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-                    onClick={() => setCompareOpen(false)}
-                  >
-                    vs Rippling
-                  </Link>
-                </div>
-              )}
-            </div>
+                {label}
+              </a>
+            ))}
           </nav>
 
-          {/* CTA buttons */}
-          <div className="hidden md:flex items-center gap-3">
+          {/* CTA */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginLeft: 'auto' }} className="hidden md:flex">
             <button
               onClick={() => navigate('/login')}
-              className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+              style={{
+                padding: '8px 16px',
+                fontSize: 14,
+                fontWeight: 600,
+                color: navTransparent ? 'rgba(255,255,255,.6)' : '#4a5568',
+                background: 'transparent',
+                border: 'none',
+                borderRadius: 8,
+                cursor: 'pointer',
+                fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+                transition: 'color .2s, background .2s',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.color = navTransparent ? '#fff' : '#0c1929'
+                e.currentTarget.style.background = navTransparent ? 'rgba(255,255,255,.05)' : '#f6f9fc'
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.color = navTransparent ? 'rgba(255,255,255,.6)' : '#4a5568'
+                e.currentTarget.style.background = 'transparent'
+              }}
             >
               Log in
             </button>
             <button
               onClick={() => navigate('/get-started')}
-              className="px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors"
-              style={{ backgroundColor: '#22c55e' }}
+              style={{
+                padding: '9px 20px',
+                fontSize: 14,
+                fontWeight: 700,
+                color: '#fff',
+                background: '#d97706',
+                border: 'none',
+                borderRadius: 9,
+                cursor: 'pointer',
+                fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+                transition: 'background .15s, transform .15s',
+                whiteSpace: 'nowrap',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = '#b45309'; e.currentTarget.style.transform = 'translateY(-1px)' }}
+              onMouseLeave={e => { e.currentTarget.style.background = '#d97706'; e.currentTarget.style.transform = 'none' }}
             >
               Get started free
             </button>
@@ -97,35 +149,32 @@ export default function MarketingShell({ children }: MarketingShellProps) {
 
           {/* Mobile toggle */}
           <button
-            className="md:hidden p-2 text-gray-500"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden ml-auto"
+            onClick={() => setMobileOpen(!mobileOpen)}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: navTransparent ? '#fff' : '#4a5568', padding: 4 }}
           >
-            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            {mobileOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
         </div>
 
         {/* Mobile menu */}
-        {mobileMenuOpen && (
-          <div className="md:hidden border-t border-gray-100 px-6 py-4 flex flex-col gap-4 bg-white">
-            <Link to="/features" className="text-sm text-gray-600" onClick={() => setMobileMenuOpen(false)}>Features</Link>
-            <Link to="/security" className="text-sm text-gray-600" onClick={() => setMobileMenuOpen(false)}>Security</Link>
-            <Link to="/switch" className="text-sm text-gray-600" onClick={() => setMobileMenuOpen(false)}>Switch</Link>
-            <div className="pl-2 flex flex-col gap-2 border-l border-gray-100">
-              <Link to="/compare/gusto" className="text-sm text-gray-500" onClick={() => setMobileMenuOpen(false)}>vs Gusto</Link>
-              <Link to="/compare/adp" className="text-sm text-gray-500" onClick={() => setMobileMenuOpen(false)}>vs ADP</Link>
-              <Link to="/compare/rippling" className="text-sm text-gray-500" onClick={() => setMobileMenuOpen(false)}>vs Rippling</Link>
-            </div>
-            <div className="flex flex-col gap-2 pt-2 border-t border-gray-100">
+        {mobileOpen && (
+          <div style={{ background: '#fff', borderTop: '1px solid #dde5ef', padding: '16px 24px', display: 'flex', flexDirection: 'column', gap: 16 }} className="md:hidden">
+            {[['#features', 'Features'], ['#compare', 'Compare'], ['#pricing', 'Pricing'], ['#faq', 'FAQ']].map(([href, label]) => (
+              <a key={label} href={href} style={{ fontSize: 14, fontWeight: 500, color: '#4a5568', textDecoration: 'none' }} onClick={() => setMobileOpen(false)}>
+                {label}
+              </a>
+            ))}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, paddingTop: 8, borderTop: '1px solid #dde5ef' }}>
               <button
-                onClick={() => { navigate('/login'); setMobileMenuOpen(false) }}
-                className="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-200 rounded-lg"
+                onClick={() => { navigate('/login'); setMobileOpen(false) }}
+                style={{ padding: '10px', fontSize: 14, fontWeight: 600, color: '#4a5568', background: 'none', border: '1.5px solid #dde5ef', borderRadius: 9, cursor: 'pointer', fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
               >
                 Log in
               </button>
               <button
-                onClick={() => { navigate('/get-started'); setMobileMenuOpen(false) }}
-                className="px-4 py-2 text-sm font-medium text-white rounded-lg"
-                style={{ backgroundColor: '#22c55e' }}
+                onClick={() => { navigate('/get-started'); setMobileOpen(false) }}
+                style={{ padding: '10px', fontSize: 14, fontWeight: 700, color: '#fff', background: '#d97706', border: 'none', borderRadius: 9, cursor: 'pointer', fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
               >
                 Get started free
               </button>
@@ -135,59 +184,68 @@ export default function MarketingShell({ children }: MarketingShellProps) {
       </header>
 
       {/* ── Page content ── */}
-      <main className="flex-1">{children}</main>
+      <main style={{ flex: 1 }}>{children}</main>
 
       {/* ── Footer ── */}
-      <footer className="bg-gray-50 border-t border-gray-100 py-14">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-10">
-            {/* Brand */}
-            <div className="md:col-span-2">
-              <Link to="/" className="inline-flex mb-3">
-                <Logo size={24} />
-              </Link>
-              <p className="text-xs text-gray-500 leading-relaxed max-w-xs">
-                Payroll and HR software for teams of 10–500. Built for US businesses.
-              </p>
-              <p className="text-xs text-gray-400 mt-4">
-                PayChamps Inc., incorporated in Delaware<br />
-                123 Market Street, San Francisco CA 94105
-              </p>
-              <p className="text-xs text-gray-400 mt-2">
-                <a href="mailto:support@paychamps.com" className="hover:text-gray-600">
-                  support@paychamps.com
-                </a>
-                <span className="mx-2">·</span>
-                +1 (800) 000-0000
-              </p>
+      <footer style={{ background: '#040c17', borderTop: '1px solid rgba(255,255,255,.07)', paddingBlock: '60px 32px' }}>
+        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 40, marginBottom: 48 }}>
+            <div style={{ gridColumn: 'span 2' }}>
+              <div style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif", fontWeight: 700, fontSize: 20, letterSpacing: '-.04em', color: '#fff', marginBottom: 12 }}>
+                Pay<span style={{ color: '#E2B85A' }}>C</span>hamps
+              </div>
+              <div style={{ fontSize: 13, color: 'rgba(255,255,255,.35)', lineHeight: 1.6, maxWidth: 260, marginBottom: 16 }}>
+                Payroll and HR software for teams of 10-500. Built for US businesses, priced fairly.
+              </div>
+              <div style={{ fontSize: 13, color: 'rgba(255,255,255,.3)' }}>
+                PayChamps Inc., Delaware<br />
+                <a href="mailto:support@paychamps.com" style={{ color: 'rgba(255,255,255,.3)', textDecoration: 'none' }}>support@paychamps.com</a>
+              </div>
             </div>
 
-            {/* Product links */}
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-4">Product</p>
-              <ul className="space-y-2 text-sm text-gray-500">
-                <li><Link to="/features" className="hover:text-gray-900">Features</Link></li>
-                <li><Link to="/security" className="hover:text-gray-900">Security</Link></li>
-                <li><Link to="/switch" className="hover:text-gray-900">Switch</Link></li>
-              </ul>
-            </div>
-
-            {/* Legal links */}
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-4">Legal</p>
-              <ul className="space-y-2 text-sm text-gray-500">
-                <li><a href="/privacy" className="hover:text-gray-900">Privacy policy</a></li>
-                <li><a href="/terms" className="hover:text-gray-900">Terms of service</a></li>
-                <li><Link to="/security" className="hover:text-gray-900">Security</Link></li>
-                <li><a href="/accessibility" className="hover:text-gray-900">Accessibility statement</a></li>
-              </ul>
-            </div>
+            {[
+              {
+                title: 'Product',
+                links: [['#features', 'Features'], ['#pricing', 'Pricing'], ['#compare', 'Compare']],
+              },
+              {
+                title: 'Compare',
+                links: [['#compare', 'vs Gusto'], ['#compare', 'vs ADP'], ['#compare', 'vs Rippling'], ['#compare', 'vs Paylocity']],
+              },
+              {
+                title: 'Legal',
+                links: [['/privacy', 'Privacy policy'], ['/terms', 'Terms of service'], ['/security', 'Security'], ['/accessibility', 'Accessibility']],
+              },
+            ].map(col => (
+              <div key={col.title}>
+                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,.3)', marginBottom: 16, fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}>
+                  {col.title}
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {col.links.map(([href, label]) => (
+                    <a key={label} href={href} style={{ fontSize: 14, color: 'rgba(255,255,255,.45)', textDecoration: 'none', transition: 'color .15s' }}
+                      onMouseEnter={e => (e.currentTarget.style.color = '#fff')}
+                      onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,.45)')}
+                    >
+                      {label}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
 
-          <div className="border-t border-gray-200 pt-6">
-            <p className="text-xs text-gray-400 text-center">
-              © 2026 PayChamps Inc. All rights reserved. Incorporated in Delaware.
-            </p>
+          <div style={{ borderTop: '1px solid rgba(255,255,255,.07)', paddingTop: 24, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+            <div style={{ fontSize: 12, color: 'rgba(255,255,255,.25)' }}>
+              © 2026 PayChamps Inc. All rights reserved.
+            </div>
+            <div style={{ display: 'flex', gap: 12 }}>
+              {['SOC 2 TYPE II', 'GDPR', '256-BIT ENCRYPTION'].map(b => (
+                <div key={b} style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.05em', padding: '4px 10px', border: '1px solid rgba(255,255,255,.12)', borderRadius: 6, color: 'rgba(255,255,255,.3)', fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}>
+                  {b}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </footer>

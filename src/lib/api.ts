@@ -15,13 +15,14 @@ export class ApiError extends Error {
 // credentials: 'include' sends the HttpOnly session cookie automatically.
 // The JWT never touches JavaScript — it lives only in the cookie.
 
-async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+async function request<T>(path: string, options: RequestInit & { isFormData?: boolean } = {}): Promise<T> {
+  const { isFormData, ...fetchOptions } = options
   const res = await fetch(`${BASE_URL}/api/v1${path}`, {
-    ...options,
+    ...fetchOptions,
     credentials: 'include',
-    headers: {
+    headers: isFormData ? {} : {
       'Content-Type': 'application/json',
-      ...(options.headers ?? {}),
+      ...(fetchOptions.headers ?? {}),
     },
   })
 
@@ -304,6 +305,57 @@ export const benefits = {
     request<Benefit>('/benefits', { method: 'POST', body: JSON.stringify(data) }),
   enrol: (id: string, employeeId: string): Promise<unknown> =>
     request<unknown>(`/benefits/${id}/enrol`, { method: 'POST', body: JSON.stringify({ employeeId }) }),
+}
+
+// ── Documents ─────────────────────────────────────────────────────────────────
+
+export interface Document {
+  id: string
+  name: string
+  docType: string
+  description: string | null
+  fileName: string
+  fileSize: number | null
+  mimeType: string | null
+  expiryDate: string | null
+  status: 'live' | 'archived' | 'pending'
+  requireSignature: boolean
+  createdAt: string
+  employeeId: string | null
+  uploadedByName: string | null
+}
+
+export const documents = {
+  list: (): Promise<Document[]> => request<Document[]>('/documents'),
+  upload: (formData: FormData): Promise<Document> =>
+    request<Document>('/documents', { method: 'POST', body: formData, isFormData: true }),
+  download: (id: string): string => `${import.meta.env.VITE_API_URL ?? ''}/api/v1/documents/${id}/download`,
+  archive: (id: string): Promise<Document> =>
+    request<Document>(`/documents/${id}/archive`, { method: 'PATCH' }),
+  remove: (id: string): Promise<void> =>
+    request<void>(`/documents/${id}`, { method: 'DELETE' }),
+}
+
+// ── Company config ────────────────────────────────────────────────────────────
+
+export interface CompanyConfig {
+  companyName?: string
+  country?: string
+  businessSize?: string
+  industry?: string
+  companySize?: string
+  county?: string
+  timezone?: string
+  currency?: string
+  registeredAddress?: string
+  website?: string
+  [key: string]: string | undefined
+}
+
+export const config = {
+  get: (): Promise<CompanyConfig> => request<CompanyConfig>('/config'),
+  save: (data: CompanyConfig): Promise<CompanyConfig> =>
+    request<CompanyConfig>('/config', { method: 'PATCH', body: JSON.stringify(data) }),
 }
 
 // ── Onboarding ────────────────────────────────────────────────────────────────
