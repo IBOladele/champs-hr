@@ -63,10 +63,12 @@ const IS_PROD = process.env.NODE_ENV === 'production';
 
 export const SESSION_COOKIE = 'champs_session';
 
+// Cross-origin deployment: frontend and API are on different domains, so the
+// cookie must be SameSite=None + Secure to travel with credentialed requests.
 export const cookieOptions = {
   httpOnly: true,
   secure: IS_PROD,
-  sameSite: 'strict' as const,
+  sameSite: (IS_PROD ? 'none' : 'lax') as 'none' | 'lax',
   path: '/',
   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
 };
