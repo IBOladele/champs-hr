@@ -63,9 +63,9 @@ export default function RoleSelect() {
       </div>
 
       {/* Right — form panel */}
-      <div className="flex-1 flex items-center justify-center px-8 py-12 bg-white">
-        <div className="w-full max-w-sm">
-          <div className="lg:hidden mb-8">
+      <div className="flex-1 flex items-center justify-center px-4 py-10 bg-gray-50">
+        <div className="w-full max-w-sm bg-white rounded-2xl border border-gray-100 shadow-sm px-7 py-9">
+          <div className="lg:hidden mb-7">
             <Logo size={28} />
           </div>
 

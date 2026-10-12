@@ -90,9 +90,9 @@ export default function Signup() {
       </div>
 
       {/* Right — form panel */}
-      <div className="flex-1 flex items-center justify-center px-8 py-12 bg-white">
-        <div className="w-full max-w-sm">
-          <div className="lg:hidden mb-8">
+      <div className="flex-1 flex items-center justify-center px-4 py-10 bg-gray-50">
+        <div className="w-full max-w-sm bg-white rounded-2xl border border-gray-100 shadow-sm px-7 py-9">
+          <div className="lg:hidden mb-7">
             <Logo size={28} />
           </div>
 
@@ -108,7 +108,7 @@ export default function Signup() {
                   placeholder="First name"
                   value={firstName}
                   onChange={e => setFirstName(e.target.value)}
-                  className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[#22c55e]"
+                  className="w-full px-3 py-3 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[#22c55e] focus:ring-2 focus:ring-[#22c55e]/10"
                 />
               </div>
               <div>
@@ -118,7 +118,7 @@ export default function Signup() {
                   placeholder="Last name"
                   value={lastName}
                   onChange={e => setLastName(e.target.value)}
-                  className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[#22c55e]"
+                  className="w-full px-3 py-3 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[#22c55e] focus:ring-2 focus:ring-[#22c55e]/10"
                 />
               </div>
             </div>
@@ -130,7 +130,7 @@ export default function Signup() {
                 placeholder="Acme Corp"
                 value={companyName}
                 onChange={e => setCompanyName(e.target.value)}
-                className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[#22c55e]"
+                className="w-full px-3 py-3 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[#22c55e] focus:ring-2 focus:ring-[#22c55e]/10"
               />
             </div>
 
@@ -141,7 +141,7 @@ export default function Signup() {
                 placeholder="you@company.com"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[#22c55e]"
+                className="w-full px-3 py-3 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[#22c55e] focus:ring-2 focus:ring-[#22c55e]/10"
               />
             </div>
 
@@ -153,7 +153,7 @@ export default function Signup() {
                   placeholder="Min 8 chars, upper, lower, number, symbol"
                   value={password}
                   onChange={e => setPassword(e.target.value)}
-                  className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[#22c55e] pr-10"
+                  className="w-full px-3 py-3 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[#22c55e] focus:ring-2 focus:ring-[#22c55e]/10 pr-10"
                 />
                 <button
                   type="button"
@@ -180,7 +180,7 @@ export default function Signup() {
             {loading ? 'Creating account...' : 'Continue'}
           </button>
 
-          <p className="text-center text-sm text-gray-500 mt-4">
+          <p className="text-center text-sm text-gray-500 mt-5">
             Already have an Account?{' '}
             <button onClick={() => navigate('/login')} className="text-[#22c55e] font-semibold hover:underline">
               Login

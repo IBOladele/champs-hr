@@ -103,9 +103,9 @@ export default function Login() {
       </div>
 
       {/* Right — form panel */}
-      <div className="flex-1 flex items-center justify-center px-8 py-12 bg-white">
-        <div className="w-full max-w-sm">
-          <div className="lg:hidden mb-8">
+      <div className="flex-1 flex items-center justify-center px-4 py-10 bg-gray-50">
+        <div className="w-full max-w-sm bg-white rounded-2xl border border-gray-100 shadow-sm px-7 py-9">
+          <div className="lg:hidden mb-7">
             <Logo size={28} />
           </div>
 
@@ -122,7 +122,7 @@ export default function Login() {
                 onChange={e => setEmail(e.target.value)}
                 onKeyDown={handleKeyDown}
                 autoComplete="email"
-                className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[#22c55e]"
+                className="w-full px-3 py-3 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[#22c55e] focus:ring-2 focus:ring-[#22c55e]/10"
               />
             </div>
 
@@ -139,7 +139,7 @@ export default function Login() {
                   onChange={e => setPassword(e.target.value)}
                   onKeyDown={handleKeyDown}
                   autoComplete="current-password"
-                  className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[#22c55e] pr-10"
+                  className="w-full px-3 py-3 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[#22c55e] focus:ring-2 focus:ring-[#22c55e]/10 pr-10"
                 />
                 <button
                   type="button"
@@ -166,7 +166,7 @@ export default function Login() {
             {loading ? 'Logging in...' : 'Login'}
           </button>
 
-          <p className="text-center text-sm text-gray-500 mt-4">
+          <p className="text-center text-sm text-gray-500 mt-5">
             Don't have an account?{' '}
             <button onClick={() => navigate('/get-started')} className="text-[#22c55e] font-semibold hover:underline">
               Get started
