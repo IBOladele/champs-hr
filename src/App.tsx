@@ -16,6 +16,7 @@ import Signup from './pages/auth/Signup'
 import Login from './pages/auth/Login'
 import Onboarding from './pages/auth/Onboarding'
 import VerifyEmail from './pages/auth/VerifyEmail'
+import AcceptInvite from './pages/auth/AcceptInvite'
 
 // Employer
 import EmployerLayout from './layouts/EmployerLayout'
@@ -71,6 +72,7 @@ export default function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/accept-invite" element={<AcceptInvite />} />
 
           {/* Onboarding — requires auth (employer only) */}
           <Route

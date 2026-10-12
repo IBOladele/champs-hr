@@ -116,7 +116,7 @@ export default function RoleSelect() {
                   <p className="text-sm font-semibold text-gray-900">As an Employee</p>
                 </div>
                 <p className="text-xs text-gray-500 mt-0.5">
-                  Log in with credentials provided by your employer
+                  Accept the invite link sent to your email by your employer
                 </p>
               </div>
             </label>

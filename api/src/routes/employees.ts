@@ -1,8 +1,10 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 import { z } from 'zod';
 import pool from '../db';
 import { requireAuth, requireEmployer } from '../middleware/auth';
+import { sendInviteEmail } from '../lib/email';
 
 const router = Router();
 
@@ -68,15 +70,28 @@ router.post(
         }
       }
 
-      const passwordHash = await bcrypt.hash('Welcome123!', 10);
+      // Random placeholder password — employee sets their own via invite link
+      const passwordHash = await bcrypt.hash(crypto.randomBytes(32).toString('hex'), 10);
+
+      // Fetch inviter details for the email
+      const inviterResult = await pool.query<{ full_name: string }>(
+        `SELECT full_name FROM users WHERE id = $1`,
+        [req.user!.userId]
+      );
+      const tenantResult = await pool.query<{ name: string }>(
+        `SELECT name FROM tenants WHERE id = $1`,
+        [tenantId]
+      );
+      const inviterName = inviterResult.rows[0]?.full_name ?? 'Your employer';
+      const companyName = tenantResult.rows[0]?.name ?? 'your company';
 
       const client = await pool.connect();
       try {
         await client.query('BEGIN');
 
         const userResult = await client.query<{ id: string }>(
-          `INSERT INTO users (tenant_id, email, password_hash, role, full_name)
-           VALUES ($1, $2, $3, 'employee', $4)
+          `INSERT INTO users (tenant_id, email, password_hash, role, full_name, email_verified)
+           VALUES ($1, $2, $3, 'employee', $4, FALSE)
            RETURNING id`,
           [tenantId, body.email, passwordHash, body.fullName]
         );
@@ -101,7 +116,19 @@ router.post(
           ]
         );
 
+        const inviteToken = crypto.randomBytes(32).toString('hex');
+        await client.query(
+          `INSERT INTO employee_invites (tenant_id, invited_by, user_id, token, expires_at)
+           VALUES ($1, $2, $3, $4, NOW() + INTERVAL '7 days')`,
+          [tenantId, req.user!.userId, userId, inviteToken]
+        );
+
         await client.query('COMMIT');
+
+        // Fire-and-forget invite email
+        sendInviteEmail(body.email, inviteToken, companyName, inviterName).catch(
+          err => console.error('[invite email]', err)
+        );
 
         const newEmp = empResult.rows[0];
         res.status(201).json({
@@ -367,6 +394,63 @@ router.delete(
       } finally {
         client.release();
       }
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+// POST /:id/resend-invite — re-send invite to a not-yet-accepted employee
+router.post(
+  '/:id/resend-invite',
+  requireEmployer,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { tenantId, userId: inviterId } = req.user!;
+      const { id } = req.params;
+
+      const empRow = await pool.query<{ user_id: string; email: string; email_verified: boolean }>(
+        `SELECT u.id AS user_id, u.email, u.email_verified
+         FROM employees e JOIN users u ON u.id = e.user_id
+         WHERE e.id = $1 AND e.tenant_id = $2`,
+        [id, tenantId]
+      );
+      if (!empRow.rows[0]) {
+        res.status(404).json({ error: 'Employee not found' });
+        return;
+      }
+      const { user_id: userId, email, email_verified } = empRow.rows[0];
+      if (email_verified) {
+        res.status(400).json({ error: 'Employee has already accepted their invite' });
+        return;
+      }
+
+      const inviterResult = await pool.query<{ full_name: string }>(
+        `SELECT full_name FROM users WHERE id = $1`, [inviterId]
+      );
+      const tenantResult = await pool.query<{ name: string }>(
+        `SELECT name FROM tenants WHERE id = $1`, [tenantId]
+      );
+      const inviterName = inviterResult.rows[0]?.full_name ?? 'Your employer';
+      const companyName = tenantResult.rows[0]?.name ?? 'your company';
+
+      // Replace any pending invite with a fresh one
+      const newToken = crypto.randomBytes(32).toString('hex');
+      await pool.query(
+        `DELETE FROM employee_invites WHERE user_id = $1 AND accepted_at IS NULL`,
+        [userId]
+      );
+      await pool.query(
+        `INSERT INTO employee_invites (tenant_id, invited_by, user_id, token, expires_at)
+         VALUES ($1, $2, $3, $4, NOW() + INTERVAL '7 days')`,
+        [tenantId, inviterId, userId, newToken]
+      );
+
+      sendInviteEmail(email, newToken, companyName, inviterName).catch(
+        err => console.error('[resend invite email]', err)
+      );
+
+      res.json({ message: 'Invite resent' });
     } catch (err) {
       next(err);
     }

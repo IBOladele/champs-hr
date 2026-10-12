@@ -235,6 +235,22 @@ export const employees = {
     request<PayrollRunItem[]>(`/employees/${id}/payslips${year ? `?year=${year}` : ''}`),
   payslip: (employeeId: string, itemId: string): Promise<PayrollRunItem> =>
     request<PayrollRunItem>(`/employees/${employeeId}/payslips/${itemId}`),
+  resendInvite: (id: string): Promise<{ message: string }> =>
+    request<{ message: string }>(`/employees/${id}/resend-invite`, { method: 'POST' }),
+}
+
+export interface InviteDetails {
+  email: string
+  fullName: string | null
+  companyName: string
+  expiresAt: string
+}
+
+export const invites = {
+  get: (token: string): Promise<InviteDetails> =>
+    request<InviteDetails>(`/invites/${token}`),
+  accept: (token: string, data: { password: string; fullName?: string }): Promise<AuthUser> =>
+    request<AuthUser>(`/invites/${token}/accept`, { method: 'POST', body: JSON.stringify(data) }),
 }
 
 // ── Departments ───────────────────────────────────────────────────────────────

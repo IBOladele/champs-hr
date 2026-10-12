@@ -62,6 +62,21 @@ CREATE INDEX IF NOT EXISTS idx_employees_tenant_id ON employees (tenant_id);
 CREATE INDEX IF NOT EXISTS idx_employees_user_id ON employees (user_id);
 CREATE INDEX IF NOT EXISTS idx_employees_department_id ON employees (department_id);
 
+-- Employee invites
+CREATE TABLE IF NOT EXISTS employee_invites (
+  id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  tenant_id    UUID NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  invited_by   UUID NOT NULL REFERENCES users (id),
+  user_id      UUID NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+  token        TEXT NOT NULL UNIQUE,
+  expires_at   TIMESTAMPTZ NOT NULL,
+  accepted_at  TIMESTAMPTZ,
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_employee_invites_token ON employee_invites (token);
+CREATE INDEX IF NOT EXISTS idx_employee_invites_user_id ON employee_invites (user_id);
+
 -- Payroll Runs
 CREATE TABLE IF NOT EXISTS payroll_runs (
   id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
