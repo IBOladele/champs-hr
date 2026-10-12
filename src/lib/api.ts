@@ -349,6 +349,21 @@ export interface CompanyConfig {
   currency?: string
   registeredAddress?: string
   website?: string
+  // payroll settings
+  payFrequency?: string
+  payDay?: string
+  overtimePolicy?: string
+  // leave settings
+  annualLeaveDays?: string
+  sickLeaveDays?: string
+  publicHolidays?: string
+  workingHoursPerDay?: string
+  // notification toggles (stored as 'true'/'false' strings)
+  notifPayroll?: string
+  notifEmployee?: string
+  notifLeave?: string
+  notifDocument?: string
+  notifBenefit?: string
   [key: string]: string | undefined
 }
 
@@ -416,6 +431,33 @@ export interface EmployeeDashboardData {
 
 export const employeeDashboard = {
   get: (): Promise<EmployeeDashboardData> => request<EmployeeDashboardData>('/employee/dashboard'),
+}
+
+// ── User access (portal sub-roles) ────────────────────────────────────────────
+
+export interface PortalUser {
+  id: string
+  fullName: string
+  email: string
+  employeeNumber: string | null
+  jobTitle: string | null
+  portalRole: string | null
+  portalPermissions: Record<string, boolean>
+  isOwner: boolean
+  createdAt: string
+}
+
+export const userAccess = {
+  list: (): Promise<PortalUser[]> => request<PortalUser[]>('/user-access'),
+  grant: (data: {
+    userId: string
+    portalRole: string
+    permissions: Record<string, boolean>
+    expiresAt?: string | null
+  }): Promise<PortalUser> =>
+    request<PortalUser>('/user-access', { method: 'POST', body: JSON.stringify(data) }),
+  revoke: (userId: string): Promise<void> =>
+    request<void>(`/user-access/${userId}`, { method: 'DELETE' }),
 }
 
 // ── Stats ─────────────────────────────────────────────────────────────────────

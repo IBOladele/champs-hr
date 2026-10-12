@@ -17,6 +17,7 @@ import dashboardRouter from './dashboard';
 import employeeDashboardRouter from './employeeDashboard';
 import documentsRouter from './documents';
 import configRouter from './config';
+import userAccessRouter from './userAccess';
 
 const router = Router();
 
@@ -33,6 +34,7 @@ router.use('/dashboard', dashboardRouter);
 router.use('/employee/dashboard', employeeDashboardRouter);
 router.use('/documents', documentsRouter);
 router.use('/config', configRouter);
+router.use('/user-access', userAccessRouter);
 router.use('', w4Router);
 router.use('', i9Router);
 router.use('', directDepositRouter);

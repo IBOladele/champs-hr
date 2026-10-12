@@ -272,3 +272,7 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verification_sent_at TIMESTAMPT
 ALTER TABLE tenants ADD COLUMN IF NOT EXISTS settings            JSONB        NOT NULL DEFAULT '{}';
 ALTER TABLE tenants ADD COLUMN IF NOT EXISTS onboarding_step     INTEGER      NOT NULL DEFAULT 0;
 ALTER TABLE tenants ADD COLUMN IF NOT EXISTS onboarding_completed BOOLEAN     NOT NULL DEFAULT FALSE;
+
+-- User portal access (sub-roles for employees granted employer-portal access)
+ALTER TABLE users ADD COLUMN IF NOT EXISTS portal_role        TEXT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS portal_permissions JSONB NOT NULL DEFAULT '{}';
