@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { usePageTitle } from '../hooks/usePageTitle'
 import MarketingShell from '../components/MarketingShell'
 
-const G = '#d97706'
+const G = '#22c55e'
 const HERO = '#0d1525'
 const FG = '#0c1929'
 const FG2 = '#4a5568'
@@ -45,7 +45,7 @@ function DashboardMockup() {
   const employees = [
     { initials: 'JS', color: '#7c3aed', name: 'John S.', amt: '$4,200' },
     { initials: 'SM', color: '#0891b2', name: 'Sarah M.', amt: '$3,800' },
-    { initials: 'AL', color: '#b45309', name: 'Alex L.', amt: '$5,100' },
+    { initials: 'AL', color: '#16a34a', name: 'Alex L.', amt: '$5,100' },
     { initials: 'RK', color: '#be185d', name: 'Riya K.', amt: '$4,650' },
   ]
 
@@ -211,7 +211,7 @@ export default function LandingPage() {
             <button
               onClick={() => navigate('/get-started')}
               style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '14px 28px', background: G, color: '#fff', fontFamily: JAKARTA, fontWeight: 700, fontSize: 15, borderRadius: 12, border: 'none', cursor: 'pointer', boxShadow: '0 4px 24px rgba(217,119,6,.35)', transition: 'all .15s' }}
-              onMouseEnter={e => { e.currentTarget.style.background = '#b45309'; e.currentTarget.style.transform = 'translateY(-2px)' }}
+              onMouseEnter={e => { e.currentTarget.style.background = '#16a34a'; e.currentTarget.style.transform = 'translateY(-2px)' }}
               onMouseLeave={e => { e.currentTarget.style.background = G; e.currentTarget.style.transform = 'none' }}
             >
               Start for free
@@ -292,7 +292,7 @@ export default function LandingPage() {
                 p: 'Clock-in tracking, absence management, and leave workflows. All automated and synced with payroll.',
                 preview: (
                   <div style={{ marginTop: 20, background: '#fff', border: `1px solid ${BORDER}`, borderRadius: 12, padding: 14, fontSize: 12 }}>
-                    {[['JS', '#7c3aed', 'John S.', '09:02', true], ['AL', '#b45309', 'Alex L.', '09:24', false]].map(([i, c, n, t, ontime]) => (
+                    {[['JS', '#7c3aed', 'John S.', '09:02', true], ['AL', '#16a34a', 'Alex L.', '09:24', false]].map(([i, c, n, t, ontime]) => (
                       <div key={String(n)} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0', borderBottom: `1px solid ${BORDER}` }}>
                         <div style={{ width: 22, height: 22, borderRadius: '50%', background: String(c), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 700, color: '#fff', fontFamily: JAKARTA }}>{i}</div>
                         <div style={{ flex: 1, color: FG, fontWeight: 500, fontFamily: INTER }}>{n}</div>
@@ -374,7 +374,7 @@ export default function LandingPage() {
               { i: 'JS', c: '#7c3aed', n: 'John Smith · Software Engineer', a: '$4,200' },
               { i: 'SM', c: '#0891b2', n: 'Sarah Meyer · Product Designer', a: '$3,800' },
               { i: 'RK', c: '#be185d', n: 'Riya Kapoor · Head of Finance', a: '$6,200' },
-              { i: 'AL', c: '#b45309', n: 'Alex Lim · Sales Lead', a: '$5,100' },
+              { i: 'AL', c: '#16a34a', n: 'Alex Lim · Sales Lead', a: '$5,100' },
             ].map(e => (
               <div key={e.i} style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.06)', borderRadius: 10, padding: '10px 12px', marginBottom: 8 }}>
                 <div style={{ width: 26, height: 26, borderRadius: '50%', background: e.c, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700, color: '#fff', flexShrink: 0, fontFamily: JAKARTA }}>{e.i}</div>
@@ -397,7 +397,7 @@ export default function LandingPage() {
             {[
               { stars: '★★★★★', quote: 'We cut our payroll processing time from 4 hours every month to under 15 minutes. Our finance team finally has time for real work.', name: 'Marcus Chen', role: 'Head of Finance · Meridian Design Co.', initials: 'MC', color: '#7c3aed' },
               { stars: '★★★★★', quote: 'Onboarding new employees used to take a full day. With PayChamps, it\'s done before lunch. The employee portal alone saved us 3 hours a week.', name: 'Priya Anand', role: 'HR Director · Strata Labs', initials: 'PA', color: '#0891b2' },
-              { stars: '★★★★★', quote: 'Other platforms made us sign an 18-month contract before we even saw the software. PayChamps just works, no commitment required.', name: 'Tom Okafor', role: 'CEO · Clearview Tech', initials: 'TO', color: '#b45309' },
+              { stars: '★★★★★', quote: 'Other platforms made us sign an 18-month contract before we even saw the software. PayChamps just works, no commitment required.', name: 'Tom Okafor', role: 'CEO · Clearview Tech', initials: 'TO', color: '#16a34a' },
             ].map((t, i) => (
               <div key={i} style={{ background: 'rgba(255,255,255,.05)', border: `1px solid ${HBORDER}`, borderRadius: 20, padding: 32, display: 'flex', flexDirection: 'column', gap: 20, transition: 'background .2s, border-color .2s' }}
                 onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,.07)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,.15)' }}
@@ -502,7 +502,7 @@ export default function LandingPage() {
                 <button
                   onClick={() => navigate('/get-started')}
                   style={{ display: 'block', width: '100%', padding: 12, textAlign: 'center', borderRadius: 10, fontFamily: JAKARTA, fontSize: 14, fontWeight: 700, cursor: 'pointer', marginBottom: 28, transition: 'all .15s', ...(plan.popular ? { background: G, color: '#fff', border: 'none', boxShadow: '0 4px 16px rgba(217,119,6,.3)' } : { background: 'transparent', color: FG, border: `1.5px solid ${BORDER}` }) }}
-                  onMouseEnter={e => { if (plan.popular) { e.currentTarget.style.background = '#b45309' } else { e.currentTarget.style.borderColor = G; e.currentTarget.style.color = G } }}
+                  onMouseEnter={e => { if (plan.popular) { e.currentTarget.style.background = '#16a34a' } else { e.currentTarget.style.borderColor = G; e.currentTarget.style.color = G } }}
                   onMouseLeave={e => { if (plan.popular) { e.currentTarget.style.background = G } else { e.currentTarget.style.borderColor = BORDER; e.currentTarget.style.color = FG } }}
                 >
                   {i === 2 ? 'Talk to sales' : 'Start free trial'}
@@ -560,7 +560,7 @@ export default function LandingPage() {
             <button
               onClick={() => navigate('/get-started')}
               style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '15px 32px', background: G, color: '#fff', fontFamily: JAKARTA, fontWeight: 700, fontSize: 15, borderRadius: 12, border: 'none', cursor: 'pointer', boxShadow: '0 4px 24px rgba(217,119,6,.35)', transition: 'all .15s' }}
-              onMouseEnter={e => { e.currentTarget.style.background = '#b45309'; e.currentTarget.style.transform = 'translateY(-2px)' }}
+              onMouseEnter={e => { e.currentTarget.style.background = '#16a34a'; e.currentTarget.style.transform = 'translateY(-2px)' }}
               onMouseLeave={e => { e.currentTarget.style.background = G; e.currentTarget.style.transform = 'none' }}
             >
               Start free. No card needed.

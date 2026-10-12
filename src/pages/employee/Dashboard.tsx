@@ -107,7 +107,7 @@ export default function EmployeeDashboard() {
 
         {[
           { label: 'Attendance',    value: `${data?.recentAttendance?.length ?? 0} records`, icon: Clock,        iconCls: 'text-blue-500',  bg: 'bg-blue-50'  },
-          { label: 'Last pay',      value: payslips[0]?.info.replace('Net: ', '') ?? '—',    icon: FileText,     iconCls: 'text-amber-500', bg: 'bg-amber-50' },
+          { label: 'Last pay',      value: payslips[0]?.info.replace('Net: ', '') ?? '—',    icon: FileText,     iconCls: 'text-green-500', bg: 'bg-green-50' },
           { label: 'Annual leave',  value: `${data?.leaveBalances?.annual ?? 0} days`,       icon: CalendarDays, iconCls: 'text-blue-500',  bg: 'bg-blue-50'  },
           { label: 'Benefit plans', value: String(benefits.length),                          icon: Gift,         iconCls: 'text-green-500', bg: 'bg-green-50' },
         ].map(({ label, value, icon: Icon, iconCls, bg }) => (

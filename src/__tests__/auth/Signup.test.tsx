@@ -152,7 +152,7 @@ describe('Signup page', () => {
     await fillForm(user)
     await user.click(screen.getByRole('button', { name: 'Continue' }))
     await waitFor(() => {
-      expect(screen.getByText('Creating account…')).toBeInTheDocument()
+      expect(screen.getByText('Creating account...')).toBeInTheDocument()
     })
     resolve(HttpResponse.json({ error: 'err' }, { status: 500 }) as unknown as Response)
   })

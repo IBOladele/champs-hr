@@ -59,13 +59,13 @@ export default function Switch() {
         <div className="max-w-3xl mx-auto px-6">
           <p
             className="text-sm font-semibold uppercase tracking-wider mb-4"
-            style={{ color: '#d97706' }}
+            style={{ color: '#22c55e' }}
           >
             Migration
           </p>
           <h1 className="text-5xl font-extrabold text-white mb-6 leading-tight">
             Switch from your current HR software{' '}
-            <span style={{ color: '#d97706' }}>in 2 weeks</span>
+            <span style={{ color: '#22c55e' }}>in 2 weeks</span>
           </h1>
           <p className="text-lg text-gray-300 mb-8 leading-relaxed">
             Currently on ADP? Gusto? Rippling? We've done it before. Our migration team handles the heavy lifting so your team can stay focused on what matters.
@@ -85,16 +85,16 @@ export default function Switch() {
       <section className="py-20">
         <div className="max-w-5xl mx-auto px-6">
           <div className="text-center mb-14">
-            <p className="text-sm font-semibold uppercase tracking-wider mb-3" style={{ color: '#d97706' }}>How it works</p>
+            <p className="text-sm font-semibold uppercase tracking-wider mb-3" style={{ color: '#22c55e' }}>How it works</p>
             <h2 className="text-3xl font-bold text-gray-900">4 steps to your new HR platform</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {steps.map((step) => (
               <div key={step.number} className="bg-white rounded-2xl border border-gray-100 p-6 hover:shadow-md transition-shadow">
                 <div className="flex items-center gap-3 mb-4">
-                  <span className="text-2xl font-extrabold" style={{ color: '#d97706' }}>{step.number}</span>
+                  <span className="text-2xl font-extrabold" style={{ color: '#22c55e' }}>{step.number}</span>
                   <div className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center">
-                    <step.icon size={18} style={{ color: '#d97706' }} />
+                    <step.icon size={18} style={{ color: '#22c55e' }} />
                   </div>
                 </div>
                 <h3 className="text-base font-semibold text-gray-900 mb-2">{step.title}</h3>
@@ -109,13 +109,13 @@ export default function Switch() {
       <section className="py-20 bg-gray-50">
         <div className="max-w-5xl mx-auto px-6">
           <div className="text-center mb-14">
-            <p className="text-sm font-semibold uppercase tracking-wider mb-3" style={{ color: '#d97706' }}>Our promise</p>
+            <p className="text-sm font-semibold uppercase tracking-wider mb-3" style={{ color: '#22c55e' }}>Our promise</p>
             <h2 className="text-3xl font-bold text-gray-900">3 guarantees every migration comes with</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {guarantees.map((g) => (
               <div key={g.title} className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-                <CheckCircle2 size={24} className="mb-4" style={{ color: '#d97706' }} />
+                <CheckCircle2 size={24} className="mb-4" style={{ color: '#22c55e' }} />
                 <h3 className="text-base font-semibold text-gray-900 mb-2">{g.title}</h3>
                 <p className="text-sm text-gray-500 leading-relaxed">{g.description}</p>
               </div>

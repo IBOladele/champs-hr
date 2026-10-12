@@ -141,7 +141,7 @@ export default function HrOps() {
           <div className="grid grid-cols-4 gap-4 mb-6">
             {[
               { label: 'Total employees',  value: String(attRows.length),  icon: Users,     iconCls: 'text-green-500', bg: 'bg-green-50' },
-              { label: 'Present today',    value: String(presentCount),    icon: UserCheck, iconCls: 'text-amber-500', bg: 'bg-amber-50' },
+              { label: 'Present today',    value: String(presentCount),    icon: UserCheck, iconCls: 'text-green-500', bg: 'bg-green-50' },
               { label: 'Late arrivals',    value: String(lateCount),       icon: Clock,     iconCls: 'text-blue-500',  bg: 'bg-blue-50'  },
               { label: 'Absent today',     value: String(attRows.filter(r => r.status === 'Absent').length), icon: Calendar, iconCls: 'text-blue-400', bg: 'bg-blue-50' },
             ].map(({ label, value, icon: Icon, iconCls, bg }) => (

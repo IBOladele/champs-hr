@@ -44,7 +44,7 @@ const ROLE_LABELS: Record<string, string> = {
   Viewer:           'Viewer',
 }
 
-const inputCls = 'border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-[#d97706] w-full'
+const inputCls = 'border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-[#22c55e] w-full'
 const accessLevels: AccessLevel[] = ['Full access', 'Limited access', 'View only']
 
 export default function AddUserAccess() {
@@ -99,7 +99,7 @@ export default function AddUserAccess() {
       <div className="mb-6">
         <button
           onClick={() => navigate('/employer/user-access')}
-          className="text-sm text-[#d97706] hover:text-[#b45309] mb-3 flex items-center gap-1 transition-colors"
+          className="text-sm text-[#22c55e] hover:text-[#16a34a] mb-3 flex items-center gap-1 transition-colors"
         >
           Back to user access
         </button>
@@ -157,7 +157,7 @@ export default function AddUserAccess() {
                     onClick={() => applyPreset(lvl)}
                     className={`px-3.5 py-1.5 rounded-full text-sm border transition-colors ${
                       accessLevel === lvl
-                        ? 'bg-[#d97706] border-[#d97706] text-white'
+                        ? 'bg-[#22c55e] border-[#22c55e] text-white'
                         : 'border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'
                     }`}
                   >
@@ -187,7 +187,7 @@ export default function AddUserAccess() {
                 </div>
                 <button
                   onClick={() => togglePerm(perm.key)}
-                  className={`relative w-10 h-5 rounded-full transition-colors flex-shrink-0 ${perms[perm.key] ? 'bg-[#d97706]' : 'bg-gray-200'}`}
+                  className={`relative w-10 h-5 rounded-full transition-colors flex-shrink-0 ${perms[perm.key] ? 'bg-[#22c55e]' : 'bg-gray-200'}`}
                 >
                   <span
                     className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all ${perms[perm.key] ? 'left-5' : 'left-0.5'}`}
@@ -213,7 +213,7 @@ export default function AddUserAccess() {
         <button
           onClick={handleSubmit}
           disabled={saving}
-          className="px-5 py-2.5 text-sm font-medium text-white bg-[#d97706] rounded-lg hover:bg-[#b45309] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+          className="px-5 py-2.5 text-sm font-medium text-white bg-[#22c55e] rounded-lg hover:bg-[#16a34a] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {saving ? 'Saving...' : existing ? 'Update access' : 'Grant access'}
         </button>

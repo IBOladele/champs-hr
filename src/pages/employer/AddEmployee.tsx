@@ -231,7 +231,7 @@ export default function AddEmployee() {
         {done ? (
           <div className="bg-white border border-gray-200 rounded-xl p-8 flex flex-col items-center text-center gap-4">
             <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ backgroundColor: '#dcfce7' }}>
-              <Check size={28} style={{ color: '#d97706' }} />
+              <Check size={28} style={{ color: '#22c55e' }} />
             </div>
             <div>
               <p className="text-base font-semibold text-gray-900 mb-1">Invite sent!</p>
@@ -301,7 +301,7 @@ export default function AddEmployee() {
       {/* Right form area */}
       <div className="flex-1 flex flex-col bg-white">
         <div className="flex-1 overflow-y-auto px-10 py-10">
-          <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: '#d97706' }}>
+          <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: '#22c55e' }}>
             Step {currentStep + 1} of {STEPS.length}
           </p>
           <h1 className="text-2xl font-bold text-gray-900 mb-1">{STEPS[currentStep].label}</h1>

@@ -79,7 +79,7 @@ export default function UserAccess() {
             <h2 className="text-base font-semibold text-gray-900">User accounts</h2>
             <button
               onClick={() => navigate('/employer/user-access/add')}
-              className="bg-[#d97706] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#b45309] transition-colors"
+              className="bg-[#22c55e] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#16a34a] transition-colors"
             >
               + Add access
             </button>
@@ -119,7 +119,7 @@ export default function UserAccess() {
                       <td className="px-6 py-4 text-gray-600 whitespace-nowrap">{user.jobTitle ?? <span className="text-gray-300">—</span>}</td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         {user.isOwner ? (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-medium">
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-100 text-green-700 text-xs font-medium">
                             <Crown size={11} />
                             Owner
                           </span>
@@ -174,7 +174,7 @@ export default function UserAccess() {
       {activeTab === 'Roles' && (
         <div className="grid grid-cols-3 gap-4">
           {[
-            { role: 'Admin',           desc: 'Full access to all modules and settings',           color: 'bg-amber-100 text-amber-700' },
+            { role: 'Admin',           desc: 'Full access to all modules and settings',           color: 'bg-green-100 text-green-700' },
             { role: 'HR Manager',      desc: 'Employees, HR Ops, Leave, Documents, Benefits',     color: 'bg-blue-100 text-blue-700'   },
             { role: 'Finance Manager', desc: 'Payroll, Analytics, Reports, Documents',            color: 'bg-purple-100 text-purple-700' },
             { role: 'Department Head', desc: 'View team members, approve leave, attendance',      color: 'bg-teal-100 text-teal-700'   },
@@ -195,9 +195,9 @@ export default function UserAccess() {
             )
           })}
           {/* Owner */}
-          <div className="bg-white rounded-xl border border-amber-100 p-5">
+          <div className="bg-white rounded-xl border border-green-100 p-5">
             <div className="flex items-start justify-between mb-3">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-medium">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-100 text-green-700 text-xs font-medium">
                 <Crown size={11} />
                 Owner
               </span>
@@ -221,7 +221,7 @@ export default function UserAccess() {
                 <p className="text-sm font-medium text-gray-900">{label}</p>
                 <p className="text-xs text-gray-400 mt-0.5">{desc}</p>
               </div>
-              <div className={`relative w-10 h-5 rounded-full flex-shrink-0 ${enabled ? 'bg-[#d97706]' : 'bg-gray-200'}`}>
+              <div className={`relative w-10 h-5 rounded-full flex-shrink-0 ${enabled ? 'bg-[#22c55e]' : 'bg-gray-200'}`}>
                 <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all ${enabled ? 'left-5' : 'left-0.5'}`} />
               </div>
             </div>

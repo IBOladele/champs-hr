@@ -101,8 +101,8 @@ export default function Attendance() {
         </div>
         {[
           { label: 'Total worked',  value: '0 hrs',   icon: Clock,    iconCls: 'text-blue-500',  bg: 'bg-blue-50'  },
-          { label: 'Leave days',    value: '0 days',  icon: FileText, iconCls: 'text-amber-500', bg: 'bg-amber-50' },
-          { label: 'Overtime work', value: '0 hrs',   icon: Clock,    iconCls: 'text-amber-500', bg: 'bg-amber-50' },
+          { label: 'Leave days',    value: '0 days',  icon: FileText, iconCls: 'text-green-500', bg: 'bg-green-50' },
+          { label: 'Overtime work', value: '0 hrs',   icon: Clock,    iconCls: 'text-green-500', bg: 'bg-green-50' },
         ].map(({ label, value, icon: Icon, iconCls, bg }) => (
           <div key={label} className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex items-start justify-between">
             <div>

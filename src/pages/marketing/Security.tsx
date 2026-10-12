@@ -39,7 +39,7 @@ const sections = [
   {
     icon: Database,
     title: 'Data Privacy',
-    color: 'bg-amber-50 text-amber-600',
+    color: 'bg-green-50 text-green-600',
     items: [
       'SOC 2 Type II certified',
       'US data residency on all plans',
@@ -91,7 +91,7 @@ export default function Security() {
           </div>
           <h1 className="text-5xl font-extrabold text-white mb-6 leading-tight">
             Enterprise-grade security,{' '}
-            <span style={{ color: '#d97706' }}>built in from day one</span>
+            <span style={{ color: '#22c55e' }}>built in from day one</span>
           </h1>
           <p className="text-lg text-gray-300 leading-relaxed">
             Your payroll and HR data is some of the most sensitive information your business handles. We treat it that way.

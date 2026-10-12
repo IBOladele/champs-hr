@@ -5,7 +5,7 @@ import type { DashboardStats, Employee, PayrollRun } from '../../lib/api'
 
 type AnalyticsTab = 'all' | 'payroll' | 'employee' | 'attendance'
 
-const AMBER = '#d97706'
+const AMBER = '#22c55e'
 
 const tabs: { key: AnalyticsTab; label: string }[] = [
   { key: 'all',        label: 'Overview'                       },
@@ -21,8 +21,8 @@ function StatCard({
   label: string; value: string; sub?: string; positive?: boolean; icon: React.ReactNode; accent?: boolean
 }) {
   return (
-    <div className={`bg-white rounded-xl border p-5 relative overflow-hidden ${accent ? 'border-amber-200' : 'border-gray-100'}`}>
-      {accent && <div className="absolute inset-0 bg-amber-50 opacity-40 pointer-events-none" />}
+    <div className={`bg-white rounded-xl border p-5 relative overflow-hidden ${accent ? 'border-green-200' : 'border-gray-100'}`}>
+      {accent && <div className="absolute inset-0 bg-green-50 opacity-40 pointer-events-none" />}
       <div className="relative">
         <div className="flex items-center justify-between mb-3">
           <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">{label}</p>
@@ -175,7 +175,7 @@ export default function Analytics() {
     const t = e.employmentType ?? 'Unknown'
     typeMap[t] = (typeMap[t] ?? 0) + 1
   }
-  const TYPE_COLORS = ['#d97706', '#0891b2', '#7c3aed', '#be185d', '#15803d']
+  const TYPE_COLORS = ['#22c55e', '#0891b2', '#7c3aed', '#be185d', '#15803d']
   const typeSeg = Object.entries(typeMap).map(([k, v], i) => ({
     label: k, value: v, color: TYPE_COLORS[i % TYPE_COLORS.length],
   }))

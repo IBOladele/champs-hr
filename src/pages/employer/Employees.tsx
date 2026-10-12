@@ -113,7 +113,7 @@ export default function Employees() {
         {/* Active employees */}
         <div className="bg-white rounded-xl border border-gray-100 p-5 relative">
           <div className="absolute top-4 right-4">
-            <div className="bg-amber-100 text-amber-600 rounded-lg p-2 flex items-center justify-center">
+            <div className="bg-green-100 text-green-600 rounded-lg p-2 flex items-center justify-center">
               <UserCheck size={18} />
             </div>
           </div>

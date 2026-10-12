@@ -152,7 +152,7 @@ export default function CreateReport() {
       <button
         onClick={() => navigate('/employer/reports')}
         className="flex items-center gap-1.5 text-sm font-medium mb-5 transition-colors"
-        style={{ color: '#d97706' }}
+        style={{ color: '#22c55e' }}
       >
         <ChevronLeft size={16} />
         Back to reports

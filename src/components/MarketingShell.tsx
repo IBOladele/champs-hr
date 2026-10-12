@@ -27,7 +27,7 @@ export default function MarketingShell({ children }: MarketingShellProps) {
   return (
     <div className="min-h-screen flex flex-col" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
       {/* ── Announcement bar ── */}
-      <div style={{ background: '#d97706', color: '#fff', textAlign: 'center', padding: '9px 16px', fontSize: 13, fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif", fontWeight: 500, letterSpacing: '.01em', position: 'relative', zIndex: 100 }}>
+      <div style={{ background: '#22c55e', color: '#fff', textAlign: 'center', padding: '9px 16px', fontSize: 13, fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif", fontWeight: 500, letterSpacing: '.01em', position: 'relative', zIndex: 100 }}>
         ✦ New: Multi-state payroll &amp; compliance now available
         <a href="#pricing" style={{ color: '#fff', textDecoration: 'underline', marginLeft: 8, opacity: .9 }}>See plans →</a>
       </div>
@@ -132,7 +132,7 @@ export default function MarketingShell({ children }: MarketingShellProps) {
                 fontSize: 14,
                 fontWeight: 700,
                 color: '#fff',
-                background: '#d97706',
+                background: '#22c55e',
                 border: 'none',
                 borderRadius: 9,
                 cursor: 'pointer',
@@ -140,8 +140,8 @@ export default function MarketingShell({ children }: MarketingShellProps) {
                 transition: 'background .15s, transform .15s',
                 whiteSpace: 'nowrap',
               }}
-              onMouseEnter={e => { e.currentTarget.style.background = '#b45309'; e.currentTarget.style.transform = 'translateY(-1px)' }}
-              onMouseLeave={e => { e.currentTarget.style.background = '#d97706'; e.currentTarget.style.transform = 'none' }}
+              onMouseEnter={e => { e.currentTarget.style.background = '#16a34a'; e.currentTarget.style.transform = 'translateY(-1px)' }}
+              onMouseLeave={e => { e.currentTarget.style.background = '#22c55e'; e.currentTarget.style.transform = 'none' }}
             >
               Get started free
             </button>
@@ -174,7 +174,7 @@ export default function MarketingShell({ children }: MarketingShellProps) {
               </button>
               <button
                 onClick={() => { navigate('/get-started'); setMobileOpen(false) }}
-                style={{ padding: '10px', fontSize: 14, fontWeight: 700, color: '#fff', background: '#d97706', border: 'none', borderRadius: 9, cursor: 'pointer', fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
+                style={{ padding: '10px', fontSize: 14, fontWeight: 700, color: '#fff', background: '#22c55e', border: 'none', borderRadius: 9, cursor: 'pointer', fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
               >
                 Get started free
               </button>

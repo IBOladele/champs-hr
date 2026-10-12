@@ -140,7 +140,7 @@ describe('Login page', () => {
     await user.type(screen.getByPlaceholderText('••••••••••••••'), 'Password123!')
     await user.click(screen.getByRole('button', { name: 'Login' }))
     await waitFor(() => {
-      expect(screen.getByText('Logging in…')).toBeInTheDocument()
+      expect(screen.getByText('Logging in...')).toBeInTheDocument()
     })
     // Resolve the pending request to clean up
     resolve(HttpResponse.json({ error: 'err' }, { status: 401 }) as unknown as Response)

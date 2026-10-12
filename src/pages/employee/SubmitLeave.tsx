@@ -71,7 +71,7 @@ export default function SubmitLeave() {
           {[
             { label: 'Annual leave', value: '20 days available', color: 'text-green-600', bg: 'bg-green-50' },
             { label: 'Sick leave',   value: '10 days available', color: 'text-blue-600',  bg: 'bg-blue-50'  },
-            { label: 'Other',        value: '5 days available',  color: 'text-amber-600', bg: 'bg-amber-50' },
+            { label: 'Other',        value: '5 days available',  color: 'text-green-600', bg: 'bg-green-50' },
           ].map(({ label, value, color, bg }) => (
             <div key={label} className={`${bg} rounded-xl p-3 text-center`}>
               <p className="text-xs text-gray-500 mb-0.5">{label}</p>
