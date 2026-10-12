@@ -66,7 +66,7 @@ function CompanySection() {
           <InfoField label="Company name"        value="Skywrapper Corp"       />
           <InfoField label="Industry"            value="Technology"             />
           <InfoField label="Company size"        value="201 – 500 employees"    />
-          <InfoField label="Timezone"            value="GMT+0 — London"         />
+          <InfoField label="Timezone"            value="GMT+0, London"         />
           <InfoField label="Currency"            value="USD ($)"                />
           <InfoField label="Website"             value="www.skywrapper.io"      />
           <InfoField label="Registered address"  value="12 Finsbury Square, London, EC2A 1AB" />

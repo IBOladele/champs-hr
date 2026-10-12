@@ -62,10 +62,10 @@ interface Step0Data {
 }
 
 const BUSINESS_SIZES = [
-  { value: '1-10', label: '1–10 employees' },
-  { value: '11-50', label: '11–50 employees' },
-  { value: '51-200', label: '51–200 employees' },
-  { value: '201-500', label: '201–500 employees' },
+  { value: '1-10', label: '1-10 employees' },
+  { value: '11-50', label: '11-50 employees' },
+  { value: '51-200', label: '51-200 employees' },
+  { value: '201-500', label: '201-500 employees' },
   { value: '500+', label: '500+ employees' },
 ]
 
@@ -97,14 +97,14 @@ const TIMEZONES = [
 ]
 
 const CURRENCIES = [
-  { value: 'USD', label: 'USD – US Dollar' },
-  { value: 'GBP', label: 'GBP – British Pound' },
-  { value: 'EUR', label: 'EUR – Euro' },
-  { value: 'NGN', label: 'NGN – Nigerian Naira' },
-  { value: 'KES', label: 'KES – Kenyan Shilling' },
-  { value: 'CAD', label: 'CAD – Canadian Dollar' },
-  { value: 'AUD', label: 'AUD – Australian Dollar' },
-  { value: 'AED', label: 'AED – UAE Dirham' },
+  { value: 'USD', label: 'USD: US Dollar' },
+  { value: 'GBP', label: 'GBP: British Pound' },
+  { value: 'EUR', label: 'EUR: Euro' },
+  { value: 'NGN', label: 'NGN: Nigerian Naira' },
+  { value: 'KES', label: 'KES: Kenyan Shilling' },
+  { value: 'CAD', label: 'CAD: Canadian Dollar' },
+  { value: 'AUD', label: 'AUD: Australian Dollar' },
+  { value: 'AED', label: 'AED: UAE Dirham' },
 ]
 
 function Step0({ data, set }: { data: Step0Data; set: (d: Step0Data) => void }) {
@@ -427,7 +427,7 @@ function EmailVerificationBanner() {
                    hover:text-amber-900 disabled:opacity-50 whitespace-nowrap"
       >
         <RefreshCw size={12} className={sending ? 'animate-spin' : ''} />
-        {sent ? 'Email sent!' : sending ? 'Sending…' : 'Resend email'}
+        {sent ? 'Email sent!' : sending ? 'Sending...' : 'Resend email'}
       </button>
     </div>
   )

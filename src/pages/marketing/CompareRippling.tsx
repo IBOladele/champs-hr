@@ -11,21 +11,21 @@ const rows = [
   { feature: 'Data residency', paychamps: 'US data residency', rippling: 'US-primary' },
   { feature: 'Employee self-service', paychamps: 'Included on all plans', rippling: 'Included' },
   { feature: 'Benefits administration', paychamps: 'Full admin + employee portal', rippling: 'Full (US-focused)' },
-  { feature: 'Time to go live', paychamps: '2 weeks', rippling: '4–6 weeks' },
+  { feature: 'Time to go live', paychamps: '2 weeks', rippling: '4-6 weeks' },
 ]
 
 const reasons = [
   {
     title: 'Built for US payroll',
-    description: 'PayChamps was built from the ground up for US payroll — federal, state, and local tax, W-2s, 1099s, and direct deposit are first-class features, not bolted on.',
+    description: 'PayChamps was built from the ground up for US payroll. Federal, state, and local tax, W-2s, 1099s, and direct deposit are first-class features, not bolted on.',
   },
   {
     title: 'No modular pricing complexity',
-    description: 'Rippling charges per module — each feature you add costs more. PayChamps tiers are clear and all-inclusive. No surprises when your team needs a new feature.',
+    description: 'Rippling charges per module. Each feature you add costs more. PayChamps tiers are clear and all-inclusive. No surprises when your team needs a new feature.',
   },
   {
     title: 'Month-to-month contracts',
-    description: 'Rippling typically requires annual commitments. PayChamps is month-to-month — if it\'s not working for you, you\'re not stuck.',
+    description: 'Rippling typically requires annual commitments. PayChamps is month-to-month. If it\'s not working for you, you\'re not stuck.',
   },
 ]
 
@@ -38,7 +38,7 @@ export default function CompareRippling() {
       {/* Hero */}
       <section className="py-20 bg-gray-50">
         <div className="max-w-3xl mx-auto px-6 text-center">
-          <p className="text-sm font-semibold uppercase tracking-wider mb-3" style={{ color: '#22c55e' }}>
+          <p className="text-sm font-semibold uppercase tracking-wider mb-3" style={{ color: '#d97706' }}>
             PayChamps vs Rippling
           </p>
           <h1 className="text-4xl font-extrabold text-gray-900 mb-4">
@@ -58,7 +58,7 @@ export default function CompareRippling() {
               <thead>
                 <tr className="border-b border-gray-100">
                   <th className="text-left py-4 px-6 text-gray-500 font-medium w-1/3">Feature</th>
-                  <th className="text-center py-4 px-4 font-semibold" style={{ color: '#22c55e' }}>PayChamps</th>
+                  <th className="text-center py-4 px-4 font-semibold" style={{ color: '#d97706' }}>PayChamps</th>
                   <th className="text-center py-4 px-4 text-gray-500 font-medium">Rippling</th>
                 </tr>
               </thead>
@@ -68,7 +68,7 @@ export default function CompareRippling() {
                     <td className="py-3.5 px-6 text-gray-700 font-medium">{row.feature}</td>
                     <td className="py-3.5 px-4 text-center">
                       <span className="inline-flex items-center gap-1.5 text-green-700 font-medium">
-                        <CheckCircle2 size={14} style={{ color: '#22c55e' }} />
+                        <CheckCircle2 size={14} style={{ color: '#d97706' }} />
                         {row.paychamps}
                       </span>
                     </td>
@@ -90,7 +90,7 @@ export default function CompareRippling() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {reasons.map((r) => (
               <div key={r.title} className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-                <CheckCircle2 size={22} className="mb-4" style={{ color: '#22c55e' }} />
+                <CheckCircle2 size={22} className="mb-4" style={{ color: '#d97706' }} />
                 <h3 className="text-base font-semibold text-gray-900 mb-2">{r.title}</h3>
                 <p className="text-sm text-gray-500 leading-relaxed">{r.description}</p>
               </div>
@@ -108,7 +108,7 @@ export default function CompareRippling() {
               <div>
                 <p className="text-sm font-semibold text-gray-900 mb-1">Where Rippling is stronger</p>
                 <p className="text-sm text-gray-500 leading-relaxed">
-                  If you need deep IT management, device management, or a fully unified HRIS alongside payroll, Rippling's all-in-one approach is hard to beat. PayChamps focuses on US payroll and HR — we do fewer things and do them better for growing US teams.
+                  If you need deep IT management, device management, or a fully unified HRIS alongside payroll, Rippling's all-in-one approach is hard to beat. PayChamps focuses on US payroll and HR. We do fewer things and do them better for growing US teams.
                 </p>
               </div>
             </div>

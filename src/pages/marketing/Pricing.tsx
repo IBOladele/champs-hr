@@ -25,7 +25,7 @@ const tiers = [
     name: 'Growth',
     price: '$15',
     unit: '/employee/month',
-    description: '50–200 employees',
+    description: '50-200 employees',
     features: [
       'Everything in Starter',
       'Benefits administration',
@@ -88,7 +88,7 @@ const faqs = [
   },
   {
     q: 'Is there a free trial?',
-    a: 'Yes — all plans include a 30-day free trial. No credit card required to start. You only pay when you\'re ready to go live.',
+    a: 'Yes. All plans include a 30-day free trial. No credit card required to start. You only pay when you\'re ready to go live.',
   },
   {
     q: 'What\'s in the contract?',
@@ -110,7 +110,7 @@ export default function Pricing() {
       {/* Hero */}
       <section className="py-20 bg-gray-50">
         <div className="max-w-3xl mx-auto px-6 text-center">
-          <p className="text-sm font-semibold uppercase tracking-wider mb-3" style={{ color: '#22c55e' }}>Pricing</p>
+          <p className="text-sm font-semibold uppercase tracking-wider mb-3" style={{ color: '#d97706' }}>Pricing</p>
           <h1 className="text-5xl font-extrabold text-gray-900 mb-4">Simple, transparent pricing</h1>
           <p className="text-lg text-gray-500">Pay per employee, per month. No setup fees, no lock-in, no surprises.</p>
         </div>
@@ -187,7 +187,7 @@ export default function Pricing() {
                 <tr className="border-b border-gray-100">
                   <th className="text-left py-4 px-6 text-gray-500 font-medium w-1/2">Feature</th>
                   <th className="text-center py-4 px-4 text-gray-900 font-semibold">Starter</th>
-                  <th className="text-center py-4 px-4 font-semibold" style={{ color: '#22c55e' }}>Growth</th>
+                  <th className="text-center py-4 px-4 font-semibold" style={{ color: '#d97706' }}>Growth</th>
                   <th className="text-center py-4 px-4 text-gray-900 font-semibold">Enterprise</th>
                 </tr>
               </thead>
@@ -196,13 +196,13 @@ export default function Pricing() {
                   <tr key={row.feature} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                     <td className="py-3 px-6 text-gray-700">{row.feature}</td>
                     <td className="py-3 px-4 text-center">
-                      {row.starter ? <CheckCircle2 size={16} className="mx-auto" style={{ color: '#22c55e' }} /> : <span className="text-gray-300">—</span>}
+                      {row.starter ? <CheckCircle2 size={16} className="mx-auto" style={{ color: '#d97706' }} /> : <span className="text-gray-300">—</span>}
                     </td>
                     <td className="py-3 px-4 text-center">
-                      {row.growth ? <CheckCircle2 size={16} className="mx-auto" style={{ color: '#22c55e' }} /> : <span className="text-gray-300">—</span>}
+                      {row.growth ? <CheckCircle2 size={16} className="mx-auto" style={{ color: '#d97706' }} /> : <span className="text-gray-300">—</span>}
                     </td>
                     <td className="py-3 px-4 text-center">
-                      {row.enterprise ? <CheckCircle2 size={16} className="mx-auto" style={{ color: '#22c55e' }} /> : <span className="text-gray-300">—</span>}
+                      {row.enterprise ? <CheckCircle2 size={16} className="mx-auto" style={{ color: '#d97706' }} /> : <span className="text-gray-300">—</span>}
                     </td>
                   </tr>
                 ))}

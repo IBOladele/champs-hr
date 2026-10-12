@@ -84,7 +84,7 @@ export default function Signup() {
             <span className="text-[#22c55e]">at a glance</span>
           </h2>
           <p className="text-sm text-white/60 leading-relaxed max-w-xs">
-            Track headcount growth, attrition trends, payroll figures — run performance from a single live dashboard.
+            Track headcount growth, attrition trends, and payroll figures from a single live dashboard.
           </p>
         </div>
       </div>
@@ -177,7 +177,7 @@ export default function Signup() {
             className="w-full mt-7 bg-[#22c55e] hover:bg-green-600 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-xl transition-colors text-sm flex items-center justify-center gap-2"
           >
             {loading && <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />}
-            {loading ? 'Creating account…' : 'Continue'}
+            {loading ? 'Creating account...' : 'Continue'}
           </button>
 
           <p className="text-center text-sm text-gray-500 mt-4">

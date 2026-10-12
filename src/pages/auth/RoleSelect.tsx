@@ -57,7 +57,7 @@ export default function RoleSelect() {
             <span className="text-[#22c55e]">3× faster</span>
           </h2>
           <p className="text-sm text-gray-400 leading-relaxed max-w-xs">
-            Powerful tools to run payroll, manage benefits, and keep your entire team aligned — all in one place.
+            Powerful tools to run payroll, manage benefits, and keep your entire team aligned, all in one place.
           </p>
         </div>
       </div>

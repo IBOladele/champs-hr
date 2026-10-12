@@ -113,7 +113,7 @@ function SummaryTab({ run, onApprove, approving }: { run: PayrollRun | null; onA
                 className="px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors disabled:opacity-60"
                 style={{ backgroundColor: '#22c55e' }}
               >
-                {approving ? 'Approving…' : 'Approve payroll'}
+                {approving ? 'Approving...' : 'Approve payroll'}
               </button>
             </div>
           )}
@@ -281,7 +281,7 @@ export default function PayrollDetail() {
         <button
           onClick={() => navigate('/employer/payroll')}
           className="flex items-center gap-1.5 text-sm font-medium mb-5 transition-colors"
-          style={{ color: '#22c55e' }}
+          style={{ color: '#d97706' }}
         >
           <ChevronLeft size={16} />
           Back to payroll
@@ -302,14 +302,14 @@ export default function PayrollDetail() {
       <button
         onClick={() => navigate('/employer/payroll')}
         className="flex items-center gap-1.5 text-sm font-medium mb-5 transition-colors"
-        style={{ color: '#22c55e' }}
+        style={{ color: '#d97706' }}
       >
         <ChevronLeft size={16} />
         Back to payroll
       </button>
 
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Payroll Run — {periodLabel}</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Payroll Run: {periodLabel}</h1>
         <div className="flex items-center gap-3">
           <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
             <Download size={14} />
@@ -322,7 +322,7 @@ export default function PayrollDetail() {
               className="px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors disabled:opacity-60"
               style={{ backgroundColor: '#22c55e' }}
             >
-              {approving ? 'Approving…' : 'Approve payroll'}
+              {approving ? 'Approving...' : 'Approve payroll'}
             </button>
           )}
         </div>

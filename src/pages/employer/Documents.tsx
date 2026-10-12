@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Search, FileText, History, Clock, ChevronDown, MoreHorizontal } from 'lucide-react'
 import { usePageTitle } from '../../hooks/usePageTitle'
+import { documents as documentsApi, type Document as ApiDocument } from '../../lib/api'
 
 type SubTab = 'Documents uploaded' | 'Assigned documents' | 'Archived documents'
 type DocStatus = 'Live' | 'Due' | 'Exp' | ''
@@ -15,6 +16,26 @@ interface DocRow {
   uploadedByColor: string
   expiryDate: string
   status: DocStatus
+  createdAt: string
+}
+
+const AVATAR_COLORS = ['bg-violet-500','bg-blue-500','bg-green-500','bg-amber-500','bg-pink-500']
+
+function mapDoc(d: ApiDocument, i: number): DocRow {
+  const name = d.uploadedByName ?? 'Unknown'
+  return {
+    id: d.id,
+    name: d.name,
+    type: d.docType,
+    uploadedBy: name,
+    uploadedByInitial: name.charAt(0).toUpperCase(),
+    uploadedByColor: AVATAR_COLORS[i % AVATAR_COLORS.length],
+    expiryDate: d.expiryDate
+      ? new Date(d.expiryDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+      : '—',
+    status: d.status === 'live' ? 'Live' : d.status === 'pending' ? 'Due' : '',
+    createdAt: d.createdAt,
+  }
 }
 
 const subTabs: SubTab[] = ['Documents uploaded', 'Assigned documents', 'Archived documents']
@@ -50,9 +71,21 @@ export default function Documents() {
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<SubTab>('Documents uploaded')
   const [search, setSearch] = useState('')
-  const [documents] = useState<DocRow[]>([])
+  const [documents, setDocuments] = useState<DocRow[]>([])
 
-  const filtered = documents.filter((d) =>
+  useEffect(() => {
+    documentsApi.list()
+      .then(data => setDocuments(data.map(mapDoc)))
+      .catch(() => {})
+  }, [])
+
+  const tabFiltered = documents.filter(d =>
+    activeTab === 'Archived documents' ? d.status === '' :
+    activeTab === 'Documents uploaded' ? d.status !== '' :
+    true
+  )
+
+  const filtered = tabFiltered.filter((d) =>
     d.name.toLowerCase().includes(search.toLowerCase()) ||
     d.type.toLowerCase().includes(search.toLowerCase()),
   )
@@ -98,7 +131,7 @@ export default function Documents() {
             <FileText size={18} className="text-[#22c55e]" />
           </div>
           <div>
-            <p className="text-2xl font-bold text-gray-900">0</p>
+            <p className="text-2xl font-bold text-gray-900">{documents.length}</p>
             <p className="text-xs text-gray-500 mt-0.5">Total documents</p>
           </div>
         </div>
@@ -108,7 +141,11 @@ export default function Documents() {
             <History size={18} className="text-orange-400" />
           </div>
           <div>
-            <p className="text-2xl font-bold text-gray-900">0</p>
+            <p className="text-2xl font-bold text-gray-900">{documents.filter(d => {
+              const c = new Date(d.createdAt)
+              const now = new Date()
+              return c.getFullYear() === now.getFullYear() && c.getMonth() === now.getMonth()
+            }).length}</p>
             <p className="text-xs text-gray-500 mt-0.5">Uploaded this month</p>
           </div>
         </div>
@@ -118,7 +155,7 @@ export default function Documents() {
             <Clock size={18} className="text-blue-500" />
           </div>
           <div>
-            <p className="text-2xl font-bold text-gray-900">0</p>
+            <p className="text-2xl font-bold text-gray-900">{documents.filter(d => d.status === 'Due').length}</p>
             <p className="text-xs text-gray-500 mt-0.5">Pending review</p>
           </div>
         </div>

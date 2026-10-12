@@ -163,7 +163,7 @@ export default function Login() {
             className="w-full mt-7 bg-[#22c55e] hover:bg-green-600 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-xl transition-colors text-sm flex items-center justify-center gap-2"
           >
             {loading && <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />}
-            {loading ? 'Logging in…' : 'Login'}
+            {loading ? 'Logging in...' : 'Login'}
           </button>
 
           <p className="text-center text-sm text-gray-500 mt-4">

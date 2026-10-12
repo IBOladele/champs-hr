@@ -270,7 +270,7 @@ export default function CreateBenefitPlan() {
           disabled={saving}
           className="px-5 py-2.5 text-sm font-medium text-white bg-[#22c55e] rounded-lg hover:bg-green-600 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          {saving ? 'Creating…' : 'Create benefit plan'}
+          {saving ? 'Creating...' : 'Create benefit plan'}
         </button>
       </div>
     </div>

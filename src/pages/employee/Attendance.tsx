@@ -86,7 +86,7 @@ export default function Attendance() {
           className="flex items-center gap-2 bg-[#22c55e] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-600 transition-colors disabled:opacity-60"
         >
           <Clock size={14} />
-          {clockingIn ? 'Clocking in…' : 'Clock in'}
+          {clockingIn ? 'Clocking in...' : 'Clock in'}
         </button>
       </div>
 

@@ -17,15 +17,15 @@ const rows = [
 const reasons = [
   {
     title: 'No long-term contracts',
-    description: 'ADP typically requires 12–24 month contracts with steep cancellation penalties. PayChamps is month-to-month. Cancel any time, no questions asked.',
+    description: 'ADP typically requires 12-24 month contracts with steep cancellation penalties. PayChamps is month-to-month. Cancel any time, no questions asked.',
   },
   {
     title: 'Transparent pricing',
-    description: 'ADP pricing is notoriously opaque — quotes vary widely, and add-ons accumulate quickly. PayChamps charges one clear rate per employee with no hidden line items.',
+    description: 'ADP pricing is notoriously opaque. Quotes vary widely and add-ons accumulate quickly. PayChamps charges one clear rate per employee with no hidden line items.',
   },
   {
     title: 'Setup in 2 weeks, not 2 months',
-    description: 'ADP implementations typically take 8–12 weeks and require a dedicated project manager. PayChamps has you live in 2 weeks with a guided migration process.',
+    description: 'ADP implementations typically take 8-12 weeks and require a dedicated project manager. PayChamps has you live in 2 weeks with a guided migration process.',
   },
 ]
 
@@ -38,7 +38,7 @@ export default function CompareADP() {
       {/* Hero */}
       <section className="py-20 bg-gray-50">
         <div className="max-w-3xl mx-auto px-6 text-center">
-          <p className="text-sm font-semibold uppercase tracking-wider mb-3" style={{ color: '#22c55e' }}>
+          <p className="text-sm font-semibold uppercase tracking-wider mb-3" style={{ color: '#d97706' }}>
             PayChamps vs ADP
           </p>
           <h1 className="text-4xl font-extrabold text-gray-900 mb-4">
@@ -54,8 +54,8 @@ export default function CompareADP() {
       <section className="py-10">
         <div className="max-w-4xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-4">
           {[
-            { label: 'ADP contract length', value: '12–24 months', bad: true },
-            { label: 'ADP setup time', value: '8–12 weeks', bad: true },
+            { label: 'ADP contract length', value: '12-24 months', bad: true },
+            { label: 'ADP setup time', value: '8-12 weeks', bad: true },
             { label: 'ADP contract', value: 'Lock-in required', bad: true },
           ].map((item) => (
             <div key={item.label} className="bg-red-50 border border-red-100 rounded-xl p-4 text-center">
@@ -86,7 +86,7 @@ export default function CompareADP() {
               <thead>
                 <tr className="border-b border-gray-100">
                   <th className="text-left py-4 px-6 text-gray-500 font-medium w-1/3">Feature</th>
-                  <th className="text-center py-4 px-4 font-semibold" style={{ color: '#22c55e' }}>PayChamps</th>
+                  <th className="text-center py-4 px-4 font-semibold" style={{ color: '#d97706' }}>PayChamps</th>
                   <th className="text-center py-4 px-4 text-gray-500 font-medium">ADP</th>
                 </tr>
               </thead>
@@ -96,7 +96,7 @@ export default function CompareADP() {
                     <td className="py-3.5 px-6 text-gray-700 font-medium">{row.feature}</td>
                     <td className="py-3.5 px-4 text-center">
                       <span className="inline-flex items-center gap-1.5 text-green-700 font-medium">
-                        <CheckCircle2 size={14} style={{ color: '#22c55e' }} />
+                        <CheckCircle2 size={14} style={{ color: '#d97706' }} />
                         {row.paychamps}
                       </span>
                     </td>
@@ -118,7 +118,7 @@ export default function CompareADP() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {reasons.map((r) => (
               <div key={r.title} className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-                <CheckCircle2 size={22} className="mb-4" style={{ color: '#22c55e' }} />
+                <CheckCircle2 size={22} className="mb-4" style={{ color: '#d97706' }} />
                 <h3 className="text-base font-semibold text-gray-900 mb-2">{r.title}</h3>
                 <p className="text-sm text-gray-500 leading-relaxed">{r.description}</p>
               </div>

@@ -11,13 +11,13 @@ const rows = [
   { feature: 'Data residency', paychamps: 'US data residency', gusto: 'US data only' },
   { feature: 'Employee self-service', paychamps: 'Included on all plans', gusto: 'Included' },
   { feature: 'Benefits administration', paychamps: 'Full admin + employee portal', gusto: 'Admin only' },
-  { feature: 'Time to go live', paychamps: '2 weeks', gusto: '2–4 weeks' },
+  { feature: 'Time to go live', paychamps: '2 weeks', gusto: '2-4 weeks' },
 ]
 
 const reasons = [
   {
     title: 'Built for US payroll',
-    description: 'PayChamps was built for US payroll from the ground up — federal + state tax filing, W-2s, 1099s, and 401(k) enrollment are first-class features.',
+    description: 'PayChamps was built for US payroll from the ground up. Federal + state tax filing, W-2s, 1099s, and 401(k) enrollment are all first-class features.',
   },
   {
     title: 'Multi-currency from day one',
@@ -38,7 +38,7 @@ export default function CompareGusto() {
       {/* Hero */}
       <section className="py-20 bg-gray-50">
         <div className="max-w-3xl mx-auto px-6 text-center">
-          <p className="text-sm font-semibold uppercase tracking-wider mb-3" style={{ color: '#22c55e' }}>
+          <p className="text-sm font-semibold uppercase tracking-wider mb-3" style={{ color: '#d97706' }}>
             PayChamps vs Gusto
           </p>
           <h1 className="text-4xl font-extrabold text-gray-900 mb-4">
@@ -58,7 +58,7 @@ export default function CompareGusto() {
               <thead>
                 <tr className="border-b border-gray-100">
                   <th className="text-left py-4 px-6 text-gray-500 font-medium w-1/3">Feature</th>
-                  <th className="text-center py-4 px-4 font-semibold" style={{ color: '#22c55e' }}>PayChamps</th>
+                  <th className="text-center py-4 px-4 font-semibold" style={{ color: '#d97706' }}>PayChamps</th>
                   <th className="text-center py-4 px-4 text-gray-500 font-medium">Gusto</th>
                 </tr>
               </thead>
@@ -68,7 +68,7 @@ export default function CompareGusto() {
                     <td className="py-3.5 px-6 text-gray-700 font-medium">{row.feature}</td>
                     <td className="py-3.5 px-4 text-center">
                       <span className="inline-flex items-center gap-1.5 text-green-700 font-medium">
-                        <CheckCircle2 size={14} style={{ color: '#22c55e' }} />
+                        <CheckCircle2 size={14} style={{ color: '#d97706' }} />
                         {row.paychamps}
                       </span>
                     </td>
@@ -90,7 +90,7 @@ export default function CompareGusto() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {reasons.map((r) => (
               <div key={r.title} className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-                <CheckCircle2 size={22} className="mb-4" style={{ color: '#22c55e' }} />
+                <CheckCircle2 size={22} className="mb-4" style={{ color: '#d97706' }} />
                 <h3 className="text-base font-semibold text-gray-900 mb-2">{r.title}</h3>
                 <p className="text-sm text-gray-500 leading-relaxed">{r.description}</p>
               </div>

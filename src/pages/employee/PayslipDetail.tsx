@@ -105,7 +105,7 @@ export default function PayslipDetail() {
           {payslip.periodStart && (
             <InfoRow
               label="Period"
-              value={`${new Date(payslip.periodStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} – ${payslip.periodEnd ? new Date(payslip.periodEnd).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}`}
+              value={`${new Date(payslip.periodStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} - ${payslip.periodEnd ? new Date(payslip.periodEnd).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}`}
             />
           )}
         </div>

@@ -187,7 +187,7 @@ export default function SubmitLeave() {
               disabled={submitting}
               className="px-5 py-2 text-sm font-medium text-white bg-[#22c55e] rounded-lg hover:bg-green-600 transition-colors disabled:opacity-60"
             >
-              {submitting ? 'Submitting…' : 'Submit request'}
+              {submitting ? 'Submitting...' : 'Submit request'}
             </button>
           </div>
         </form>
