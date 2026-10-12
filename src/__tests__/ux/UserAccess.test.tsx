@@ -104,8 +104,6 @@ describe('UserAccess page', () => {
       expect(screen.getByText('Owner')).toBeInTheDocument()
     })
     // The owner row should not have a Revoke button
-    const revokeButtons = screen.queryAllByRole('button', { name: /revoke/i })
-    // Jane Smith has revoke, but owner does not — if only one Revoke it belongs to non-owner
     const ownerRow = screen.getByText('Test Employer').closest('tr')
     expect(ownerRow).not.toContain(screen.queryByRole('button', { name: /revoke/i }))
   })
